@@ -1,0 +1,28 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-settings-form-page
+  type: formPage
+  config:
+    request:
+      service: Restic
+      get:
+        method: getSettings
+      post:
+        method: setSettings
+    fields:
+      - type: checkbox
+        name: enable
+        label: _("Enable")
+        value: true
+        hint: _("Whether Restic should operate.")
+      - type: textInput
+        name: version
+        label: _("Version")
+        value: ""
+        hint: _("The current version number of Restic.")
+        submitValue: false
+        modifiers:
+          - type: readonly
+    buttons:
+      - template: submit

@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/repos"
+  title: _("Repositories")
+  component: omv-services-restic-repos-datatable-page

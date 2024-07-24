@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "services.restic.envvars"
+  text: _("Environment Variables")
+  position: 30
+  icon: mdi:cog-outline
+  url: "/services/restic/envvars"

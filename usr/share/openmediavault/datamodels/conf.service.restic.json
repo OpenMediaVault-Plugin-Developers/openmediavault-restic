@@ -1,0 +1,140 @@
+{
+  "type": "config",
+  "id": "conf.service.restic",
+  "title": "Restic",
+  "queryinfo": {
+    "xpath": "//services/restic",
+    "iterable": false
+  },
+  "properties": {
+    "settings": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "repos": {
+      "type": "object",
+      "properties": {
+        "repo": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "local"
+                ],
+                "default": "local"
+              },
+              "sharedfolderref": {
+                "type": "string",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "format": "uuidv4"
+                  },
+                  {
+                    "type": "string",
+                    "maxLength": 0
+                  }
+                ],
+                "default": ""
+              },
+              "passphrase": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "snapshots": {
+      "type": "object",
+      "properties": {
+        "snapshot": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "hash": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "string"
+              },
+              "csvsharedfolderrefs": {
+                "type": "string"
+              },
+              "reporef": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "exclude": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "envvars": {
+      "type": "object",
+      "properties": {
+        "envvar": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "envname": {
+                "type": "string"
+              },
+              "envvalue": {
+                "type": "string"
+              },
+              "reporef": {
+                "type": "string",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "format": "uuidv4"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "shared"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "maxLength": 0
+                  }
+                ],
+                "default": ""
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

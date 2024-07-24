@@ -1,0 +1,51 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-snapshots-datatable-page
+  type: datatablePage
+  config:
+    autoReload: false
+    hasSearchField: true
+    stateId: c3b6be8f-f71e-4bc7-84af-40a1902b4096
+    sorters:
+      - dir: asc
+        prop: rule1
+    store:
+      proxy:
+        service: Restic
+        get:
+          method: getSnapshotList
+    columns:
+      - name: _("Hash")
+        prop: hash
+        flexGrow: 1
+        sortable: true
+      - name: _("Shared Folders")
+        prop: sourcename
+        flexGrow: 1
+        sortable: true
+      - name: _("Repository")
+        prop: reponame
+        flexGrow: 1
+        sortable: true
+      - name: _("Tags")
+        prop: tags
+        flexGrow: 1
+        sortable: true
+      - name: _("Excludes")
+        prop: exclude
+        flexGrow: 1
+        sortable: false
+    actions:
+      - template: create
+        execute:
+          type: url
+          url: "/services/restic/snapshots/create"
+      - template: delete
+        execute:
+          type: request
+          request:
+            service: Restic
+            method: deleteSnapshot
+            params:
+              uuid: "{{ _selected[0].uuid }}"

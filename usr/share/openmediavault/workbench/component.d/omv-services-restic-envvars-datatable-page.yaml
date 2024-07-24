@@ -1,0 +1,47 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-envvars-datatable-page
+  type: datatablePage
+  config:
+    autoReload: false
+    hasSearchField: true
+    stateId: b8ada2b8-029f-4806-8d97-258bc06bb1b4
+    sorters:
+      - dir: asc
+        prop: envname
+    store:
+      proxy:
+        service: Restic
+        get:
+          method: getEnvVarList
+    columns:
+      - name: _("Name")
+        prop: envname
+        flexGrow: 1
+        sortable: true
+      - name: _("Value")
+        prop: envvalue
+        flexGrow: 1
+        sortable: true
+      - name: _("Repository")
+        prop: reponame
+        flexGrow: 1
+        sortable: true
+    actions:
+      - template: create
+        execute:
+          type: url
+          url: "/services/restic/envvars/create"
+      - template: edit
+        execute:
+          type: url
+          url: "/services/restic/envvars/edit/{{ _selected[0].uuid }}"
+      - template: delete
+        execute:
+          type: request
+          request:
+            service: Restic
+            method: deleteEnvVar
+            params:
+              uuid: "{{ _selected[0].uuid }}"

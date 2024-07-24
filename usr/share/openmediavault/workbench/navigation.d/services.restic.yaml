@@ -1,0 +1,7 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "services.restic"
+  text: _("Restic")
+  icon: "mdi:content-duplicate"
+  url: "/services/restic"

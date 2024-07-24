@@ -1,0 +1,23 @@
+version: "1.0"
+type: log
+data:
+  id: restic
+  text: _("Restic")
+  columns:
+    - name: _("Component")
+      sortable: true
+      prop: component
+      flexGrow: 1
+    - name: _("Level")
+      sortable: true
+      prop: level
+      flexGrow: 1
+    - name: _("Event")
+      sortable: true
+      prop: event
+      flexGrow: 3
+  request:
+    service: LogFile
+    method: getList
+    params:
+      id: restic

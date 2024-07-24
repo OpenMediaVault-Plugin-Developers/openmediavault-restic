@@ -1,0 +1,72 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-snapshot-form-page
+  type: formPage
+  config:
+    request:
+      service: Restic
+      get:
+        method: getSnapshot
+        params:
+          uuid: "{{ _routeParams.uuid }}"
+      post:
+        method: createSnapshot
+        task: true
+        progressMessage: _("Creating a snapshot, this may take a while.")
+    fields:
+      - type: confObjUuid
+      - type: hidden
+        name: hash
+        value: ""
+      - type: textInput
+        name: tags
+        label: _("Tags")
+        hint: _("Name of each snapshot tag. Put a comma between each entry.")
+        value: ""
+        validators:
+          required: false
+      - type: select
+        name: sharedfolderrefs
+        label: _("Shared Folders")
+        placeholder: _("Select a shared folder.")
+        hint: _("Select all shared folders to back up.")
+        multiple: true
+        valueField: uuid
+        textField: description
+        store:
+          proxy:
+            service: ShareMgmt
+            get:
+              method: enumerateSharedFolders
+        validators:
+          required: true
+      - type: select
+        name: reporef
+        label: _('Repository')
+        placeholder: _("Select a repository.")
+        textField: name
+        valueField: uuid
+        store:
+          proxy:
+            service: Restic
+            get:
+              method: enumerateRepoCandidates
+        validators:
+          required: true
+      - type: textInput
+        name: exclude
+        label: _("Excludes")
+        hint: _("What files or folders to exclude. Put a comma between each entry.")
+        value: ""
+        validators:
+          required: false
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/services/restic/snapshots"
+      - template: cancel
+        execute:
+          type: url
+          url: "/services/restic/snapshots"

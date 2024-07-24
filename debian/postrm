@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+
+remove_action() {
+    dpkg-trigger update-workbench
+}
+
+
+case "$1" in
+    purge)
+        remove_action
+        # Remove the configuration data.
+        omv_config_delete "/config/services/restic"
+    ;;
+
+    remove)
+        remove_action
+        # remove restic confs
+        rm -rf /var/lib/openmediavault/restic
+        # remove cron.d file
+        rm -f /etc/cron.d/openmediavault-restic
+    ;;
+
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

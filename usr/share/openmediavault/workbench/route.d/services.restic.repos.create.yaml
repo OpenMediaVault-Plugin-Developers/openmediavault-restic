@@ -1,0 +1,8 @@
+
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/repos/create"
+  title: _("Create repository")
+  notificationTitle: _("Created repository.")
+  component: omv-services-restic-repo-create-form-page

@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/snapshots/create"
+  title: _("Create")
+  notificationTitle: _("Created snapshot.")
+  component: omv-services-restic-snapshot-form-page

@@ -1,0 +1,11 @@
+openmediavault-restic (7.0) UNRELEASED; urgency=medium
+
+  * Initial release
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 23 Jul 2024 11:58:30 -0500
+
+openmediavault-restic (0.1) stable; urgency=low
+
+  * Initial release
+
+ -- administrator <administrator@fedora>  Sat, 18 Feb 2023 20:31:14 +1100

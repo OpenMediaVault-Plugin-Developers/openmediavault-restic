@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/snapshots"
+  title: _("Snapshots")
+  component: omv-services-restic-snapshots-datatable-page

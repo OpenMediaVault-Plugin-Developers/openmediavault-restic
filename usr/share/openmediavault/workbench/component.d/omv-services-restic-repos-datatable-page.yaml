@@ -1,0 +1,65 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-repos-datatable-page
+  type: datatablePage
+  config:
+    autoReload: false
+    hasSearchField: true
+    stateId: bfe5761c-z0e0-17e7-99ib-2gbe6a78674h
+    sorters:
+      - dir: asc
+        prop: name
+    store:
+      proxy:
+        service: Restic
+        get:
+          method: getRepoList
+    columns:
+      - name: _("Name")
+        prop: name
+        flexGrow: 1
+        sortable: true
+      - name: _("Shared Folder")
+        prop: sharedfoldername
+        flexGrow: 1
+        sortable: true
+      - name: _("Snapshots")
+        prop: snapshotCount
+        sortable: true
+        flexGrow: 1
+    actions:
+      - template: create
+        execute:
+          type: url
+          url: "/services/restic/repos/create"
+      - template: delete
+        execute:
+          type: request
+          request:
+            service: Restic
+            method: deleteRepo
+            params:
+              uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+          constraint:
+            - operator: eq
+              arg0:
+                prop: snapshotCount
+              arg1: 0
+      - type: menu
+        icon: mdi:link
+        tooltip: _("Restic documentation")
+        actions:
+          - text: _("Restic")
+            icon: mdi:link-box
+            execute:
+              type: url
+              url: '/externalRedirect/https%3A%2F%2Frestic.readthedocs.io%2Fen%2Fstable'
+          - text: _("OMV-Extras Wiki")
+            icon: mdi:link-box
+            execute:
+              type: url
+              url: '/externalRedirect/https%3A%2F%2Fwiki.omv-extras.org'

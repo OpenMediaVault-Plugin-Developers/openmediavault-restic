@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "services.restic.repos"
+  text: _("Repositories")
+  position: 10
+  icon: mdi:folder-multiple-outline
+  url: "/services/restic/repos"
