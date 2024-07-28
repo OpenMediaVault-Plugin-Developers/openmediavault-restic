@@ -31,10 +31,14 @@
               "name": {
                 "type": "string"
               },
+              "passphrase": {
+                "type": "string"
+              },
               "type": {
                 "type": "string",
                 "enum": [
-                  "local"
+                  "local",
+                  "s3"
                 ],
                 "default": "local"
               },
@@ -52,7 +56,13 @@
                 ],
                 "default": ""
               },
-              "passphrase": {
+              "uri": {
+                "type": "string"
+              },
+              "accesskey": {
+                "type": "string"
+              },
+              "secretkey": {
                 "type": "string"
               }
             }

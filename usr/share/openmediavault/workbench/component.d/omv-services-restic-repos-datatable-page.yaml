@@ -20,6 +20,14 @@ data:
         prop: name
         flexGrow: 1
         sortable: true
+      - name: _("Type")
+        prop: type
+        flexGrow: 1
+        sortable: true
+      - name: _("Remote path")
+        prop: uri
+        flexGrow: 2
+        sortable: true
       - name: _("Shared Folder")
         prop: sharedfoldername
         flexGrow: 1

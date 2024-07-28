@@ -130,14 +130,15 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         foreach ($repos as $repok => &$repov) {
             // Add the new property 'sharedfoldername'.
             $repov->add('sharedfoldername', 'string', gettext("n/a"));
-            // Get the shared folder configuration object.
-            $sfObject = $db->get(
-                'conf.system.sharedfolder',
-                $repov->get('sharedfolderref')
-            );
-            // Update the 'sharedfoldername' property.
-            $repov->set('sharedfoldername', $sfObject->get('name'));
-
+            if ($repov->get('type') == 'local') {
+                // Get the shared folder configuration object.
+                $sfObject = $db->get(
+                    'conf.system.sharedfolder',
+                    $repov->get('sharedfolderref')
+                );
+                // Update the 'sharedfoldername' property.
+                $repov->set('sharedfoldername', $sfObject->get('name'));
+            }
             // Get how many snapshots have been created for this repository
             $snapshotCount = 0;
             foreach ($snapshots as $snapshotk => $snapshotv) {
@@ -195,7 +196,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.restic.setrepo');
-
+        $type = $params['type'];
         // Get the repository via its UUID as per the validation method params RPC datamodel
         $repo = new \OMV\Config\ConfigObject('conf.service.restic.repo');
         $db = \OMV\Config\Database::getInstance();
@@ -213,20 +214,31 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $db->assertIsUnique($repo, 'sharedfolderref');
         }
 
-        $path = escapeshellarg(\OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
-            'uuid' => $params['sharedfolderref']
-        ], $context));
+        $path = '';
+        if ($type == 'local') {
+            $path = escapeshellarg(\OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
+                'uuid' => $params['sharedfolderref']
+            ], $context));
+        }
         $cmdArgs = [];
         $cmdArgs[] = $this->getProgram;
 
         // Initalise the repository, unless we opted to skip initalisation        
         if ($params['skipinit'] == false) {
-            $cmdArgs[] = 'init --repo';
-            $cmdArgs[] = $path;
+            $cmdArgs[] = 'init';
+            if ($type == 'local') {
+                $cmdArgs[] = sprintf("--repo '%s'", $path);
+            }
 
             // Attempt to initialise the repository
             $cmd = new \OMV\System\Process($cmdArgs);
-            $cmd->setEnv("RESTIC_PASSWORD", escapeshellarg($params['passphrase']));
+            $cmd->setEnv("RESTIC_PASSWORD", escapeshellarg($params['passphrase']), true);
+            if ($type != 'local') {
+                $uri = sprintf('%s:%s', $type, $params['uri']);
+                $cmd->setEnv("AWS_ACCESS_KEY_ID", escapeshellarg($params['accesskey']));
+                $cmd->setEnv("AWS_SECRET_ACCESS_KEY", escapeshellarg($params['secretkey']), true);
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg($uri));
+            }
             if (!$isNew) {
                 $cmd->setEnvFromFile($this->envFile . $params['uuid']);
             }

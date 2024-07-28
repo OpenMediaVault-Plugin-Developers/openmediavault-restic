@@ -30,7 +30,8 @@
         "type": {
           "type": "string",
           "enum": [
-            "local"
+            "local",
+            "s3"
           ],
           "required": true
         },

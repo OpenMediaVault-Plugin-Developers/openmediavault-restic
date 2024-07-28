@@ -20,6 +20,12 @@ data:
         validators:
           required: true
           patternType: 'shareName'
+      - type: passwordInput
+        name: passphrase
+        label: _("Passphrase")
+        hint: _("Ensure that the password is strong and stored securely.")
+        validators:
+          required: true
       - type: select
         name: type
         label: _("Type")
@@ -27,17 +33,52 @@ data:
         store:
           data:
             - ["local", _("Local")]
+            - ["s3", _("S3")]
       - type: sharedFolderSelect
         name: sharedfolderref
         label: _("Shared Folder")
         hint: _("Ensure that the shared folder is not referenced by anything.")
         value: ""
+        modifiers:
+          - type: hidden
+            constraint:
+              operator: ne
+              arg0:
+                prop: type
+              arg1: "local"
+      - type: textInput
+        name: uri
+        label: _("Remote path")
+        value: ""
+        modifiers:
+          - type: hidden
+            constraint:
+              operator: eq
+              arg0:
+                prop: type
+              arg1: "local"
+      - type: textInput
+        name: accesskey
+        label: _("Access key")
+        value: ""
+        modifiers:
+          - type: hidden
+            constraint:
+              operator: eq
+              arg0:
+                prop: type
+              arg1: "local"
       - type: passwordInput
-        name: passphrase
-        label: _("Passphrase")
-        hint: _("Ensure that the password is strong and stored securely.")
-        validators:
-          required: true
+        name: secretkey
+        label: _("Secret access key")
+        value: ""
+        modifiers:
+          - type: hidden
+            constraint:
+              operator: eq
+              arg0:
+                prop: type
+              arg1: "local"
       - type: checkbox
         name: skipinit
         label: _("Skip initialisation")
