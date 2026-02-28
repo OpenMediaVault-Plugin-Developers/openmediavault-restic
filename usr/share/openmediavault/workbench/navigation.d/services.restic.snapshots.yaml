@@ -2,7 +2,7 @@ version: "1.0"
 type: navigation-item
 data:
   path: "services.restic.snapshots"
-  text: _("Snapshots")
+  text: _("Backup Jobs")
   position: 20
   icon: mdi:archive-outline
   url: "/services/restic/snapshots"

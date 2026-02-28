@@ -1,0 +1,45 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-restore-form-page
+  type: formPage
+  config:
+    request:
+      service: Restic
+      post:
+        method: restoreSnapshot
+        task: true
+        progressMessage: _("Restoring snapshot, this may take a while…")
+    fields:
+      - type: hidden
+        name: reporef
+        value: "{{ _routeParams.uuid }}"
+      - type: hidden
+        name: snapshotid
+        value: "{{ _routeParams.snapshotid }}"
+      - type: textInput
+        name: snapshotid_display
+        label: _("Snapshot ID")
+        value: "{{ _routeParams.snapshotid }}"
+        submitValue: false
+        readonly: true
+      - type: sharedFolderSelect
+        name: targetref
+        label: _("Restore target folder")
+        hint: _("Files will be restored into this shared folder. Existing files may be overwritten.")
+        validators:
+          required: true
+      - type: textInput
+        name: includepath
+        label: _("Path filter (optional)")
+        hint: _("Only restore files matching this path prefix within the snapshot (e.g. /home/user/documents).")
+        value: ""
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/services/restic/repos/snapshots/{{ _routeParams.uuid }}"
+      - template: cancel
+        execute:
+          type: url
+          url: "/services/restic/repos/snapshots/{{ _routeParams.uuid }}"

@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/repos/snapshots/:uuid/restore/:snapshotid"
+  title: _("Restore Snapshot")
+  editing: true
+  component: omv-services-restic-restore-form-page

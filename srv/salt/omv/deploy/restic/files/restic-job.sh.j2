@@ -1,0 +1,107 @@
+#!/bin/bash
+{{ pillar['headers']['auto_generated'] }}
+{{ pillar['headers']['warning'] }}
+# Restic backup job: {{ job.uuid }}{% if job.name %} ({{ job.name }}){% endif %}
+
+LOG_DIR="/var/log/restic"
+LOG_FILE="${LOG_DIR}/restic.log"
+JOB_ID="{{ job.uuid }}"
+
+mkdir -p "${LOG_DIR}"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [${JOB_ID}] $*" | tee -a "${LOG_FILE}"
+}
+
+log "=== Starting backup job{% if job.name %}: {{ job.name }}{% endif %} ==="
+
+# Load shared environment variables
+if [ -f /etc/restic/restic-envvar-shared ]; then
+    set -a
+    source /etc/restic/restic-envvar-shared
+    set +a
+fi
+
+# Load repository-specific environment variables
+if [ -f /etc/restic/restic-envvar-{{ job.reporef }} ]; then
+    set -a
+    source /etc/restic/restic-envvar-{{ job.reporef }}
+    set +a
+fi
+
+# Set repository credentials
+export RESTIC_PASSWORD="{{ repo.passphrase }}"
+
+{% if repo.type == 'local' %}
+export RESTIC_REPOSITORY="{{ repo_path }}"
+{% elif repo.type == 's3' %}
+export RESTIC_REPOSITORY="s3:{{ repo.uri }}"
+export AWS_ACCESS_KEY_ID="{{ repo.accesskey }}"
+export AWS_SECRET_ACCESS_KEY="{{ repo.secretkey }}"
+{% elif repo.type == 'b2' %}
+export RESTIC_REPOSITORY="b2:{{ repo.uri }}"
+export B2_ACCOUNT_ID="{{ repo.accesskey }}"
+export B2_ACCOUNT_KEY="{{ repo.secretkey }}"
+{% elif repo.type == 'sftp' %}
+export RESTIC_REPOSITORY="sftp:{{ repo.uri }}"
+{% elif repo.type == 'rest' %}
+export RESTIC_REPOSITORY="rest:{{ repo.uri }}"
+{% endif %}
+
+# Build backup command
+BACKUP_ARGS=""
+
+{% if job.tags %}
+{% for tag in job.tags.split(',') %}
+{% if tag | trim %}
+BACKUP_ARGS="${BACKUP_ARGS} --tag {{ tag | trim | replace(' ', '_') }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if job.exclude %}
+{% for excl in job.exclude.split(',') %}
+{% if excl | trim %}
+BACKUP_ARGS="${BACKUP_ARGS} --exclude {{ excl | trim | replace(' ', '\\ ') }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% for path in source_paths %}
+BACKUP_ARGS="${BACKUP_ARGS} {{ path | replace(' ', '\\ ') }}"
+{% endfor %}
+
+log "Running: /usr/bin/restic backup --verbose${BACKUP_ARGS}"
+/usr/bin/restic backup --verbose${BACKUP_ARGS} 2>&1 | tee -a "${LOG_FILE}"
+BACKUP_EXIT=${PIPESTATUS[0]}
+
+if [ ${BACKUP_EXIT} -ne 0 ]; then
+    log "ERROR: Backup failed with exit code ${BACKUP_EXIT}"
+    exit ${BACKUP_EXIT}
+fi
+
+{% set has_keeplast    = job.keeplast    | int > 0 %}
+{% set has_keepdaily   = job.keepdaily   | int > 0 %}
+{% set has_keepweekly  = job.keepweekly  | int > 0 %}
+{% set has_keepmonthly = job.keepmonthly | int > 0 %}
+{% set has_keepyearly  = job.keepyearly  | int > 0 %}
+{% if has_keeplast or has_keepdaily or has_keepweekly or has_keepmonthly or has_keepyearly %}
+
+# Apply retention policy
+FORGET_ARGS="--prune"
+{% if has_keeplast    %} FORGET_ARGS="${FORGET_ARGS} --keep-last {{ job.keeplast }}"    {% endif %}
+{% if has_keepdaily   %} FORGET_ARGS="${FORGET_ARGS} --keep-daily {{ job.keepdaily }}"   {% endif %}
+{% if has_keepweekly  %} FORGET_ARGS="${FORGET_ARGS} --keep-weekly {{ job.keepweekly }}"  {% endif %}
+{% if has_keepmonthly %} FORGET_ARGS="${FORGET_ARGS} --keep-monthly {{ job.keepmonthly }}" {% endif %}
+{% if has_keepyearly  %} FORGET_ARGS="${FORGET_ARGS} --keep-yearly {{ job.keepyearly }}"  {% endif %}
+
+log "Applying retention: /usr/bin/restic forget${FORGET_ARGS}"
+/usr/bin/restic forget${FORGET_ARGS} 2>&1 | tee -a "${LOG_FILE}"
+FORGET_EXIT=${PIPESTATUS[0]}
+
+if [ ${FORGET_EXIT} -ne 0 ]; then
+    log "WARNING: Retention policy application failed with exit code ${FORGET_EXIT}"
+fi
+{% endif %}
+
+log "=== Backup job completed successfully ==="

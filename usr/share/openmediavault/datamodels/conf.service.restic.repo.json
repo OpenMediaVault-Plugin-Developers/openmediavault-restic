@@ -22,7 +22,10 @@
       "type": "string",
       "enum": [
         "local",
-        "s3"
+        "s3",
+        "sftp",
+        "b2",
+        "rest"
       ],
       "default": "local"
     },
@@ -41,16 +44,16 @@
       "default": ""
     },
     "uri": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "accesskey": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "secretkey": {
-      "type": "string"
-    },
-    "skipinit": {
-      "type": "boolean"
+      "type": "string",
+      "default": ""
     }
   }
 }

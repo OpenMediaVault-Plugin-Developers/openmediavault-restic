@@ -1,0 +1,55 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-repo-snapshots-datatable-page
+  type: datatablePage
+  config:
+    autoReload: false
+    hasSearchField: true
+    stateId: a4d2f8c1-9e30-4b17-a5c6-8f2e1d7b3c09
+    sorters:
+      - dir: desc
+        prop: time
+    store:
+      proxy:
+        service: Restic
+        get:
+          method: getRepoSnapshotList
+          params:
+            reporef: "{{ _routeParams.uuid }}"
+    columns:
+      - name: _("ID")
+        prop: id_short
+        flexGrow: 1
+        sortable: false
+      - name: _("Date / Time")
+        prop: time_formatted
+        flexGrow: 2
+        sortable: true
+      - name: _("Hostname")
+        prop: hostname
+        flexGrow: 1
+        sortable: true
+      - name: _("Paths")
+        prop: paths_str
+        flexGrow: 3
+        sortable: false
+      - name: _("Tags")
+        prop: tags_str
+        flexGrow: 1
+        sortable: false
+    actions:
+      - type: iconButton
+        icon: mdi:restore
+        tooltip: _("Restore this snapshot to a shared folder")
+        execute:
+          type: url
+          url: "/services/restic/repos/snapshots/{{ _routeParams.uuid }}/restore/{{ _selected[0].id }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
+        icon: mdi:refresh
+        tooltip: _("Refresh snapshot list")
+        execute:
+          type: reload

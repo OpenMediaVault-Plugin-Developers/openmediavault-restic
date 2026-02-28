@@ -1,0 +1,8 @@
+{{ pillar['headers']['auto_generated'] }}
+{{ pillar['headers']['warning'] }}
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+{%- for job in jobs %}
+{{ job.scheduleminute }} {{ job.schedulehour }} {{ job.scheduledayofmonth }} {{ job.schedulemonth }} {{ job.scheduledayofweek }} root {{ job.scriptfile }} >> {{ logdir }}/restic.log 2>&1
+{%- endfor %}

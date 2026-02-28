@@ -23,7 +23,7 @@ data:
       - type: passwordInput
         name: passphrase
         label: _("Passphrase")
-        hint: _("Ensure that the password is strong and stored securely.")
+        hint: _("Ensure that the passphrase is strong and stored securely. It cannot be recovered if lost.")
         validators:
           required: true
       - type: select
@@ -32,12 +32,15 @@ data:
         value: "local"
         store:
           data:
-            - ["local", _("Local")]
-            - ["s3", _("S3")]
+            - ["local", _("Local (shared folder)")]
+            - ["s3", _("S3 compatible (AWS, Backblaze S3, Wasabi, MinIO …)")]
+            - ["sftp", _("SFTP (SSH)")]
+            - ["b2", _("Backblaze B2 (native API)")]
+            - ["rest", _("REST server")]
       - type: sharedFolderSelect
         name: sharedfolderref
         label: _("Shared Folder")
-        hint: _("Ensure that the shared folder is not referenced by anything.")
+        hint: _("The shared folder used as the restic repository location.")
         value: ""
         modifiers:
           - type: hidden
@@ -48,8 +51,9 @@ data:
               arg1: "local"
       - type: textInput
         name: uri
-        label: _("Remote path")
+        label: _("Remote path / URI")
         value: ""
+        hint: '_("S3: bucket-name or s3.host.com/bucket · SFTP: user@host:/path · B2: bucket-name · REST: http://host:8000/repo")'
         modifiers:
           - type: hidden
             constraint:
@@ -59,32 +63,33 @@ data:
               arg1: "local"
       - type: textInput
         name: accesskey
-        label: _("Access key")
+        label: _("Account ID / Access key")
         value: ""
+        hint: '_("S3: Access key ID · B2: Account ID")'
         modifiers:
           - type: hidden
             constraint:
-              operator: eq
+              operator: in
               arg0:
                 prop: type
-              arg1: "local"
+              arg1: ["local", "sftp", "rest"]
       - type: passwordInput
         name: secretkey
-        label: _("Secret access key")
+        label: _("Account key / Secret key")
         value: ""
+        hint: '_("S3: Secret access key · B2: Application key")'
         modifiers:
           - type: hidden
             constraint:
-              operator: eq
+              operator: in
               arg0:
                 prop: type
-              arg1: "local"
+              arg1: ["local", "sftp", "rest"]
       - type: checkbox
         name: skipinit
         label: _("Skip initialisation")
         value: false
-        hint:
-          _("Skip initialisation to import an existing repository. Please ensure that the password is correct for the existing repository.")
+        hint: _("Tick this to import an existing restic repository. The passphrase must match the one already used by that repository.")
     buttons:
       - template: submit
         execute:

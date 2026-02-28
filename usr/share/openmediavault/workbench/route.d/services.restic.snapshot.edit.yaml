@@ -1,7 +1,8 @@
 version: "1.0"
 type: route
 data:
-  url: "/services/restic/snapshots/create"
-  title: _("Create Backup Job")
+  url: "/services/restic/snapshots/edit/:uuid"
+  title: _("Edit Backup Job")
   notificationTitle: _("Backup job saved.")
+  editing: true
   component: omv-services-restic-snapshot-form-page

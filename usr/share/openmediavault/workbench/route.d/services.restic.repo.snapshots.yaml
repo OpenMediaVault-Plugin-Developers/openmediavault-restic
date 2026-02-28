@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/repos/snapshots/:uuid"
+  title: _("Repository Snapshots")
+  editing: false
+  component: omv-services-restic-repo-snapshots-datatable-page

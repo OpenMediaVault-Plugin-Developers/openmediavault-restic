@@ -9,38 +9,70 @@ data:
     stateId: c3b6be8f-f71e-4bc7-84af-40a1902b4096
     sorters:
       - dir: asc
-        prop: rule1
+        prop: name
     store:
       proxy:
         service: Restic
         get:
           method: getSnapshotList
     columns:
-      - name: _("Hash")
-        prop: hash
+      - name: _("Enabled")
+        prop: enable
         flexGrow: 1
         sortable: true
-      - name: _("Shared Folders")
-        prop: sourcename
+        cellTemplateName: checkIcon
+      - name: _("Name")
+        prop: name
         flexGrow: 1
         sortable: true
       - name: _("Repository")
         prop: reponame
         flexGrow: 1
         sortable: true
+      - name: _("Source folders")
+        prop: sourcename
+        flexGrow: 2
+        sortable: true
       - name: _("Tags")
         prop: tags
         flexGrow: 1
         sortable: true
-      - name: _("Excludes")
-        prop: exclude
+      - name: _("Last snapshot")
+        prop: hash
         flexGrow: 1
         sortable: false
+      - name: _("Schedule")
+        prop: schedulehour
+        flexGrow: 1
+        sortable: false
+        cellTemplateName: template
+        cellTemplateConfig: "{{ _row.scheduleminute }} {{ _row.schedulehour }} {{ _row.scheduledayofmonth }} {{ _row.schedulemonth }} {{ _row.scheduledayofweek }}"
     actions:
       - template: create
         execute:
           type: url
           url: "/services/restic/snapshots/create"
+      - template: edit
+        execute:
+          type: url
+          url: "/services/restic/snapshots/edit/{{ _selected[0].uuid }}"
+      - type: iconButton
+        icon: mdi:play
+        tooltip: _("Run backup now")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Running backup job ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: runSnapshot
+                params:
+                  uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
       - template: delete
         execute:
           type: request

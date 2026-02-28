@@ -24,7 +24,7 @@ data:
         prop: type
         flexGrow: 1
         sortable: true
-      - name: _("Remote path")
+      - name: _("Location / URI")
         prop: uri
         flexGrow: 2
         sortable: true
@@ -32,7 +32,7 @@ data:
         prop: sharedfoldername
         flexGrow: 1
         sortable: true
-      - name: _("Snapshots")
+      - name: _("Backup Jobs")
         prop: snapshotCount
         sortable: true
         flexGrow: 1
@@ -57,11 +57,54 @@ data:
               arg0:
                 prop: snapshotCount
               arg1: 0
+      - type: iconButton
+        icon: mdi:magnify
+        tooltip: _("View snapshots stored in this repository")
+        execute:
+          type: url
+          url: "/services/restic/repos/snapshots/{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
+        icon: mdi:shield-check-outline
+        tooltip: _("Check repository integrity")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Checking repository integrity ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: checkRepo
+                params:
+                  uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
+        icon: mdi:broom
+        tooltip: _("Prune unused data from repository")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Pruning repository ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: pruneRepo
+                params:
+                  uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
       - type: menu
         icon: mdi:link
-        tooltip: _("Restic documentation")
+        tooltip: _("Help")
         actions:
-          - text: _("Restic")
+          - text: _("Restic documentation")
             icon: mdi:link-box
             execute:
               type: url

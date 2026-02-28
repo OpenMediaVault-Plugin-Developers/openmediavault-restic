@@ -31,7 +31,10 @@
           "type": "string",
           "enum": [
             "local",
-            "s3"
+            "s3",
+            "sftp",
+            "b2",
+            "rest"
           ],
           "required": true
         },
@@ -53,6 +56,15 @@
           "type": "string",
           "required": true
         },
+        "uri": {
+          "type": "string"
+        },
+        "accesskey": {
+          "type": "string"
+        },
+        "secretkey": {
+          "type": "string"
+        },
         "skipinit": {
           "type": "boolean",
           "required": true
@@ -70,6 +82,12 @@
           "type": "string",
           "format": "uuidv4",
           "required": true
+        },
+        "enable": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
         },
         "hash": {
           "type": "string",
@@ -122,6 +140,36 @@
             }
           ],
           "required": true
+        },
+        "scheduleminute": {
+          "type": "string"
+        },
+        "schedulehour": {
+          "type": "string"
+        },
+        "scheduledayofmonth": {
+          "type": "string"
+        },
+        "schedulemonth": {
+          "type": "string"
+        },
+        "scheduledayofweek": {
+          "type": "string"
+        },
+        "keeplast": {
+          "type": "integer"
+        },
+        "keepdaily": {
+          "type": "integer"
+        },
+        "keepweekly": {
+          "type": "integer"
+        },
+        "keepmonthly": {
+          "type": "integer"
+        },
+        "keepyearly": {
+          "type": "integer"
         }
       }
     }
@@ -164,6 +212,32 @@
             }
           ],
           "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.restoresnapshot",
+    "params": {
+      "type": "object",
+      "properties": {
+        "reporef": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "snapshotid": {
+          "type": "string",
+          "required": true
+        },
+        "targetref": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "includepath": {
+          "type": "string"
         }
       }
     }

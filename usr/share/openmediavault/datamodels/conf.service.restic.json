@@ -38,32 +38,28 @@
                 "type": "string",
                 "enum": [
                   "local",
-                  "s3"
+                  "s3",
+                  "sftp",
+                  "b2",
+                  "rest"
                 ],
                 "default": "local"
               },
               "sharedfolderref": {
                 "type": "string",
-                "oneOf": [
-                  {
-                    "type": "string",
-                    "format": "uuidv4"
-                  },
-                  {
-                    "type": "string",
-                    "maxLength": 0
-                  }
-                ],
                 "default": ""
               },
               "uri": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               },
               "accesskey": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               },
               "secretkey": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               }
             }
           }
@@ -82,21 +78,73 @@
                 "type": "string",
                 "format": "uuidv4"
               },
+              "enable": {
+                "type": "boolean",
+                "default": true
+              },
+              "name": {
+                "type": "string",
+                "default": ""
+              },
               "hash": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               },
               "tags": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               },
               "csvsharedfolderrefs": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               },
               "reporef": {
                 "type": "string",
                 "format": "uuidv4"
               },
               "exclude": {
-                "type": "string"
+                "type": "string",
+                "default": ""
+              },
+              "scheduleminute": {
+                "type": "string",
+                "default": "0"
+              },
+              "schedulehour": {
+                "type": "string",
+                "default": "0"
+              },
+              "scheduledayofmonth": {
+                "type": "string",
+                "default": "*"
+              },
+              "schedulemonth": {
+                "type": "string",
+                "default": "*"
+              },
+              "scheduledayofweek": {
+                "type": "string",
+                "default": "*"
+              },
+              "keeplast": {
+                "type": "integer",
+                "default": 0
+              },
+              "keepdaily": {
+                "type": "integer",
+                "default": 7
+              },
+              "keepweekly": {
+                "type": "integer",
+                "default": 4
+              },
+              "keepmonthly": {
+                "type": "integer",
+                "default": 12
+              },
+              "keepyearly": {
+                "type": "integer",
+                "default": 0
               }
             }
           }

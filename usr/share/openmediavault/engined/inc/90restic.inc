@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
- * @copyright Copyright (c) 2013-2024 OpenMediaVault Plugin Developers
+ * @copyright Copyright (c) 2013-2026 openmediavault plugin developers
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,11 @@ require_once("openmediavault/globals.inc");
     "filename" => "restic.log",
     "filepath" => \OMV\Environment::get("OMV_RESTIC_LOG_DIR", "/var/log/restic") .
     "/restic.log",
-    "regex" => "/^(.*?):\d+:\s+(.*?):\s+(.*)$/",
+    // Matches: "2024-01-01 12:00:00 [job-uuid] message"
+    "regex" => "/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[([^\]]+)\] (.*)$/",
     "columns" => [
-        "component" => 1,
-        "level" => 2,
-        "event" => 3
+        "ts"      => 1,
+        "jobid"   => 2,
+        "message" => 3
     ]
 ]);

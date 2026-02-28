@@ -4,18 +4,18 @@ data:
   id: restic
   text: _("Restic")
   columns:
-    - name: _("Component")
+    - name: _("Date/Time")
       sortable: true
-      prop: component
-      flexGrow: 1
-    - name: _("Level")
+      prop: ts
+      flexGrow: 2
+    - name: _("Job")
       sortable: true
-      prop: level
-      flexGrow: 1
-    - name: _("Event")
-      sortable: true
-      prop: event
-      flexGrow: 3
+      prop: jobid
+      flexGrow: 2
+    - name: _("Message")
+      sortable: false
+      prop: message
+      flexGrow: 5
   request:
     service: LogFile
     method: getList

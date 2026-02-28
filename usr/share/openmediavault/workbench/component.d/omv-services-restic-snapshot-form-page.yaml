@@ -11,26 +11,35 @@ data:
         params:
           uuid: "{{ _routeParams.uuid }}"
       post:
-        method: createSnapshot
-        task: true
-        progressMessage: _("Creating a snapshot, this may take a while.")
+        method: setSnapshot
     fields:
       - type: confObjUuid
       - type: hidden
         name: hash
         value: ""
+
+      # ── Identity ─────────────────────────────────────────────────────────
+      - type: divider
+        title: _("Job")
+      - type: checkbox
+        name: enable
+        label: _("Enabled")
+        value: true
+        hint: _("Enable or disable this backup job. Disabled jobs are skipped by the scheduler.")
       - type: textInput
-        name: tags
-        label: _("Tags")
-        hint: _("Name of each snapshot tag. Put a comma between each entry.")
+        name: name
+        label: _("Job name")
+        hint: _("Optional human-readable name for this backup job.")
         value: ""
-        validators:
-          required: false
+
+      # ── Source & destination ──────────────────────────────────────────────
+      - type: divider
+        title: _("Source & Destination")
       - type: select
         name: sharedfolderrefs
-        label: _("Shared Folders")
-        placeholder: _("Select a shared folder.")
-        hint: _("Select all shared folders to back up.")
+        label: _("Source folders")
+        placeholder: _("Select one or more shared folders to back up.")
+        hint: _("All selected folders will be included in the same snapshot.")
         multiple: true
         valueField: uuid
         textField: description
@@ -43,7 +52,7 @@ data:
           required: true
       - type: select
         name: reporef
-        label: _('Repository')
+        label: _("Repository")
         placeholder: _("Select a repository.")
         textField: name
         valueField: uuid
@@ -54,13 +63,109 @@ data:
               method: enumerateRepoCandidates
         validators:
           required: true
+
+      # ── Options ───────────────────────────────────────────────────────────
+      - type: divider
+        title: _("Options")
       - type: textInput
-        name: exclude
-        label: _("Excludes")
-        hint: _("What files or folders to exclude. Put a comma between each entry.")
+        name: tags
+        label: _("Tags")
+        hint: _("Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite).")
         value: ""
         validators:
           required: false
+      - type: textInput
+        name: exclude
+        label: _("Exclude patterns")
+        hint: _("Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys).")
+        value: ""
+        validators:
+          required: false
+
+      # ── Schedule ─────────────────────────────────────────────────────────
+      - type: divider
+        title: _("Schedule")
+      - type: hint
+        hintType: info
+        text: _("Use standard cron notation.")
+      - type: textInput
+        name: scheduleminute
+        label: _("Minute")
+        value: "0"
+        hint: _("0–59 or * or */5 etc.")
+        validators:
+          required: true
+      - type: textInput
+        name: schedulehour
+        label: _("Hour")
+        value: "0"
+        hint: _("0–23 or * or */2 etc.")
+        validators:
+          required: true
+      - type: textInput
+        name: scheduledayofmonth
+        label: _("Day of month")
+        value: "*"
+        hint: _("1–31 or *")
+        validators:
+          required: true
+      - type: textInput
+        name: schedulemonth
+        label: _("Month")
+        value: "*"
+        hint: _("1–12 or *")
+        validators:
+          required: true
+      - type: textInput
+        name: scheduledayofweek
+        label: _("Day of week")
+        value: "*"
+        hint: _("0=Sunday … 6=Saturday or *")
+        validators:
+          required: true
+
+      # ── Retention policy ──────────────────────────────────────────────────
+      - type: divider
+        title: _("Retention policy")
+      - type: hint
+        hintType: info
+        text: _("After each backup the retention policy is applied. Snapshots outside these limits are forgotten and the repository is pruned. Set a field to 0 to disable that limit.")
+      - type: numberInput
+        name: keeplast
+        label: _("Keep last N")
+        hint: _("Keep this many of the most recent snapshots (0 = disabled).")
+        value: 0
+        validators:
+          min: 0
+      - type: numberInput
+        name: keepdaily
+        label: _("Keep daily")
+        hint: _("Keep one snapshot per day for this many days (0 = disabled).")
+        value: 7
+        validators:
+          min: 0
+      - type: numberInput
+        name: keepweekly
+        label: _("Keep weekly")
+        hint: _("Keep one snapshot per week for this many weeks (0 = disabled).")
+        value: 4
+        validators:
+          min: 0
+      - type: numberInput
+        name: keepmonthly
+        label: _("Keep monthly")
+        hint: _("Keep one snapshot per month for this many months (0 = disabled).")
+        value: 12
+        validators:
+          min: 0
+      - type: numberInput
+        name: keepyearly
+        label: _("Keep yearly")
+        hint: _("Keep one snapshot per year for this many years (0 = disabled).")
+        value: 0
+        validators:
+          min: 0
+
     buttons:
       - template: submit
         execute:
