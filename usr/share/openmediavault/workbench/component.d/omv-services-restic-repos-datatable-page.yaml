@@ -67,6 +67,23 @@ data:
           minSelected: 1
           maxSelected: 1
       - type: iconButton
+        icon: mdi:chart-bar
+        tooltip: _("View repository statistics")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Repository statistics ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: getRepoStats
+                params:
+                  uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
         icon: mdi:shield-check-outline
         tooltip: _("Check repository integrity")
         execute:

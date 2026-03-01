@@ -10,6 +10,10 @@
     "enable": {
       "type": "boolean",
       "default": true
+    },
+    "cachedir": {
+      "type": "string",
+      "default": "/var/cache/restic"
     }
   }
 }

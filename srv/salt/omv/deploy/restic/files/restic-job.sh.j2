@@ -29,8 +29,11 @@ if [ -f /etc/restic/restic-envvar-{{ job.reporef }} ]; then
     set +a
 fi
 
-# Set repository credentials
+# Set repository credentials and cache
 export RESTIC_PASSWORD="{{ repo.passphrase }}"
+{% if cachedir %}
+export RESTIC_CACHE_DIR="{{ cachedir }}"
+{% endif %}
 
 {% if repo.type == 'local' %}
 export RESTIC_REPOSITORY="{{ repo_path }}"

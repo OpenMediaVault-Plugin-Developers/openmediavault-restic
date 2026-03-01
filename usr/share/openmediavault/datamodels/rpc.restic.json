@@ -8,6 +8,10 @@
         "enable": {
           "type": "boolean",
           "required": true
+        },
+        "cachedir": {
+          "type": "string",
+          "required": true
         }
       }
     }

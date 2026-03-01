@@ -19,6 +19,7 @@
 {% set envVarDir = '/etc/restic' %}
 {% set envVarPrefix = 'restic-envvar-' %}
 {% set logDir = '/var/log/restic' %}
+{% set cacheDir = config.settings.cachedir | default('') %}
 {% set scriptsDir = '/var/lib/openmediavault/restic' %}
 {% set scriptPrefix = 'restic-job-' %}
 {% set cronFile = '/etc/cron.d/openmediavault-restic' %}
@@ -57,6 +58,16 @@ configure_restic_log_dir:
     - user: root
     - group: root
     - mode: 755
+
+{% if cacheDir %}
+configure_restic_cache_dir:
+  file.directory:
+    - name: "{{ cacheDir }}"
+    - user: root
+    - group: root
+    - mode: 700
+    - makedirs: true
+{% endif %}
 
 configure_restic_envvar_dir:
   file.directory:
@@ -157,6 +168,7 @@ configure_restic_job_script_{{ job.uuid }}:
         repo: {{ repo | json }}
         repo_path: "{{ repo_path }}"
         source_paths: {{ source_paths | json }}
+        cachedir: "{{ cacheDir }}"
     - template: jinja
     - user: root
     - group: root

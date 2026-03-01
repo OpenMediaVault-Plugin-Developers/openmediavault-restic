@@ -82,7 +82,10 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.restic.setsettings');
         $db = \OMV\Config\Database::getInstance();
         $object = $db->get("conf.service.restic.settings");
-        $object->setFlatAssoc(["enable" => $params['enable']]);
+        $object->setFlatAssoc([
+            "enable"   => $params['enable'],
+            "cachedir" => $params['cachedir'],
+        ]);
         $db->set($object);
         return $object->getAssoc();
     }
@@ -150,6 +153,12 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
                 // Custom/other: use URI as-is
                 $cmd->setEnv("RESTIC_REPOSITORY", $repo->get('uri'));
                 break;
+        }
+
+        $settings = \OMV\Config\Database::getInstance()->get("conf.service.restic.settings");
+        $cacheDir = $settings->get("cachedir");
+        if (!empty($cacheDir)) {
+            $cmd->setEnv("RESTIC_CACHE_DIR", $cacheDir);
         }
     }
 
@@ -395,32 +404,18 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
 
-        $cmdArgs = [$this->getProgram, 'stats', '--json'];
-        $cmd = new \OMV\System\Process($cmdArgs);
-        $this->buildRepoEnv($repo, $context, $cmd);
-        $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
-        $cmd->setEnvFromFile($this->envFile . 'shared');
-        $cmd->setRedirect2to1();
-        $cmd->execute($output, $exitStatus);
-
-        if ($exitStatus === 0 && !empty($output)) {
-            $stats = json_decode(implode('', $output), true);
-            if (is_array($stats)) {
-                // Convert bytes to human-readable
-                $bytes = isset($stats['total_size']) ? intval($stats['total_size']) : 0;
-                $stats['total_size_human'] = $this->formatBytes($bytes);
-                return $stats;
-            }
-        }
-        return ['error' => 'Could not retrieve stats'];
-    }
-
-    private function formatBytes($bytes)
-    {
-        if ($bytes >= 1073741824) return round($bytes / 1073741824, 2) . ' GiB';
-        if ($bytes >= 1048576)    return round($bytes / 1048576, 2) . ' MiB';
-        if ($bytes >= 1024)       return round($bytes / 1024, 2) . ' KiB';
-        return $bytes . ' B';
+        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
+            $cmdArgs = [$this->getProgram, 'stats'];
+            $cmd = new \OMV\System\Process($cmdArgs);
+            $this->buildRepoEnv($repo, $context, $cmd);
+            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
+            $cmd->setEnvFromFile($this->envFile . 'shared');
+            $cmd->setRedirect2to1();
+            $cmdLine = $cmd->getCommandLine();
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->exec($cmdLine, $output, $bgOutputFilename);
+            return $output;
+        });
     }
 
     /**
