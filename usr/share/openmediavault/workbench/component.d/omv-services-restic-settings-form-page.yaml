@@ -11,11 +11,6 @@ data:
       post:
         method: setSettings
     fields:
-      - type: checkbox
-        name: enable
-        label: _("Enable")
-        value: true
-        hint: _("Whether Restic should operate.")
       - type: textInput
         name: cachedir
         label: _("Cache directory")

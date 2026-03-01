@@ -5,10 +5,6 @@
     "params": {
       "type": "object",
       "properties": {
-        "enable": {
-          "type": "boolean",
-          "required": true
-        },
         "cachedir": {
           "type": "string",
           "required": true

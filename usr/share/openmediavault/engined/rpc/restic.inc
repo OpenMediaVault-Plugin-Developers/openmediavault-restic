@@ -80,7 +80,6 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $object = $db->get("conf.service.restic.settings");
         $object->setFlatAssoc([
-            "enable"   => $params['enable'],
             "cachedir" => $params['cachedir'],
         ]);
         $db->set($object);
