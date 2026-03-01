@@ -526,6 +526,21 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             if (file_exists($hashFile)) {
                 $snapshotAssoc['hash'] = trim(file_get_contents($hashFile));
             }
+            // Build a cron expression string for display (fed to cron2human in the UI).
+            switch ($snapshotAssoc['execution'] ?? 'daily') {
+                case 'hourly':  $snapshotAssoc['schedule'] = '0 * * * *';   break;
+                case 'daily':   $snapshotAssoc['schedule'] = '0 0 * * *';   break;
+                case 'weekly':  $snapshotAssoc['schedule'] = '0 0 * * 0';   break;
+                case 'monthly': $snapshotAssoc['schedule'] = '0 0 1 * *';   break;
+                case 'yearly':  $snapshotAssoc['schedule'] = '0 0 1 1 *';   break;
+                case 'reboot':  $snapshotAssoc['schedule'] = '@reboot';      break;
+                default: // exactly
+                    $min = ($snapshotAssoc['everynminute']     ? '*/' : '') . $snapshotAssoc['minute'];
+                    $hr  = ($snapshotAssoc['everynhour']       ? '*/' : '') . $snapshotAssoc['hour'];
+                    $dom = ($snapshotAssoc['everyndayofmonth'] ? '*/' : '') . $snapshotAssoc['dayofmonth'];
+                    $snapshotAssoc['schedule'] = "$min $hr $dom {$snapshotAssoc['month']} {$snapshotAssoc['dayofweek']}";
+                    break;
+            }
             $snapshotsAssoc[] = $snapshotAssoc;
         }
         unset($snapshotv);
@@ -544,6 +559,10 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $obj = $db->getAssoc('conf.service.restic.snapshot', $params['uuid']);
         // Convert CSV back to array so the multi-select form field populates correctly
         $obj['sharedfolderrefs'] = array_values(array_filter(array_map('trim', explode(',', $obj['csvsharedfolderrefs'] ?? ''))));
+        // Convert comma-separated schedule strings to arrays for the multi-select fields
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $field) {
+            $obj[$field] = array_values(array_filter(array_map('trim', explode(',', $obj[$field] ?? '*'))));
+        }
         return $obj;
     }
 
@@ -560,19 +579,22 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         unset($params['sharedfolderrefs']);
         $params['csvsharedfolderrefs'] = $csvRefs;
 
+        // Convert schedule arrays to comma-separated strings for storage
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $field) {
+            if (is_array($params[$field])) {
+                $params[$field] = implode(',', $params[$field]);
+            }
+        }
+
         // Apply default values for optional fields that may be missing
-        $params['enable']             = $params['enable']             ?? true;
-        $params['name']               = $params['name']               ?? '';
-        $params['scheduleminute']     = $params['scheduleminute']     ?? '0';
-        $params['schedulehour']       = $params['schedulehour']       ?? '0';
-        $params['scheduledayofmonth'] = $params['scheduledayofmonth'] ?? '*';
-        $params['schedulemonth']      = $params['schedulemonth']      ?? '*';
-        $params['scheduledayofweek']  = $params['scheduledayofweek']  ?? '*';
-        $params['keeplast']           = isset($params['keeplast'])    ? intval($params['keeplast'])    : 0;
-        $params['keepdaily']          = isset($params['keepdaily'])   ? intval($params['keepdaily'])   : 7;
-        $params['keepweekly']         = isset($params['keepweekly'])  ? intval($params['keepweekly'])  : 4;
-        $params['keepmonthly']        = isset($params['keepmonthly']) ? intval($params['keepmonthly']) : 12;
-        $params['keepyearly']         = isset($params['keepyearly'])  ? intval($params['keepyearly'])  : 0;
+        $params['enable']    = $params['enable'] ?? true;
+        $params['name']      = $params['name']   ?? '';
+        $params['execution'] = $params['execution'] ?? 'daily';
+        $params['keeplast']   = isset($params['keeplast'])    ? intval($params['keeplast'])    : 0;
+        $params['keepdaily']  = isset($params['keepdaily'])   ? intval($params['keepdaily'])   : 7;
+        $params['keepweekly'] = isset($params['keepweekly'])  ? intval($params['keepweekly'])  : 4;
+        $params['keepmonthly']= isset($params['keepmonthly']) ? intval($params['keepmonthly']) : 12;
+        $params['keepyearly'] = isset($params['keepyearly'])  ? intval($params['keepyearly'])  : 0;
 
         $db = \OMV\Config\Database::getInstance();
         $snapshot = new \OMV\Config\ConfigObject('conf.service.restic.snapshot');
@@ -584,7 +606,6 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
     public function createSnapshot($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.restic.setsnapshot');
 
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['reporef']);

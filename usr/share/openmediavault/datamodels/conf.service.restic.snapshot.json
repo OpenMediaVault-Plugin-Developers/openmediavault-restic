@@ -40,23 +40,40 @@
       "type": "string",
       "default": ""
     },
-    "scheduleminute": {
+    "execution": {
+      "type": "string",
+      "enum": ["exactly", "hourly", "daily", "weekly", "monthly", "yearly", "reboot"],
+      "default": "daily"
+    },
+    "minute": {
       "type": "string",
       "default": "0"
     },
-    "schedulehour": {
+    "everynminute": {
+      "type": "boolean",
+      "default": false
+    },
+    "hour": {
       "type": "string",
       "default": "0"
     },
-    "scheduledayofmonth": {
+    "everynhour": {
+      "type": "boolean",
+      "default": false
+    },
+    "dayofmonth": {
       "type": "string",
       "default": "*"
     },
-    "schedulemonth": {
+    "everyndayofmonth": {
+      "type": "boolean",
+      "default": false
+    },
+    "month": {
       "type": "string",
       "default": "*"
     },
-    "scheduledayofweek": {
+    "dayofweek": {
       "type": "string",
       "default": "*"
     },

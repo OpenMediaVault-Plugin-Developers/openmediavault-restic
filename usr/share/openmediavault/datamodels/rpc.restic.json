@@ -145,20 +145,47 @@
           ],
           "required": true
         },
-        "scheduleminute": {
-          "type": "string"
+        "execution": {
+          "type": "string",
+          "enum": ["exactly", "hourly", "daily", "weekly", "monthly", "yearly", "reboot"],
+          "required": true
         },
-        "schedulehour": {
-          "type": "string"
+        "minute": {
+          "type": "array",
+          "items": { "type": "string" },
+          "required": true
         },
-        "scheduledayofmonth": {
-          "type": "string"
+        "everynminute": {
+          "type": "boolean",
+          "required": true
         },
-        "schedulemonth": {
-          "type": "string"
+        "hour": {
+          "type": "array",
+          "items": { "type": "string" },
+          "required": true
         },
-        "scheduledayofweek": {
-          "type": "string"
+        "everynhour": {
+          "type": "boolean",
+          "required": true
+        },
+        "dayofmonth": {
+          "type": "array",
+          "items": { "type": "string" },
+          "required": true
+        },
+        "everyndayofmonth": {
+          "type": "boolean",
+          "required": true
+        },
+        "month": {
+          "type": "array",
+          "items": { "type": "string" },
+          "required": true
+        },
+        "dayofweek": {
+          "type": "array",
+          "items": { "type": "string" },
+          "required": true
         },
         "keeplast": {
           "type": "integer"

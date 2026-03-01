@@ -83,22 +83,6 @@ configure_restic_scripts_dir:
     - group: root
     - mode: 700
 
-# Remove pre-existing environment variable files
-remove_restic_envvar_files:
-  module.run:
-    - file.find:
-        - path: "{{ envVarDir }}"
-        - iname: "{{ envVarPrefix }}*"
-        - delete: "f"
-
-# Remove pre-existing backup job scripts
-remove_restic_job_scripts:
-  module.run:
-    - file.find:
-        - path: "{{ scriptsDir }}"
-        - iname: "{{ scriptPrefix }}*"
-        - delete: "f"
-
 # Create environment variable file for each repository
 {% for repo in config.repos.repo %}
 {% set envVarFile = envVarDir ~ '/' ~ envVarPrefix ~ repo.uuid %}
@@ -117,7 +101,7 @@ configure_restic_envvar_{{ repo.uuid }}:
     - mode: 600
 {% endfor %}
 
-# Create shared environment variable file (applies to all repositories)
+# Shared environment variable file (applies to all repositories)
 {% set envVarFile = envVarDir ~ '/' ~ envVarPrefix ~ 'shared' %}
 configure_restic_envvar_shared:
   file.managed:
@@ -182,13 +166,28 @@ configure_restic_job_script_{{ job.uuid }}:
 {% for job in config.snapshots.snapshot %}
 {% if job.enable | string | lower not in ['false', '0', 'no', 'off'] and job.reporef in repomap %}
 {% set scriptFile = scriptsDir ~ '/' ~ scriptPrefix ~ job.uuid ~ '.sh' %}
+{% set ns = namespace(cronexpr='0 0 * * *') %}
+{% if job.execution == 'reboot' %}
+{% set ns.cronexpr = '@reboot' %}
+{% elif job.execution == 'hourly' %}
+{% set ns.cronexpr = '0 * * * *' %}
+{% elif job.execution == 'daily' %}
+{% set ns.cronexpr = '0 0 * * *' %}
+{% elif job.execution == 'weekly' %}
+{% set ns.cronexpr = '0 0 * * 0' %}
+{% elif job.execution == 'monthly' %}
+{% set ns.cronexpr = '0 0 1 * *' %}
+{% elif job.execution == 'yearly' %}
+{% set ns.cronexpr = '0 0 1 1 *' %}
+{% else %}
+{% set _min = ('*/' ~ job.minute) if job.everynminute else job.minute %}
+{% set _hour = ('*/' ~ job.hour) if job.everynhour else job.hour %}
+{% set _dom = ('*/' ~ job.dayofmonth) if job.everyndayofmonth else job.dayofmonth %}
+{% set ns.cronexpr = _min ~ ' ' ~ _hour ~ ' ' ~ _dom ~ ' ' ~ job.month ~ ' ' ~ job.dayofweek %}
+{% endif %}
 {% do cronjobs.append({
-    'scheduleminute':     job.scheduleminute,
-    'schedulehour':       job.schedulehour,
-    'scheduledayofmonth': job.scheduledayofmonth,
-    'schedulemonth':      job.schedulemonth,
-    'scheduledayofweek':  job.scheduledayofweek,
-    'scriptfile':         scriptFile
+    'cronexpr':   ns.cronexpr,
+    'scriptfile': scriptFile
 }) %}
 {% endif %}
 {% endfor %}
@@ -206,3 +205,47 @@ configure_restic_cron:
     - user: root
     - group: root
     - mode: 644
+
+{# -----------------------------------------------------------------------
+   Purge stale files left over from deleted/renamed repos and jobs.
+   file.tidied removes files matching the pattern that are NOT in the
+   exclude list - idempotent, no delete-all-then-recreate needed.
+   ----------------------------------------------------------------------- #}
+
+{% set keep_env = [] %}
+{% for repo in config.repos.repo %}
+{% do keep_env.append(envVarPrefix ~ repo.uuid) %}
+{% endfor %}
+{% do keep_env.append(envVarPrefix ~ 'shared') %}
+
+purge_stale_restic_envvars:
+  file.tidied:
+    - name: "{{ envVarDir }}"
+    - matches:
+      - "{{ envVarPrefix }}.*"
+    - exclude:
+{%- for f in keep_env %}
+      - "{{ f }}"
+{%- endfor %}
+    - rmdirs: False
+    - rmlinks: True
+
+
+{% set keep_scripts = [] %}
+{% for job in config.snapshots.snapshot %}
+{% if job.enable | string | lower not in ['false', '0', 'no', 'off'] %}
+{% do keep_scripts.append(scriptPrefix ~ job.uuid ~ '.sh') %}
+{% endif %}
+{% endfor %}
+
+purge_stale_restic_scripts:
+  file.tidied:
+    - name: "{{ scriptsDir }}"
+    - matches:
+      - "{{ scriptPrefix }}.*"
+    - exclude:
+{%- for f in keep_scripts %}
+      - "{{ f }}"
+{%- endfor %}
+    - rmdirs: False
+    - rmlinks: True

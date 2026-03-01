@@ -42,11 +42,11 @@ data:
         flexGrow: 1
         sortable: false
       - name: _("Schedule")
-        prop: schedulehour
-        flexGrow: 1
-        sortable: false
+        prop: schedule
+        flexGrow: 2
+        sortable: true
         cellTemplateName: template
-        cellTemplateConfig: "{{ _row.scheduleminute }} {{ _row.schedulehour }} {{ _row.scheduledayofmonth }} {{ _row.schedulemonth }} {{ _row.scheduledayofweek }}"
+        cellTemplateConfig: "{{ schedule | cron2human }}"
     actions:
       - template: create
         execute:

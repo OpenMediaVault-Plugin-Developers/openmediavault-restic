@@ -2,5 +2,5 @@ version: "1.0"
 type: route
 data:
   url: "/services/restic/snapshots"
-  title: _("Snapshots")
+  title: _("Backup Jobs")
   component: omv-services-restic-snapshots-datatable-page
