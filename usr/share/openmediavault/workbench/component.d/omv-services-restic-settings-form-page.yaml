@@ -21,15 +21,5 @@ data:
         label: _("Cache directory")
         value: "/var/cache/restic"
         hint: _("Directory where Restic stores its local cache. The cache speeds up operations, especially for remote repositories. Leave blank to disable caching (not recommended).")
-        validators:
-          patternType: 'absoluteDirPath'
-      - type: textInput
-        name: version
-        label: _("Version")
-        value: ""
-        hint: _("The current version number of Restic.")
-        submitValue: false
-        modifiers:
-          - type: readonly
     buttons:
       - template: submit

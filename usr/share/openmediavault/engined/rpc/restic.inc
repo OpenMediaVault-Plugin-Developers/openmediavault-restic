@@ -31,7 +31,6 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         // Settings
         $this->registerMethod("getSettings");
         $this->registerMethod("setSettings");
-        $this->registerMethod("getResticVersion");
 
         // Repositories
         $this->registerMethod("getRepoList");
@@ -71,8 +70,6 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ["role" => OMV_ROLE_ADMINISTRATOR]);
         $db = \OMV\Config\Database::getInstance();
         $object = $db->get("conf.service.restic.settings");
-        $version = $this->getResticVersion($params, $context);
-        $object->add('version', 'string', $version);
         return $object->getAssoc();
     }
 
@@ -88,21 +85,6 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         ]);
         $db->set($object);
         return $object->getAssoc();
-    }
-
-    public function getResticVersion($params, $context)
-    {
-        try {
-            $cmd = new \OMV\System\Process($this->getProgram, ['version']);
-            $cmd->setRedirect2to1();
-            $cmd->execute($output);
-            if (!empty($output) && preg_match('/restic\s+(\S+)/i', $output[0], $matches)) {
-                return $matches[1];
-            }
-            return isset($output[0]) ? $output[0] : 'unknown';
-        } catch (\Exception $e) {
-            return 'not installed';
-        }
     }
 
     // =========================================================================
