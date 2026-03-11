@@ -24,24 +24,6 @@ set -e
 SERVICE_XPATH_NAME="restic"
 SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
 
-# We need to add in the Restic configs to `/etc/openmediavault/config.xml`
-# If the keys do not exist, we will add them in
-# We will end up with something like this:
-# <config>
-#     <services>
-#         <restic>
-#             <settings>
-#                 <enable>0</enable>
-#             </settings>
-#             <repos>
-#             </repos>
-#             <snapshots>
-#             </snapshots>
-#             <envvars>
-#             </envvars>
-#         </restic>
-#     </services>
-# </config>
 if ! omv_config_exists "${SERVICE_XPATH}"; then
     omv_config_add_node "/config/services" "${SERVICE_XPATH_NAME}"
 fi
@@ -49,7 +31,7 @@ fi
 # Configure the settings config
 if ! omv_config_exists "${SERVICE_XPATH}/settings"; then
     omv_config_add_node "${SERVICE_XPATH}" "settings"
-    omv_config_add_key "${SERVICE_XPATH}/settings" "enable" "0"
+    omv_config_add_key "${SERVICE_XPATH}/settings" "cachedir" "/var/cache/restic"
 fi
 
 # Configure the repos config
