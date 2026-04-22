@@ -1,0 +1,8 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/repos/edit/:uuid"
+  title: _("Edit repository")
+  editing: true
+  notificationTitle: _("Edited repository.")
+  component: omv-services-restic-repo-create-form-page

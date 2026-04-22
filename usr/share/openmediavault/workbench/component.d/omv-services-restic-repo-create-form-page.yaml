@@ -89,6 +89,7 @@ data:
         name: skipinit
         label: _("Skip initialisation")
         value: false
+        disabled: "{{ _routeConfig.data.editing | toboolean }}"
         hint: _("Tick this to import an existing restic repository. The passphrase must match the one already used by that repository.")
     buttons:
       - template: submit

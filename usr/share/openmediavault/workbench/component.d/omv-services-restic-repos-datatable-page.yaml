@@ -41,6 +41,10 @@ data:
         execute:
           type: url
           url: "/services/restic/repos/create"
+      - template: edit
+        execute:
+          type: url
+          url: "/services/restic/repos/edit/{{ _selected[0].uuid }}"
       - template: delete
         execute:
           type: request

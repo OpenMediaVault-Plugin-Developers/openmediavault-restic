@@ -269,14 +269,11 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             }
         }
 
-        // Initialise unless skipped
-        if (!$skipinit) {
+        // Initialise only for new repos (unless skipped)
+        if ($isNew && !$skipinit) {
             $cmdArgs = [$this->getProgram, 'init'];
             $cmd = new \OMV\System\Process($cmdArgs);
             $this->buildRepoEnv($repo, $context, $cmd);
-            if (!$isNew) {
-                $cmd->setEnvFromFile($this->envFile . $params['uuid']);
-            }
             $cmd->setEnvFromFile($this->envFile . 'shared');
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
