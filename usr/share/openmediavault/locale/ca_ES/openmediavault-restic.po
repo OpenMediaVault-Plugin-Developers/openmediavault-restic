@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 00:45+0000\n"
+"POT-Creation-Date: 2026-05-29 01:34+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Language-Team: Catalan (Spain) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/ca_ES/)\n"
 "MIME-Version: 1.0\n"
@@ -302,6 +302,9 @@ msgstr ""
 msgid "Remote path / URI"
 msgstr ""
 
+msgid "Remove stale locks (unlock)"
+msgstr ""
+
 msgid "Repositories"
 msgstr ""
 
@@ -402,6 +405,12 @@ msgstr ""
 msgid "Tags"
 msgstr ""
 
+msgid "Test connection"
+msgstr ""
+
+msgid "Testing repository connection ..."
+msgstr ""
+
 msgid "The shared folder used as the restic repository location."
 msgstr ""
 
@@ -425,6 +434,9 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
+msgid "Unlocking repository ..."
+msgstr ""
+
 msgid "Value"
 msgstr ""
 
@@ -444,4 +456,7 @@ msgid "Yearly"
 msgstr ""
 
 msgid "n/a"
+msgstr ""
+
+msgid "rclone remote"
 msgstr ""
