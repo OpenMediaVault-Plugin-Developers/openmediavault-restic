@@ -2,7 +2,12 @@
 {{ pillar['headers']['auto_generated'] }}
 {{ pillar['headers']['warning'] }}
 # Restic backup job: {{ job.uuid }}{% if job.name %} ({{ job.name }}){% endif %}
-
+{# POSIX single-quote shell escaping: wrap in single quotes and replace any
+   embedded single quote with the '\'' sequence. Keeps secrets and paths safe
+   from word splitting and shell injection. #}
+{% macro sq(val) -%}
+'{{ val | string | replace("'", "'\\''") }}'
+{%- endmacro %}
 LOG_DIR="/var/log/restic"
 LOG_FILE="${LOG_DIR}/restic.log"
 JOB_ID="{{ job.uuid }}"
@@ -30,34 +35,37 @@ if [ -f /etc/restic/restic-envvar-{{ job.reporef }} ]; then
 fi
 
 # Set repository credentials and cache
-export RESTIC_PASSWORD="{{ repo.passphrase }}"
+export RESTIC_PASSWORD={{ sq(repo.passphrase) }}
 {% if cachedir %}
-export RESTIC_CACHE_DIR="{{ cachedir }}"
+export RESTIC_CACHE_DIR={{ sq(cachedir) }}
 {% endif %}
 
 {% if repo.type == 'local' %}
-export RESTIC_REPOSITORY="{{ repo_path }}"
+export RESTIC_REPOSITORY={{ sq(repo_path) }}
 {% elif repo.type == 's3' %}
-export RESTIC_REPOSITORY="s3:{{ repo.uri }}"
-export AWS_ACCESS_KEY_ID="{{ repo.accesskey }}"
-export AWS_SECRET_ACCESS_KEY="{{ repo.secretkey }}"
+export RESTIC_REPOSITORY={{ sq('s3:' ~ repo.uri) }}
+export AWS_ACCESS_KEY_ID={{ sq(repo.accesskey) }}
+export AWS_SECRET_ACCESS_KEY={{ sq(repo.secretkey) }}
 {% elif repo.type == 'b2' %}
-export RESTIC_REPOSITORY="b2:{{ repo.uri }}"
-export B2_ACCOUNT_ID="{{ repo.accesskey }}"
-export B2_ACCOUNT_KEY="{{ repo.secretkey }}"
+export RESTIC_REPOSITORY={{ sq('b2:' ~ repo.uri) }}
+export B2_ACCOUNT_ID={{ sq(repo.accesskey) }}
+export B2_ACCOUNT_KEY={{ sq(repo.secretkey) }}
 {% elif repo.type == 'sftp' %}
-export RESTIC_REPOSITORY="sftp:{{ repo.uri }}"
+export RESTIC_REPOSITORY={{ sq('sftp:' ~ repo.uri) }}
 {% elif repo.type == 'rest' %}
-export RESTIC_REPOSITORY="rest:{{ repo.uri }}"
+export RESTIC_REPOSITORY={{ sq('rest:' ~ repo.uri) }}
+{% elif repo.type == 'rclone' %}
+export RESTIC_REPOSITORY={{ sq('rclone:' ~ repo.uri) }}
 {% endif %}
 
-# Build backup command
-BACKUP_ARGS=""
+# Build backup command as an array so paths/patterns with spaces or shell
+# metacharacters are passed to restic verbatim.
+BACKUP_ARGS=()
 
 {% if job.tags %}
 {% for tag in job.tags.split(',') %}
 {% if tag | trim %}
-BACKUP_ARGS="${BACKUP_ARGS} --tag {{ tag | trim | replace(' ', '_') }}"
+BACKUP_ARGS+=(--tag {{ sq(tag | trim) }})
 {% endif %}
 {% endfor %}
 {% endif %}
@@ -65,17 +73,17 @@ BACKUP_ARGS="${BACKUP_ARGS} --tag {{ tag | trim | replace(' ', '_') }}"
 {% if job.exclude %}
 {% for excl in job.exclude.split(',') %}
 {% if excl | trim %}
-BACKUP_ARGS="${BACKUP_ARGS} --exclude {{ excl | trim | replace(' ', '\\ ') }}"
+BACKUP_ARGS+=(--exclude {{ sq(excl | trim) }})
 {% endif %}
 {% endfor %}
 {% endif %}
 
 {% for path in source_paths %}
-BACKUP_ARGS="${BACKUP_ARGS} {{ path | replace(' ', '\\ ') }}"
+BACKUP_ARGS+=({{ sq(path) }})
 {% endfor %}
 
-log "Running: /usr/bin/restic backup --verbose${BACKUP_ARGS}"
-/usr/bin/restic backup --verbose${BACKUP_ARGS} 2>&1 | tee -a "${LOG_FILE}"
+log "Running: restic backup --verbose ${BACKUP_ARGS[*]}"
+/usr/bin/restic backup --verbose --retry-lock 5m "${BACKUP_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
 BACKUP_EXIT=${PIPESTATUS[0]}
 
 if [ ${BACKUP_EXIT} -ne 0 ]; then
@@ -90,16 +98,20 @@ fi
 {% set has_keepyearly  = job.keepyearly  | int > 0 %}
 {% if has_keeplast or has_keepdaily or has_keepweekly or has_keepmonthly or has_keepyearly %}
 
-# Apply retention policy
-FORGET_ARGS="--prune"
-{% if has_keeplast    %} FORGET_ARGS="${FORGET_ARGS} --keep-last {{ job.keeplast }}"    {% endif %}
-{% if has_keepdaily   %} FORGET_ARGS="${FORGET_ARGS} --keep-daily {{ job.keepdaily }}"   {% endif %}
-{% if has_keepweekly  %} FORGET_ARGS="${FORGET_ARGS} --keep-weekly {{ job.keepweekly }}"  {% endif %}
-{% if has_keepmonthly %} FORGET_ARGS="${FORGET_ARGS} --keep-monthly {{ job.keepmonthly }}" {% endif %}
-{% if has_keepyearly  %} FORGET_ARGS="${FORGET_ARGS} --keep-yearly {{ job.keepyearly }}"  {% endif %}
+# Apply retention policy, scoped to this job's source paths so it cannot
+# forget snapshots created by other jobs that share the same repository.
+FORGET_ARGS=(--prune --retry-lock 5m)
+{% if has_keeplast    %}FORGET_ARGS+=(--keep-last {{ job.keeplast | int }}){% endif %}
+{% if has_keepdaily   %}FORGET_ARGS+=(--keep-daily {{ job.keepdaily | int }}){% endif %}
+{% if has_keepweekly  %}FORGET_ARGS+=(--keep-weekly {{ job.keepweekly | int }}){% endif %}
+{% if has_keepmonthly %}FORGET_ARGS+=(--keep-monthly {{ job.keepmonthly | int }}){% endif %}
+{% if has_keepyearly  %}FORGET_ARGS+=(--keep-yearly {{ job.keepyearly | int }}){% endif %}
+{% for path in source_paths %}
+FORGET_ARGS+=(--path {{ sq(path) }})
+{% endfor %}
 
-log "Applying retention: /usr/bin/restic forget${FORGET_ARGS}"
-/usr/bin/restic forget${FORGET_ARGS} 2>&1 | tee -a "${LOG_FILE}"
+log "Applying retention: restic forget ${FORGET_ARGS[*]}"
+/usr/bin/restic forget "${FORGET_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
 FORGET_EXIT=${PIPESTATUS[0]}
 
 if [ ${FORGET_EXIT} -ne 0 ]; then

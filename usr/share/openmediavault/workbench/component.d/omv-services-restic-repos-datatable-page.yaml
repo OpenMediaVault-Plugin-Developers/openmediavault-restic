@@ -71,6 +71,40 @@ data:
           minSelected: 1
           maxSelected: 1
       - type: iconButton
+        icon: mdi:connection
+        tooltip: _("Test connection")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Testing repository connection ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: testRepo
+                params:
+                  uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
+        icon: mdi:lock-open-variant-outline
+        tooltip: _("Remove stale locks (unlock)")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Unlocking repository ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: unlockRepo
+                params:
+                  uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
         icon: mdi:chart-bar
         tooltip: _("View repository statistics")
         execute:

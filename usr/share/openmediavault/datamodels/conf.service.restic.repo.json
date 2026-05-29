@@ -25,7 +25,8 @@
         "s3",
         "sftp",
         "b2",
-        "rest"
+        "rest",
+        "rclone"
       ],
       "default": "local"
     },

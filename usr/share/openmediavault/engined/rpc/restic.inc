@@ -40,6 +40,8 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod("deleteRepo");
         $this->registerMethod("checkRepo");
         $this->registerMethod("pruneRepo");
+        $this->registerMethod("unlockRepo");
+        $this->registerMethod("testRepo");
         $this->registerMethod("getRepoStats");
         $this->registerMethod("getRepoSnapshotList");
 
@@ -92,54 +94,63 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
     /**
      * Set RESTIC_PASSWORD and RESTIC_REPOSITORY (plus backend credentials)
-     * as environment variables on a Process object. Does NOT use escapeshellarg
-     * because setEnv passes values directly to the process environment.
+     * as environment variables on a Process object.
+     *
+     * IMPORTANT: \OMV\System\Process::getCommandLine() emits each variable as
+     * an unquoted `export NAME=value;` shell statement, so values MUST be
+     * passed through escapeshellarg() here. Omitting it breaks any value that
+     * contains whitespace or shell metacharacters and allows shell injection.
      */
     private function buildRepoEnv($repo, $context, &$cmd)
     {
         $type = $repo->get('type');
 
         // Password is always required
-        $cmd->setEnv("RESTIC_PASSWORD", $repo->get('passphrase'));
+        $cmd->setEnv("RESTIC_PASSWORD", escapeshellarg($repo->get('passphrase')));
 
         switch ($type) {
             case 'local':
                 $path = \OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
                     'uuid' => $repo->get('sharedfolderref')
                 ], $context);
-                $cmd->setEnv("RESTIC_REPOSITORY", $path);
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg($path));
                 break;
 
             case 's3':
-                $cmd->setEnv("RESTIC_REPOSITORY", 's3:' . $repo->get('uri'));
-                $cmd->setEnv("AWS_ACCESS_KEY_ID", $repo->get('accesskey'));
-                $cmd->setEnv("AWS_SECRET_ACCESS_KEY", $repo->get('secretkey'));
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg('s3:' . $repo->get('uri')));
+                $cmd->setEnv("AWS_ACCESS_KEY_ID", escapeshellarg($repo->get('accesskey')));
+                $cmd->setEnv("AWS_SECRET_ACCESS_KEY", escapeshellarg($repo->get('secretkey')));
                 break;
 
             case 'b2':
-                $cmd->setEnv("RESTIC_REPOSITORY", 'b2:' . $repo->get('uri'));
-                $cmd->setEnv("B2_ACCOUNT_ID", $repo->get('accesskey'));
-                $cmd->setEnv("B2_ACCOUNT_KEY", $repo->get('secretkey'));
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg('b2:' . $repo->get('uri')));
+                $cmd->setEnv("B2_ACCOUNT_ID", escapeshellarg($repo->get('accesskey')));
+                $cmd->setEnv("B2_ACCOUNT_KEY", escapeshellarg($repo->get('secretkey')));
                 break;
 
             case 'sftp':
-                $cmd->setEnv("RESTIC_REPOSITORY", 'sftp:' . $repo->get('uri'));
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg('sftp:' . $repo->get('uri')));
                 break;
 
             case 'rest':
-                $cmd->setEnv("RESTIC_REPOSITORY", 'rest:' . $repo->get('uri'));
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg('rest:' . $repo->get('uri')));
+                break;
+
+            case 'rclone':
+                // The rclone remote must be configured out of band via `rclone config`.
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg('rclone:' . $repo->get('uri')));
                 break;
 
             default:
                 // Custom/other: use URI as-is
-                $cmd->setEnv("RESTIC_REPOSITORY", $repo->get('uri'));
+                $cmd->setEnv("RESTIC_REPOSITORY", escapeshellarg($repo->get('uri')));
                 break;
         }
 
         $settings = \OMV\Config\Database::getInstance()->get("conf.service.restic.settings");
         $cacheDir = $settings->get("cachedir");
         if (!empty($cacheDir)) {
-            $cmd->setEnv("RESTIC_CACHE_DIR", $cacheDir);
+            $cmd->setEnv("RESTIC_CACHE_DIR", escapeshellarg($cacheDir));
         }
     }
 
@@ -159,7 +170,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             return;
         }
 
-        $forgetArgs = [$this->getProgram, 'forget', '--prune'];
+        $forgetArgs = [$this->getProgram, 'forget', '--prune', '--retry-lock', '5m'];
         if ($keepLast    > 0) $forgetArgs[] = '--keep-last '    . $keepLast;
         if ($keepDaily   > 0) $forgetArgs[] = '--keep-daily '   . $keepDaily;
         if ($keepWeekly  > 0) $forgetArgs[] = '--keep-weekly '  . $keepWeekly;
@@ -267,6 +278,13 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             if ($type === 'local') {
                 $db->assertIsUnique($repo, 'sharedfolderref');
             }
+        } else {
+            // A restic repository's encryption password cannot be changed by
+            // rewriting config - it must be rotated with `restic key passwd`.
+            // Silently rewriting it here would orphan the repository, so we
+            // always preserve the stored passphrase on edit.
+            $existing = $db->get('conf.service.restic.repo', $repo->get('uuid'));
+            $repo->set('passphrase', $existing->get('passphrase'));
         }
 
         // Initialise only for new repos (unless skipped)
@@ -339,7 +357,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
 
         return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'check'];
+            $cmdArgs = [$this->getProgram, 'check', '--retry-lock', '5m'];
             $cmd = new \OMV\System\Process($cmdArgs);
             $this->buildRepoEnv($repo, $context, $cmd);
             $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
@@ -361,7 +379,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
 
         return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'prune'];
+            $cmdArgs = [$this->getProgram, 'prune', '--retry-lock', '5m'];
             $cmd = new \OMV\System\Process($cmdArgs);
             $this->buildRepoEnv($repo, $context, $cmd);
             $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
@@ -370,6 +388,60 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmdLine = $cmd->getCommandLine();
             $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
             $this->exec($cmdLine, $output, $bgOutputFilename);
+            return $output;
+        });
+    }
+
+    /**
+     * Remove stale locks from a repository (`restic unlock`).
+     */
+    public function unlockRepo($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+
+        $db = \OMV\Config\Database::getInstance();
+        $repo = $db->get('conf.service.restic.repo', $params['uuid']);
+
+        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
+            $cmdArgs = [$this->getProgram, 'unlock'];
+            $cmd = new \OMV\System\Process($cmdArgs);
+            $this->buildRepoEnv($repo, $context, $cmd);
+            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
+            $cmd->setEnvFromFile($this->envFile . 'shared');
+            $cmd->setRedirect2to1();
+            $cmdLine = $cmd->getCommandLine();
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->exec($cmdLine, $output, $bgOutputFilename);
+            $this->writeBgProcOutput($bgOutputFilename, "\nDone.\n");
+            return $output;
+        });
+    }
+
+    /**
+     * Verify connectivity and credentials for a repository by reading its
+     * config (`restic cat config`). Fast and non-destructive.
+     */
+    public function testRepo($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+
+        $db = \OMV\Config\Database::getInstance();
+        $repo = $db->get('conf.service.restic.repo', $params['uuid']);
+
+        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
+            $cmdArgs = [$this->getProgram, 'cat', 'config', '--retry-lock', '5m'];
+            $cmd = new \OMV\System\Process($cmdArgs);
+            $this->buildRepoEnv($repo, $context, $cmd);
+            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
+            $cmd->setEnvFromFile($this->envFile . 'shared');
+            $cmd->setRedirect2to1();
+            $cmdLine = $cmd->getCommandLine();
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->exec($cmdLine, $output, $bgOutputFilename);
+            $this->writeBgProcOutput($bgOutputFilename,
+                "\nConnection successful: repository is reachable and the passphrase is correct.\n");
             return $output;
         });
     }
@@ -383,7 +455,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
 
         return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'stats'];
+            $cmdArgs = [$this->getProgram, 'stats', '--retry-lock', '5m'];
             $cmd = new \OMV\System\Process($cmdArgs);
             $this->buildRepoEnv($repo, $context, $cmd);
             $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
@@ -411,7 +483,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $reporef);
 
-        $cmdArgs = [$this->getProgram, 'snapshots', '--json'];
+        $cmdArgs = [$this->getProgram, 'snapshots', '--json', '--retry-lock', '5m'];
         $cmd = new \OMV\System\Process($cmdArgs);
         $this->buildRepoEnv($repo, $context, $cmd);
         $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
@@ -589,7 +661,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $repo = $db->get('conf.service.restic.repo', $params['reporef']);
 
         return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'backup', '--verbose'];
+            $cmdArgs = [$this->getProgram, 'backup', '--verbose', '--retry-lock', '5m'];
 
             // Tags (ignore empty strings)
             $tags = array_filter(array_map('trim', explode(',', $params['tags'] ?? '')));
@@ -671,12 +743,29 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $snapshot = $db->get('conf.service.restic.snapshot', $params['uuid']);
         $repo = $db->get('conf.service.restic.repo', $snapshot->get('reporef'));
 
-        // Forget the specific snapshot hash in the restic repo (if one was ever created).
-        // Check flat file first (written by createSnapshot), fall back to config field.
-        $hashFile = '/var/lib/openmediavault/restic/hash-' . $snapshot->get('uuid');
-        $hash = file_exists($hashFile) ? trim(file_get_contents($hashFile)) : $snapshot->get('hash');
-        if (!empty($hash)) {
-            $cmdArgs = [$this->getProgram, 'forget', '--prune', $hash];
+        // Forget every snapshot this job produced, not just the most recent one.
+        // A job is identified by its source paths, so we scope the forget with
+        // a --path filter for each source folder (the same scoping used by the
+        // retention policy). This avoids leaving orphaned snapshots behind.
+        $pathArgs = [];
+        $csvRefs = $snapshot->get('csvsharedfolderrefs');
+        foreach (array_filter(array_map('trim', explode(',', $csvRefs))) as $uuid) {
+            try {
+                $sfpath = \OMV\Rpc\Rpc::call("ShareMgmt", "getPath", ["uuid" => $uuid], $context);
+                $pathArgs[] = '--path';
+                $pathArgs[] = escapeshellarg($sfpath);
+            } catch (\Exception $e) {
+                // skip unresolvable paths
+            }
+        }
+
+        // Only forget if we could resolve at least one path; otherwise we would
+        // risk operating on the whole repository.
+        if (!empty($pathArgs)) {
+            $cmdArgs = array_merge(
+                [$this->getProgram, 'forget', '--prune', '--retry-lock', '5m'],
+                $pathArgs
+            );
             $cmd = new \OMV\System\Process($cmdArgs);
             $this->buildRepoEnv($repo, $context, $cmd);
             $cmd->setEnvFromFile($this->envFile . $snapshot->get('reporef'));
@@ -684,7 +773,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setQuiet(true);
             $cmd->execute();
         }
-        @unlink($hashFile);
+        @unlink('/var/lib/openmediavault/restic/hash-' . $snapshot->get('uuid'));
 
         $db->delete($snapshot);
         return $snapshot->getAssoc();
@@ -709,6 +798,8 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmdArgs = [
                 $this->getProgram,
                 'restore',
+                '--retry-lock',
+                '5m',
                 escapeshellarg($params['snapshotid']),
                 '--target',
                 escapeshellarg($targetPath)

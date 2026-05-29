@@ -37,6 +37,7 @@ data:
             - ["sftp", _("SFTP")]
             - ["b2", _("Backblaze B2 (native API)")]
             - ["rest", _("REST server")]
+            - ["rclone", _("rclone remote")]
       - type: sharedFolderSelect
         name: sharedfolderref
         label: _("Shared Folder")
@@ -53,7 +54,7 @@ data:
         name: uri
         label: _("Remote path / URI")
         value: ""
-        hint: '_("S3 (AWS): bucket-name · S3 (custom endpoint): https://host/bucket or https://host:port/bucket · SFTP: user@host:/path · B2: bucket-name · REST: http://host:8000/repo")'
+        hint: '_("S3 (AWS): bucket-name · S3 (custom endpoint): https://host/bucket or https://host:port/bucket · SFTP: user@host:/path · B2: bucket-name · REST: http://host:8000/repo · rclone: remote:path (the remote must be configured with `rclone config`)")'
         modifiers:
           - type: hidden
             constraint:
@@ -72,7 +73,7 @@ data:
               operator: in
               arg0:
                 prop: type
-              arg1: ["local", "sftp", "rest"]
+              arg1: ["local", "sftp", "rest", "rclone"]
       - type: passwordInput
         name: secretkey
         label: _("Account key / Secret key")
@@ -84,7 +85,7 @@ data:
               operator: in
               arg0:
                 prop: type
-              arg1: ["local", "sftp", "rest"]
+              arg1: ["local", "sftp", "rest", "rclone"]
       - type: checkbox
         name: skipinit
         label: _("Skip initialisation")
