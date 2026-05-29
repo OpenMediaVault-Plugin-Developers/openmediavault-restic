@@ -106,6 +106,7 @@ REST_REPO_UUID=""
 SFTP_REPO_UUID=""
 S3_REPO_UUID=""
 B2_REPO_UUID=""
+RCLONE_REPO_UUID=""
 SNAPSHOT_UUID=""
 ENVVAR_UUID=""
 ENVVAR_SHARED_UUID=""
@@ -138,7 +139,7 @@ cleanup() {
         rpc "Restic" "deleteEnvVar" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
     done
 
-    for uuid in "$REST_REPO_UUID" "$SFTP_REPO_UUID" "$S3_REPO_UUID" "$B2_REPO_UUID"; do
+    for uuid in "$REST_REPO_UUID" "$SFTP_REPO_UUID" "$S3_REPO_UUID" "$B2_REPO_UUID" "$RCLONE_REPO_UUID"; do
         [ -z "$uuid" ] && continue
         info "Deleting repo $uuid"
         rpc "Restic" "deleteRepo" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
@@ -221,19 +222,38 @@ if [ -n "$REST_REPO_UUID" ]; then
     assert_rpc "getRepoList includes REST repo" "Restic" "getRepoList" \
         "$LIST_PARAMS" "restic-test-rest" >/dev/null
 
-    # Update the repo (change passphrase)
+    # Update the repo. A restic repo's passphrase cannot be rotated by editing
+    # config, so setRepo must IGNORE a changed passphrase on edit and keep the
+    # stored one (otherwise the repository would be orphaned).
     assert_rpc "setRepo (REST, update)" "Restic" "setRepo" "$(python3 -c "
 import json; print(json.dumps({
     'uuid': '$REST_REPO_UUID',
     'name': 'restic-test-rest',
     'type': 'rest',
     'passphrase': 'updatedpassword456',
-    'uri': 'http://localhost:18000/',
+    'uri': 'http://localhost:18001/',
     'sharedfolderref': '',
     'accesskey': '',
     'secretkey': '',
     'skipinit': True,
 }))")" >/dev/null
+
+    # Regression: passphrase must be unchanged after edit, but other fields
+    # (e.g. uri) must still update.
+    assert_rpc "getRepo (post-update)" "Restic" "getRepo" \
+        "{\"uuid\":\"$REST_REPO_UUID\"}" >/dev/null
+    UPD_PASS=$(json_field "$RPC_OUT" "passphrase")
+    UPD_URI=$(json_field "$RPC_OUT" "uri")
+    if [ "$UPD_PASS" = "testpassword123" ]; then
+        _pass "setRepo edit — passphrase preserved (not rewritten)"
+    else
+        _fail "setRepo edit — passphrase preserved" "Expected 'testpassword123', got '$UPD_PASS'"
+    fi
+    if [ "$UPD_URI" = "http://localhost:18001/" ]; then
+        _pass "setRepo edit — non-passphrase fields still update"
+    else
+        _fail "setRepo edit — uri update" "Expected 'http://localhost:18001/', got '$UPD_URI'"
+    fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -311,7 +331,32 @@ else
     B2_REPO_UUID=""
 fi
 
-# getRepoList should now include all four test repos
+# ---------------------------------------------------------------------------
+# Repository CRUD — rclone (skipinit=true)
+# ---------------------------------------------------------------------------
+section "Repository CRUD — rclone"
+
+assert_rpc "setRepo (rclone, new)" "Restic" "setRepo" "$(python3 -c "
+import json; print(json.dumps({
+    'uuid': '$OMV_NEW_UUID',
+    'name': 'restic-test-rclone',
+    'type': 'rclone',
+    'passphrase': 'testpassword123',
+    'uri': 'gdrive:restic-backups',
+    'sharedfolderref': '',
+    'accesskey': '',
+    'secretkey': '',
+    'skipinit': True,
+}))")" >/dev/null
+RCLONE_REPO_UUID=$(json_field "$RPC_OUT" "uuid")
+if [ -n "$RCLONE_REPO_UUID" ] && [ "$RCLONE_REPO_UUID" != "$OMV_NEW_UUID" ]; then
+    _pass "setRepo rclone — got real UUID ($RCLONE_REPO_UUID)"
+else
+    _fail "setRepo rclone — no real UUID returned"
+    RCLONE_REPO_UUID=""
+fi
+
+# getRepoList should now include all five test repos
 assert_rpc "getRepoList includes all test repos" "Restic" "getRepoList" \
     "$LIST_PARAMS" "restic-test" >/dev/null
 
@@ -706,19 +751,19 @@ print('yes' if isinstance(d,list) or isinstance(d.get('data',[]),list) else 'no'
 fi
 
 # ---------------------------------------------------------------------------
-# Background operations: checkRepo, pruneRepo, getRepoStats
+# Background operations: checkRepo, pruneRepo, getRepoStats, testRepo, unlockRepo
 # These start a background process (execBgProc) and return a task handle.
 # The task will fail because the REST URL is fake; we just verify the RPC
 # accepts the call and returns a non-empty response.
 # ---------------------------------------------------------------------------
-section "Background operations (checkRepo / pruneRepo / getRepoStats)"
+section "Background operations (check / prune / stats / test / unlock)"
 
 if [ -z "$REST_REPO_UUID" ]; then
     _skip "background operations" "no test repo available"
 elif ! $RESTIC_AVAILABLE; then
     _skip "background operations" "restic binary not installed"
 else
-    for op in checkRepo pruneRepo getRepoStats; do
+    for op in checkRepo pruneRepo getRepoStats testRepo unlockRepo; do
         BG_OUT=$(rpc "Restic" "$op" "{\"uuid\":\"$REST_REPO_UUID\"}" 2>&1) || true
         if [ -n "$BG_OUT" ] && ! echo "$BG_OUT" | grep -qi "exception\|error"; then
             _pass "$op — RPC accepted (background task started)"
