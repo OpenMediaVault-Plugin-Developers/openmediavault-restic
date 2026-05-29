@@ -1,0 +1,447 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the openmediavault-restic package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: openmediavault-restic\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-29 00:45+0000\n"
+"PO-Revision-Date: 2026-05-29 00:46+0000\n"
+"Language-Team: Dutch (Belgium) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/nl_BE/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: nl_BE\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "A repository must be specified."
+msgstr ""
+
+msgid "Account ID / Access key"
+msgstr ""
+
+msgid "Account key / Secret key"
+msgstr ""
+
+msgid ""
+"After each backup the retention policy is applied. Snapshots outside these "
+"limits are forgotten and the repository is pruned. Set a field to 0 to "
+"disable that limit."
+msgstr ""
+
+msgid "All selected folders will be included in the same snapshot."
+msgstr ""
+
+msgid "April"
+msgstr ""
+
+msgid "At reboot"
+msgstr ""
+
+msgid "August"
+msgstr ""
+
+msgid "Backblaze B2 (native API)"
+msgstr ""
+
+msgid "Backup Jobs"
+msgstr ""
+
+msgid "Backup job saved."
+msgstr ""
+
+msgid "Cache directory"
+msgstr ""
+
+msgid "Certain date"
+msgstr ""
+
+msgid "Check repository integrity"
+msgstr ""
+
+msgid "Checking repository integrity ..."
+msgstr ""
+
+msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
+msgstr ""
+
+msgid ""
+"Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
+msgstr ""
+
+msgid "Create"
+msgstr ""
+
+msgid "Create Backup Job"
+msgstr ""
+
+msgid "Create repository"
+msgstr ""
+
+msgid "Created environment variable."
+msgstr ""
+
+msgid "Created repository."
+msgstr ""
+
+msgid "Daily"
+msgstr ""
+
+msgid "Date / Time"
+msgstr ""
+
+msgid "Date/Time"
+msgstr ""
+
+msgid "Day of month"
+msgstr ""
+
+msgid "Day of week"
+msgstr ""
+
+msgid "December"
+msgstr ""
+
+msgid ""
+"Directory where Restic stores its local cache. The cache speeds up "
+"operations, especially for remote repositories. Leave blank to disable "
+"caching (not recommended)."
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Edit Backup Job"
+msgstr ""
+
+msgid "Edit repository"
+msgstr ""
+
+msgid "Edited environment variable."
+msgstr ""
+
+msgid "Edited repository."
+msgstr ""
+
+msgid ""
+"Enable or disable this backup job. Disabled jobs are skipped by the "
+"scheduler."
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid ""
+"Ensure that the passphrase is strong and stored securely. It cannot be "
+"recovered if lost."
+msgstr ""
+
+msgid "Environment Variables"
+msgstr ""
+
+msgid "Every N day of month"
+msgstr ""
+
+msgid "Every N hour"
+msgstr ""
+
+msgid "Every N minute"
+msgstr ""
+
+msgid "Exclude patterns"
+msgstr ""
+
+msgid "February"
+msgstr ""
+
+msgid ""
+"Files will be restored into this shared folder. Existing files may be "
+"overwritten."
+msgstr ""
+
+msgid "Friday"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "Hostname"
+msgstr ""
+
+msgid "Hour"
+msgstr ""
+
+msgid "Hourly"
+msgstr ""
+
+msgid "ID"
+msgstr ""
+
+msgid "January"
+msgstr ""
+
+msgid "Job"
+msgstr ""
+
+msgid "Job name"
+msgstr ""
+
+msgid "July"
+msgstr ""
+
+msgid "June"
+msgstr ""
+
+msgid "Keep daily"
+msgstr ""
+
+msgid "Keep last N"
+msgstr ""
+
+msgid "Keep monthly"
+msgstr ""
+
+msgid "Keep one snapshot per day for this many days (0 = disabled)."
+msgstr ""
+
+msgid "Keep one snapshot per month for this many months (0 = disabled)."
+msgstr ""
+
+msgid "Keep one snapshot per week for this many weeks (0 = disabled)."
+msgstr ""
+
+msgid "Keep one snapshot per year for this many years (0 = disabled)."
+msgstr ""
+
+msgid "Keep this many of the most recent snapshots (0 = disabled)."
+msgstr ""
+
+msgid "Keep weekly"
+msgstr ""
+
+msgid "Keep yearly"
+msgstr ""
+
+msgid "Last snapshot"
+msgstr ""
+
+msgid "Local (shared folder)"
+msgstr ""
+
+msgid "Location / URI"
+msgstr ""
+
+msgid "March"
+msgstr ""
+
+msgid "May"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Minute"
+msgstr ""
+
+msgid "Monday"
+msgstr ""
+
+msgid "Month"
+msgstr ""
+
+msgid "Monthly"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "November"
+msgstr ""
+
+msgid "OMV-Extras Wiki"
+msgstr ""
+
+msgid "October"
+msgstr ""
+
+msgid ""
+"Only restore files matching this path prefix within the snapshot (e.g. "
+"/home/user/documents)."
+msgstr ""
+
+msgid "Optional human-readable name for this backup job."
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Passphrase"
+msgstr ""
+
+msgid "Path filter (optional)"
+msgstr ""
+
+msgid "Paths"
+msgstr ""
+
+msgid "Prune unused data from repository"
+msgstr ""
+
+msgid "Pruning repository ..."
+msgstr ""
+
+msgid "REST server"
+msgstr ""
+
+msgid "Refresh snapshot list"
+msgstr ""
+
+msgid "Remote path / URI"
+msgstr ""
+
+msgid "Repositories"
+msgstr ""
+
+msgid "Repository"
+msgstr ""
+
+msgid "Repository Snapshots"
+msgstr ""
+
+msgid ""
+"Repository is in use. Please delete the backup jobs associated with this "
+"repository first."
+msgstr ""
+
+msgid "Repository name"
+msgstr ""
+
+msgid "Repository statistics ..."
+msgstr ""
+
+msgid "Restic"
+msgstr ""
+
+msgid "Restic documentation"
+msgstr ""
+
+msgid "Restore Snapshot"
+msgstr ""
+
+msgid "Restore target folder"
+msgstr ""
+
+msgid "Restore this snapshot to a shared folder"
+msgstr ""
+
+msgid "Restoring snapshot, this may take a while…"
+msgstr ""
+
+msgid "Retention policy"
+msgstr ""
+
+msgid "Run backup now"
+msgstr ""
+
+msgid "Running backup job ..."
+msgstr ""
+
+msgid "S3 compatible"
+msgstr ""
+
+msgid "SFTP"
+msgstr ""
+
+msgid "Saturday"
+msgstr ""
+
+msgid "Schedule"
+msgstr ""
+
+msgid "Select a repository"
+msgstr ""
+
+msgid "Select a repository."
+msgstr ""
+
+msgid "Select one or more shared folders to back up."
+msgstr ""
+
+msgid ""
+"Selecting 'All Repositories' will ensure that the environment variable will "
+"be applied to all repositories."
+msgstr ""
+
+msgid "September"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Shared Folder"
+msgstr ""
+
+msgid "Skip initialisation"
+msgstr ""
+
+msgid "Snapshot ID"
+msgstr ""
+
+msgid "Source & Destination"
+msgstr ""
+
+msgid "Source folders"
+msgstr ""
+
+msgid "Sunday"
+msgstr ""
+
+msgid "Tags"
+msgstr ""
+
+msgid "The shared folder used as the restic repository location."
+msgstr ""
+
+msgid "This must be a valid Restic environment variable."
+msgstr ""
+
+msgid "Thursday"
+msgstr ""
+
+msgid ""
+"Tick this to import an existing restic repository. The passphrase must match"
+" the one already used by that repository."
+msgstr ""
+
+msgid "Time of execution"
+msgstr ""
+
+msgid "Tuesday"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Value"
+msgstr ""
+
+msgid "View repository statistics"
+msgstr ""
+
+msgid "View snapshots stored in this repository"
+msgstr ""
+
+msgid "Wednesday"
+msgstr ""
+
+msgid "Weekly"
+msgstr ""
+
+msgid "Yearly"
+msgstr ""
+
+msgid "n/a"
+msgstr ""
