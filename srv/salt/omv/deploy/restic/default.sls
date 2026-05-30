@@ -57,7 +57,7 @@ configure_restic_log_dir:
     - name: "{{ logDir }}"
     - user: root
     - group: root
-    - mode: 755
+    - mode: '0755'
 
 {% if cacheDir %}
 configure_restic_cache_dir:
@@ -65,7 +65,7 @@ configure_restic_cache_dir:
     - name: "{{ cacheDir }}"
     - user: root
     - group: root
-    - mode: 700
+    - mode: '0700'
     - makedirs: true
 {% endif %}
 
@@ -74,14 +74,14 @@ configure_restic_envvar_dir:
     - name: "{{ envVarDir }}"
     - user: root
     - group: root
-    - mode: 700
+    - mode: '0700'
 
 configure_restic_scripts_dir:
   file.directory:
     - name: "{{ scriptsDir }}"
     - user: root
     - group: root
-    - mode: 700
+    - mode: '0700'
 
 # Create environment variable file for each repository
 {% for repo in config.repos.repo %}
@@ -98,7 +98,7 @@ configure_restic_envvar_{{ repo.uuid }}:
     - template: jinja
     - user: root
     - group: root
-    - mode: 600
+    - mode: '0600'
 {% endfor %}
 
 # Shared environment variable file (applies to all repositories)
@@ -114,7 +114,7 @@ configure_restic_envvar_shared:
     - template: jinja
     - user: root
     - group: root
-    - mode: 600
+    - mode: '0600'
 
 # Generate a backup script for each enabled backup job
 {% for job in config.snapshots.snapshot %}
@@ -156,7 +156,7 @@ configure_restic_job_script_{{ job.uuid }}:
     - template: jinja
     - user: root
     - group: root
-    - mode: 700
+    - mode: '0700'
 {% endif %}
 {% endif %}
 {% endfor %}
@@ -204,7 +204,7 @@ configure_restic_cron:
     - template: jinja
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 {# -----------------------------------------------------------------------
    Purge stale files left over from deleted/renamed repos and jobs.
