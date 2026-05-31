@@ -10,6 +10,7 @@ Package: openmediavault-restic
 Architecture: all
 Depends: openmediavault (>= 8),
          restic,
+         rclone,
          ${misc:Depends}
 Description: restic plugin for OpenMediaVault.
  Restic is a deduplicating backup program.
