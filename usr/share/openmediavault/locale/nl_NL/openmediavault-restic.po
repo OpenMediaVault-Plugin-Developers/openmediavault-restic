@@ -3,13 +3,17 @@
 # This file is distributed under the same license as the openmediavault-restic package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
+# Translators:
+# Stephan Paternotte <stephan@paternottes.net>, 2026
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 01:34+0000\n"
+"POT-Creation-Date: 2026-05-31 01:25+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
+"Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2026\n"
 "Language-Team: Dutch (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,445 +22,478 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "A repository must be specified."
-msgstr ""
+msgstr "Er moet een opslagplaats worden opgegeven."
 
 msgid "Account ID / Access key"
-msgstr ""
+msgstr "Account-ID / Toegangssleutel"
 
 msgid "Account key / Secret key"
-msgstr ""
+msgstr "Account-sleutel / Geheime sleutel"
 
 msgid ""
 "After each backup the retention policy is applied. Snapshots outside these "
 "limits are forgotten and the repository is pruned. Set a field to 0 to "
 "disable that limit."
 msgstr ""
+"Na elke back-up wordt het bewaarbeleid toegepast. Momentopnames buiten deze "
+"limieten worden vergeten en de opslagplaats wordt gesnoeid. Stel een veld in"
+" op 0 om die limiet uit te schakelen."
 
 msgid "All selected folders will be included in the same snapshot."
-msgstr ""
+msgstr "Alle geselecteerde mappen worden in dezelfde momentopname opgenomen."
 
 msgid "April"
-msgstr ""
+msgstr "April"
 
 msgid "At reboot"
-msgstr ""
+msgstr "Bij herstart"
 
 msgid "August"
-msgstr ""
+msgstr "Augustus"
 
 msgid "Backblaze B2 (native API)"
-msgstr ""
+msgstr "Backblaze B2 (eigen API)"
 
 msgid "Backup Jobs"
-msgstr ""
+msgstr "Back-uptaken"
 
 msgid "Backup job saved."
-msgstr ""
+msgstr "Back-uptaken opgeslagen."
 
 msgid "Cache directory"
-msgstr ""
+msgstr "Map voor tijdelijke opslag"
 
 msgid "Certain date"
-msgstr ""
+msgstr "Bepaalde datum"
 
 msgid "Check repository integrity"
-msgstr ""
+msgstr "Integriteit van opslagplaats controleren"
 
 msgid "Checking repository integrity ..."
-msgstr ""
+msgstr "Integriteit van opslagplaats controleren…"
 
 msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
 msgstr ""
+"Door komma's gescheiden lijst van uit te sluiten patronen (bijv. "
+"*.tmp,/proc,/sys)."
 
 msgid ""
 "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
 msgstr ""
+"Door komma's gescheiden lijst met aan de momentopname toe te voegen labels "
+"(bijv. dagelijks, extern)."
 
 msgid "Create"
-msgstr ""
+msgstr "Aanmaken"
 
 msgid "Create Backup Job"
-msgstr ""
+msgstr "Back-uptaak aanmaken"
 
 msgid "Create repository"
-msgstr ""
+msgstr "Opslagplaats aanmaken"
 
 msgid "Created environment variable."
-msgstr ""
+msgstr "Omgevingsvariabele aangemaakt."
 
 msgid "Created repository."
-msgstr ""
+msgstr "Opslagplaats aangemaakt."
 
 msgid "Daily"
-msgstr ""
+msgstr "Dagelijks"
 
 msgid "Date / Time"
-msgstr ""
+msgstr "Datum / Tijd"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Datum/Tijd"
 
 msgid "Day of month"
-msgstr ""
+msgstr "Dag van de maand"
 
 msgid "Day of week"
-msgstr ""
+msgstr "Dag van de week"
 
 msgid "December"
-msgstr ""
+msgstr "December"
 
 msgid ""
 "Directory where Restic stores its local cache. The cache speeds up "
 "operations, especially for remote repositories. Leave blank to disable "
 "caching (not recommended)."
 msgstr ""
+"Map waar Restic zijn tijdelijke oplag opslaat. De tijdelijke opslag versnelt"
+" bewerkingen, vooral voor externe opslagplaatsen. Laat leeg om tijdelijke "
+"opslag uit te schakelen (niet aanbevolen)."
 
 msgid "Edit"
-msgstr ""
+msgstr "Bewerken"
 
 msgid "Edit Backup Job"
-msgstr ""
+msgstr "Back-uptaak bewerken"
 
 msgid "Edit repository"
-msgstr ""
+msgstr "Opslagplaats bewerken"
 
 msgid "Edited environment variable."
-msgstr ""
+msgstr "Omgevingsvariabele bewerkt."
 
 msgid "Edited repository."
-msgstr ""
+msgstr "Opslagplaats bewerkt."
 
 msgid ""
 "Enable or disable this backup job. Disabled jobs are skipped by the "
 "scheduler."
 msgstr ""
+"Schakel deze back-uptaak in of uit. Uitgeschakelde taken worden overgeslagen"
+" door de planner."
 
 msgid "Enabled"
-msgstr ""
+msgstr "Ingeschakeld"
 
 msgid ""
 "Ensure that the passphrase is strong and stored securely. It cannot be "
 "recovered if lost."
 msgstr ""
+"Zorg ervoor dat de toegangscode sterk en veilig opgeslagen wordt. Deze kan "
+"niet worden hersteld als deze verloren gaat."
 
 msgid "Environment Variables"
-msgstr ""
+msgstr "Omgevingsvariabelen"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "Elke N-de dag van de maand"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "Elke N uur"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "Elke N minuten"
 
 msgid "Exclude patterns"
-msgstr ""
+msgstr "Uitsluitingspatronen"
 
 msgid "February"
-msgstr ""
+msgstr "Februari"
 
 msgid ""
 "Files will be restored into this shared folder. Existing files may be "
 "overwritten."
 msgstr ""
+"Bestanden worden in deze gedeelde map hersteld. Bestaande bestanden kunnen "
+"worden overschreven."
 
 msgid "Friday"
-msgstr ""
+msgstr "Vrijdag"
 
 msgid "Help"
-msgstr ""
+msgstr "Hulp"
 
 msgid "Hostname"
-msgstr ""
+msgstr "Hostnaam"
 
 msgid "Hour"
-msgstr ""
+msgstr "Uur"
 
 msgid "Hourly"
-msgstr ""
+msgstr "Ieder uur"
 
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 msgid "January"
-msgstr ""
+msgstr "Januari"
 
 msgid "Job"
-msgstr ""
+msgstr "Taak"
 
 msgid "Job name"
-msgstr ""
+msgstr "Taaknaam"
 
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 msgid "Keep daily"
-msgstr ""
+msgstr "Dagelijkse behouden"
 
 msgid "Keep last N"
-msgstr ""
+msgstr "Laatste N behouden"
 
 msgid "Keep monthly"
-msgstr ""
+msgstr "Maandelijkse behouden"
 
 msgid "Keep one snapshot per day for this many days (0 = disabled)."
 msgstr ""
+"Bewaar één momentopname per dag voor dit aantal dagen (0 = uitgeschakeld)."
 
 msgid "Keep one snapshot per month for this many months (0 = disabled)."
 msgstr ""
+"Bewaar één momentopname per maand voor dit aantal maanden (0 = "
+"uitgeschakeld)."
 
 msgid "Keep one snapshot per week for this many weeks (0 = disabled)."
 msgstr ""
+"Bewaar één momentopname per week voor dit aantal weken (0 = uitgeschakeld)."
 
 msgid "Keep one snapshot per year for this many years (0 = disabled)."
 msgstr ""
+"Bewaar één momentopname per jaar voor dit aantal jaren (0 = uitgeschakeld)."
 
 msgid "Keep this many of the most recent snapshots (0 = disabled)."
 msgstr ""
+"Bewaar dit aantal van de meeste recente momentopnames (0 = uitgeschakeld)."
 
 msgid "Keep weekly"
-msgstr ""
+msgstr "Wekelijkse behouden"
 
 msgid "Keep yearly"
-msgstr ""
+msgstr "Jaarlijkse behouden"
 
 msgid "Last snapshot"
-msgstr ""
+msgstr "Laatste momentopname"
 
 msgid "Local (shared folder)"
-msgstr ""
+msgstr "Lokaal (gedeelde map)"
 
 msgid "Location / URI"
-msgstr ""
+msgstr "Locatie / URI"
 
 msgid "March"
-msgstr ""
+msgstr "Maart"
 
 msgid "May"
-msgstr ""
+msgstr "Mei"
 
 msgid "Message"
-msgstr ""
+msgstr "Bericht"
 
 msgid "Minute"
-msgstr ""
+msgstr "Minuut"
 
 msgid "Monday"
-msgstr ""
+msgstr "Maandag"
 
 msgid "Month"
-msgstr ""
+msgstr "Maand"
 
 msgid "Monthly"
-msgstr ""
+msgstr "Maandelijks"
 
 msgid "Name"
-msgstr ""
+msgstr "Naam"
 
 msgid "November"
-msgstr ""
+msgstr "November"
 
 msgid "OMV-Extras Wiki"
-msgstr ""
+msgstr "OMV-Extras Wiki"
 
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 msgid ""
 "Only restore files matching this path prefix within the snapshot (e.g. "
 "/home/user/documents)."
 msgstr ""
+"Herstel alleen bestanden die overeenkomen met dit padvoorvoegsel binnen de "
+"momentopname (bijv. /home/user/documents)."
 
 msgid "Optional human-readable name for this backup job."
-msgstr ""
+msgstr "Optionele leesbare naam voor deze back-uptaak."
 
 msgid "Options"
-msgstr ""
+msgstr "Opties"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "Wachtwoordzin"
 
 msgid "Path filter (optional)"
-msgstr ""
+msgstr "Padfilter (optioneel)"
 
 msgid "Paths"
-msgstr ""
+msgstr "Paden"
 
 msgid "Prune unused data from repository"
-msgstr ""
+msgstr "Verwijder ongebruikte gegevens uit de opslagplaats"
 
 msgid "Pruning repository ..."
-msgstr ""
+msgstr "Opslagplaats snoeien…"
 
 msgid "REST server"
-msgstr ""
+msgstr "REST-server"
 
 msgid "Refresh snapshot list"
-msgstr ""
+msgstr "Lijst met momentopnames verversen"
 
 msgid "Remote path / URI"
-msgstr ""
+msgstr "Extern pad / URI"
 
 msgid "Remove stale locks (unlock)"
-msgstr ""
+msgstr "Verlopen vergrendelingen verwijderen (ontgrendelen)"
 
 msgid "Repositories"
-msgstr ""
+msgstr "Opslagplaatsen"
 
 msgid "Repository"
-msgstr ""
+msgstr "Opslagplaats"
 
 msgid "Repository Snapshots"
-msgstr ""
+msgstr "Momentopnames van opslagplaats"
 
 msgid ""
 "Repository is in use. Please delete the backup jobs associated with this "
 "repository first."
 msgstr ""
+"Het opslagstation is in gebruik. Verwijder eerst de back-uptaken die aan dit"
+" opslagstation zijn gekoppeld."
 
 msgid "Repository name"
-msgstr ""
+msgstr "Naam van opslagplaats"
 
 msgid "Repository statistics ..."
-msgstr ""
+msgstr "Statistieken van opslagplaats…"
 
 msgid "Restic"
-msgstr ""
+msgstr "Restic"
 
 msgid "Restic documentation"
-msgstr ""
+msgstr "Restic documentatie"
 
 msgid "Restore Snapshot"
-msgstr ""
+msgstr "Momentopname terugzetten"
 
 msgid "Restore target folder"
-msgstr ""
+msgstr "Doelmap terugzetten"
 
 msgid "Restore this snapshot to a shared folder"
-msgstr ""
+msgstr "Deze momentopname terugzetten naar een gedeelde map"
 
 msgid "Restoring snapshot, this may take a while…"
-msgstr ""
+msgstr "Momentopname terugzetten, dit kan even duren…"
 
 msgid "Retention policy"
-msgstr ""
+msgstr "Bewaarbeleid"
 
 msgid "Run backup now"
-msgstr ""
+msgstr "Back-up nu uitvoeren"
 
 msgid "Running backup job ..."
-msgstr ""
+msgstr "Back-uptaak uitvoeren…"
 
 msgid "S3 compatible"
-msgstr ""
+msgstr "S3-compatibel"
 
 msgid "SFTP"
-msgstr ""
+msgstr "SFTP"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Zaterdag"
 
 msgid "Schedule"
-msgstr ""
+msgstr "Planning"
 
 msgid "Select a repository"
-msgstr ""
+msgstr "Selecteer een opslagplaats"
 
 msgid "Select a repository."
-msgstr ""
+msgstr "Selecteer een opslagplaats."
 
 msgid "Select one or more shared folders to back up."
-msgstr ""
+msgstr "Selecteer een of meer gedeelde mappen om te back-uppen."
 
 msgid ""
 "Selecting 'All Repositories' will ensure that the environment variable will "
 "be applied to all repositories."
 msgstr ""
+"Het selecteren van 'Alle opslagplaatsen' zorgt ervoor dat de "
+"omgevingsvariabele daarop wordt toegepast."
 
 msgid "September"
-msgstr ""
+msgstr "September"
 
 msgid "Settings"
-msgstr ""
+msgstr "Instellingen"
 
 msgid "Shared Folder"
-msgstr ""
+msgstr "Gedeelde map"
 
 msgid "Skip initialisation"
-msgstr ""
+msgstr "Initalisatie overslaan"
 
 msgid "Snapshot ID"
-msgstr ""
+msgstr "Momentopname-ID"
 
 msgid "Source & Destination"
-msgstr ""
+msgstr "Bron & Bestemming"
 
 msgid "Source folders"
-msgstr ""
+msgstr "Bronmappen"
 
 msgid "Sunday"
-msgstr ""
+msgstr "Zondag"
 
 msgid "Tags"
-msgstr ""
+msgstr "Labels"
 
 msgid "Test connection"
-msgstr ""
+msgstr "Verbinding testen"
 
 msgid "Testing repository connection ..."
-msgstr ""
+msgstr "Verbinding testen met opslagplaats…"
 
 msgid "The shared folder used as the restic repository location."
 msgstr ""
+"De gedeelde map die wordt gebruikt als de locatie van de restic-"
+"opslagplaats."
 
 msgid "This must be a valid Restic environment variable."
-msgstr ""
+msgstr "Dit moet een geldige Restic-omgevingsvariabele zijn."
 
 msgid "Thursday"
-msgstr ""
+msgstr "Donderdag"
 
 msgid ""
 "Tick this to import an existing restic repository. The passphrase must match"
 " the one already used by that repository."
 msgstr ""
+"Vink dit aan om een bestaande restic-opslagplaats te importeren. De "
+"wachtwoordzin moet overeenkomen met degene die al door die opslagplaats is "
+"gebruikt."
 
 msgid "Time of execution"
-msgstr ""
+msgstr "Tijd van uitvoering"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Dinsdag"
 
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 msgid "Unlocking repository ..."
-msgstr ""
+msgstr "Opslagplaats ontgrendelen…"
 
 msgid "Value"
-msgstr ""
+msgstr "Waarde"
 
 msgid "View repository statistics"
-msgstr ""
+msgstr "Statistieken van opslagplaats weergeven"
 
 msgid "View snapshots stored in this repository"
-msgstr ""
+msgstr "Momentopnames in deze opslagplaats weergeven"
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Woensdag"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Wekelijks"
 
 msgid "Yearly"
-msgstr ""
+msgstr "Jaarlijks"
 
 msgid "n/a"
-msgstr ""
+msgstr "n.v.t."
 
 msgid "rclone remote"
-msgstr ""
+msgstr "rclone remote"
