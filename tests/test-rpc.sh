@@ -781,6 +781,51 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Restore — dry-run preview
+# A dry-run restore (dryrun=true) needs no target folder and starts a
+# background `restic restore --dry-run` task. Against the fake REST repo the
+# task itself will fail, but the RPC must accept the call and start the task.
+# A normal restore (dryrun=false) must reject a missing target folder.
+# ---------------------------------------------------------------------------
+section "Restore (dry-run preview)"
+
+if [ -z "$REST_REPO_UUID" ]; then
+    _skip "restore dry-run" "no test repo available"
+else
+    # Negative: a real (non-dry-run) restore requires a target folder.
+    assert_rpc_fails "restoreSnapshot — target required when not a dry run" \
+        "Restic" "restoreSnapshot" \
+        "{\"reporef\":\"$REST_REPO_UUID\",\"snapshotid\":\"latest\",\"dryrun\":false}"
+
+    # Negative: reporef and snapshotid are mandatory regardless of dry-run.
+    assert_rpc_fails "restoreSnapshot — missing snapshotid rejected" \
+        "Restic" "restoreSnapshot" \
+        "{\"reporef\":\"$REST_REPO_UUID\",\"dryrun\":true}"
+
+    if ! $RESTIC_AVAILABLE; then
+        _skip "restoreSnapshot — dry-run accepted" "restic binary not installed"
+    else
+        # Positive: dry-run needs no target and must be accepted (bg task).
+        DR_OUT=$(rpc "Restic" "restoreSnapshot" \
+            "{\"reporef\":\"$REST_REPO_UUID\",\"snapshotid\":\"latest\",\"dryrun\":true}" 2>&1) || true
+        if [ -n "$DR_OUT" ] && ! echo "$DR_OUT" | grep -qi "exception\|error"; then
+            _pass "restoreSnapshot — dry-run accepted (no target, background task started)"
+        else
+            _fail "restoreSnapshot — dry-run rejected" "${DR_OUT:0:200}"
+        fi
+
+        # Positive: dry-run with an include-path filter must also be accepted.
+        DR_OUT2=$(rpc "Restic" "restoreSnapshot" \
+            "{\"reporef\":\"$REST_REPO_UUID\",\"snapshotid\":\"latest\",\"dryrun\":true,\"includepath\":\"/etc\"}" 2>&1) || true
+        if [ -n "$DR_OUT2" ] && ! echo "$DR_OUT2" | grep -qi "exception\|error"; then
+            _pass "restoreSnapshot — dry-run with include-path accepted"
+        else
+            _fail "restoreSnapshot — dry-run with include-path rejected" "${DR_OUT2:0:200}"
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 section "Summary"
