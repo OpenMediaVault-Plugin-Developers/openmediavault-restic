@@ -108,6 +108,7 @@ S3_REPO_UUID=""
 B2_REPO_UUID=""
 RCLONE_REPO_UUID=""
 SNAPSHOT_UUID=""
+RESTORETEST_UUID=""
 ENVVAR_UUID=""
 ENVVAR_SHARED_UUID=""
 
@@ -131,6 +132,12 @@ cleanup() {
     if [ -n "$SNAPSHOT_UUID" ]; then
         info "Deleting test backup job $SNAPSHOT_UUID"
         rpc "Restic" "deleteSnapshot" "{\"uuid\":\"$SNAPSHOT_UUID\"}" &>/dev/null || true
+    fi
+
+    # Restore tests must also go before repos (deleteRepo checks for references)
+    if [ -n "$RESTORETEST_UUID" ]; then
+        info "Deleting test restore test $RESTORETEST_UUID"
+        rpc "Restic" "deleteRestoreTest" "{\"uuid\":\"$RESTORETEST_UUID\"}" &>/dev/null || true
     fi
 
     for uuid in "$ENVVAR_UUID" "$ENVVAR_SHARED_UUID"; do
@@ -552,6 +559,8 @@ import json; print(json.dumps({
     'keepweekly': 4,
     'keepmonthly': 12,
     'keepyearly': 0,
+    'sendemail': True,
+    'emailonerror': True,
 }))")" >/dev/null
 
         assert_rpc "getSnapshotList — schedule for exactly" "Restic" "getSnapshotList" \
@@ -567,6 +576,191 @@ for s in data:
             _pass "getSnapshotList — custom cron expression correct"
         else
             _fail "getSnapshotList — custom cron" "Expected '30 4 1 * *', got '$EXACT_SCHED'"
+        fi
+
+        # Email notification fields must round-trip
+        assert_rpc "getSnapshot (email fields)" "Restic" "getSnapshot" \
+            "{\"uuid\":\"$SNAPSHOT_UUID\"}" >/dev/null
+        SNAP_SE=$(json_field "$RPC_OUT" "sendemail")
+        SNAP_EOE=$(json_field "$RPC_OUT" "emailonerror")
+        if [ "$SNAP_SE" = "True" ] && [ "$SNAP_EOE" = "True" ]; then
+            _pass "setSnapshot — email fields persisted"
+        else
+            _fail "setSnapshot — email fields" "Expected True/True, got sendemail=$SNAP_SE emailonerror=$SNAP_EOE"
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Restore Test Jobs CRUD
+# Uses the SFTP repo (no backup job references it) so the deleteRepo guard
+# below is genuinely exercised by the restore test, not masked by a snapshot.
+# ---------------------------------------------------------------------------
+section "Restore Test Jobs CRUD"
+
+RT_REPO_UUID="${SFTP_REPO_UUID:-$REST_REPO_UUID}"
+
+if [ -z "$RT_REPO_UUID" ]; then
+    _skip "restore test CRUD" "no test repo available"
+else
+    assert_rpc "getRestoreTestList (pre-test)" "Restic" "getRestoreTestList" "$LIST_PARAMS" >/dev/null
+
+    # Create a dry-run restore test (weekly)
+    assert_rpc "setRestoreTest (new, dry-run, weekly)" "Restic" "setRestoreTest" "$(python3 -c "
+import json; print(json.dumps({
+    'uuid': '$OMV_NEW_UUID',
+    'enable': True,
+    'name': 'restic-test-restoretest',
+    'reporef': '$RT_REPO_UUID',
+    'mode': 'dryrun',
+    'targetref': '',
+    'cleanup': True,
+    'includepath': '',
+    'execution': 'weekly',
+    'minute': ['0'],
+    'everynminute': False,
+    'hour': ['2'],
+    'everynhour': False,
+    'dayofmonth': ['*'],
+    'everyndayofmonth': False,
+    'month': ['*'],
+    'dayofweek': ['0'],
+}))")" >/dev/null
+    RESTORETEST_UUID=$(json_field "$RPC_OUT" "uuid")
+
+    if [ -n "$RESTORETEST_UUID" ] && [ "$RESTORETEST_UUID" != "$OMV_NEW_UUID" ]; then
+        _pass "setRestoreTest — got real UUID ($RESTORETEST_UUID)"
+    else
+        _fail "setRestoreTest — no real UUID returned"
+        RESTORETEST_UUID=""
+    fi
+
+    if [ -n "$RESTORETEST_UUID" ]; then
+        assert_rpc "getRestoreTest" "Restic" "getRestoreTest" \
+            "{\"uuid\":\"$RESTORETEST_UUID\"}" "\"uuid\":\"$RESTORETEST_UUID\"" >/dev/null
+
+        # getRestoreTest should return schedule fields as arrays
+        MIN_IS_ARRAY=$(echo "$RPC_OUT" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+print('yes' if isinstance(d.get('minute',[]), list) else 'no')" 2>/dev/null || echo no)
+        if [ "$MIN_IS_ARRAY" = "yes" ]; then
+            _pass "getRestoreTest — schedule fields returned as arrays"
+        else
+            _fail "getRestoreTest — minute field not an array"
+        fi
+
+        assert_rpc "getRestoreTestList includes restore test" "Restic" "getRestoreTestList" \
+            "$LIST_PARAMS" "restic-test-restoretest" >/dev/null
+
+        # getRestoreTestList should build a schedule string from execution type
+        RT_SCHED=$(echo "$RPC_OUT" | python3 -c "
+import sys,json
+data=json.load(sys.stdin).get('data',[])
+for s in data:
+    if s.get('name')=='restic-test-restoretest':
+        print(s.get('schedule',''))
+        break" 2>/dev/null || echo "")
+        if [ "$RT_SCHED" = "0 0 * * 0" ]; then
+            _pass "getRestoreTestList — schedule field correct for weekly"
+        else
+            _fail "getRestoreTestList — schedule field" "Expected '0 0 * * 0', got '$RT_SCHED'"
+        fi
+
+        # Update to verify mode with a target folder
+        assert_rpc "setRestoreTest (update, verify)" "Restic" "setRestoreTest" "$(python3 -c "
+import json; print(json.dumps({
+    'uuid': '$RESTORETEST_UUID',
+    'enable': True,
+    'name': 'restic-test-restoretest',
+    'reporef': '$RT_REPO_UUID',
+    'mode': 'verify',
+    'targetref': '$FAKE_SF_UUID',
+    'cleanup': True,
+    'includepath': '/etc',
+    'execution': 'daily',
+    'minute': ['0'],
+    'everynminute': False,
+    'hour': ['3'],
+    'everynhour': False,
+    'dayofmonth': ['*'],
+    'everyndayofmonth': False,
+    'month': ['*'],
+    'dayofweek': ['*'],
+    'sendemail': True,
+    'emailonerror': True,
+}))")" >/dev/null
+
+        # Email notification fields must round-trip
+        assert_rpc "getRestoreTest (email fields)" "Restic" "getRestoreTest" \
+            "{\"uuid\":\"$RESTORETEST_UUID\"}" >/dev/null
+        RT_SE=$(json_field "$RPC_OUT" "sendemail")
+        RT_EOE=$(json_field "$RPC_OUT" "emailonerror")
+        if [ "$RT_SE" = "True" ] && [ "$RT_EOE" = "True" ]; then
+            _pass "setRestoreTest — email fields persisted"
+        else
+            _fail "setRestoreTest — email fields" "Expected True/True, got sendemail=$RT_SE emailonerror=$RT_EOE"
+        fi
+
+        # Negative: verify mode without a target folder must be rejected
+        assert_rpc_fails "setRestoreTest — verify requires a target folder" \
+            "Restic" "setRestoreTest" "$(python3 -c "
+import json; print(json.dumps({
+    'uuid': '$RESTORETEST_UUID',
+    'enable': True,
+    'name': 'restic-test-restoretest',
+    'reporef': '$RT_REPO_UUID',
+    'mode': 'verify',
+    'targetref': '',
+    'cleanup': True,
+    'includepath': '',
+    'execution': 'daily',
+    'minute': ['0'],
+    'everynminute': False,
+    'hour': ['3'],
+    'everynhour': False,
+    'dayofmonth': ['*'],
+    'everyndayofmonth': False,
+    'month': ['*'],
+    'dayofweek': ['*'],
+}))")"
+
+        # deleteRepo must be blocked while a restore test references it
+        assert_rpc_fails "deleteRepo — blocked by referenced restore test" \
+            "Restic" "deleteRepo" "{\"uuid\":\"$RT_REPO_UUID\"}"
+
+        # Reset back to dry-run so a manual run needs no real target folder
+        assert_rpc "setRestoreTest (reset, dry-run)" "Restic" "setRestoreTest" "$(python3 -c "
+import json; print(json.dumps({
+    'uuid': '$RESTORETEST_UUID',
+    'enable': True,
+    'name': 'restic-test-restoretest',
+    'reporef': '$RT_REPO_UUID',
+    'mode': 'dryrun',
+    'targetref': '',
+    'cleanup': True,
+    'includepath': '',
+    'execution': 'weekly',
+    'minute': ['0'],
+    'everynminute': False,
+    'hour': ['2'],
+    'everynhour': False,
+    'dayofmonth': ['*'],
+    'everyndayofmonth': False,
+    'month': ['*'],
+    'dayofweek': ['0'],
+}))")" >/dev/null
+
+        # Manually run the dry-run restore test (starts a background task)
+        if ! $RESTIC_AVAILABLE; then
+            _skip "runRestoreTest — dry-run" "restic binary not installed"
+        else
+            RT_OUT=$(rpc "Restic" "runRestoreTest" "{\"uuid\":\"$RESTORETEST_UUID\"}" 2>&1) || true
+            if [ -n "$RT_OUT" ] && ! echo "$RT_OUT" | grep -qi "exception\|error"; then
+                _pass "runRestoreTest — dry-run accepted (background task started)"
+            else
+                _fail "runRestoreTest — dry-run rejected" "${RT_OUT:0:200}"
+            fi
         fi
     fi
 fi
@@ -677,6 +871,12 @@ assert_rpc_fails "getSnapshot — unknown UUID" "Restic" "getSnapshot" \
     '{"uuid":"00000000-0000-4000-8000-000000000001"}'
 
 assert_rpc_fails "deleteSnapshot — unknown UUID" "Restic" "deleteSnapshot" \
+    '{"uuid":"00000000-0000-4000-8000-000000000001"}'
+
+assert_rpc_fails "getRestoreTest — unknown UUID" "Restic" "getRestoreTest" \
+    '{"uuid":"00000000-0000-4000-8000-000000000001"}'
+
+assert_rpc_fails "deleteRestoreTest — unknown UUID" "Restic" "deleteRestoreTest" \
     '{"uuid":"00000000-0000-4000-8000-000000000001"}'
 
 assert_rpc_fails "getEnvVar — unknown UUID" "Restic" "getEnvVar" \
