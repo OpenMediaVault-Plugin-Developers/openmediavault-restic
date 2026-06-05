@@ -1,0 +1,86 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-restoretests-datatable-page
+  type: datatablePage
+  config:
+    autoReload: false
+    hasSearchField: true
+    stateId: 7d2f1a4e-3c6b-4e9a-9b1d-2f6a8c0e5b71
+    sorters:
+      - dir: asc
+        prop: name
+    store:
+      proxy:
+        service: Restic
+        get:
+          method: getRestoreTestList
+    columns:
+      - name: _("Enabled")
+        prop: enable
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+      - name: _("Name")
+        prop: name
+        flexGrow: 1
+        sortable: true
+      - name: _("Repository")
+        prop: reponame
+        flexGrow: 1
+        sortable: true
+      - name: _("Mode")
+        prop: mode
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: template
+        cellTemplateConfig: "{% if mode == 'verify' %}{{ 'Verify' | translate }}{% else %}{{ 'Dry run' | translate }}{% endif %}"
+      - name: _("Target folder")
+        prop: targetname
+        flexGrow: 1
+        sortable: true
+      - name: _("Cleanup")
+        prop: cleanup
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+      - name: _("Schedule")
+        prop: schedule
+        flexGrow: 2
+        sortable: true
+        cellTemplateName: template
+        cellTemplateConfig: "{{ schedule | cron2human }}"
+    actions:
+      - template: create
+        execute:
+          type: url
+          url: "/services/restic/restoretests/create"
+      - template: edit
+        execute:
+          type: url
+          url: "/services/restic/restoretests/edit/{{ _selected[0].uuid }}"
+      - type: iconButton
+        icon: mdi:play
+        tooltip: _("Run restore test now")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Running restore test ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: runRestoreTest
+                params:
+                  uuid: "{{ _selected[0].uuid }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - template: delete
+        execute:
+          type: request
+          request:
+            service: Restic
+            method: deleteRestoreTest
+            params:
+              uuid: "{{ _selected[0].uuid }}"

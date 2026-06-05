@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/restoretests/create"
+  title: _("Create Restore Test")
+  notificationTitle: _("Restore test saved.")
+  component: omv-services-restic-restoretest-form-page

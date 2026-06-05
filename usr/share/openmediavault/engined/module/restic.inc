@@ -44,6 +44,11 @@ class OMVModuleRestic extends \OMV\Engine\Module\ServiceAbstract implements \OMV
         );
         $dispatcher->addListener(
             OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
+            "org.openmediavault.conf.service.restic.restoretest",
+            [ $this, "setDirty" ]
+        );
+        $dispatcher->addListener(
+            OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
             "org.openmediavault.conf.service.restic.envvar",
             [ $this, "setDirty" ]
         );

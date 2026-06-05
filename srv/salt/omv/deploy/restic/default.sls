@@ -22,6 +22,7 @@
 {% set cacheDir = config.settings.cachedir | default('') %}
 {% set scriptsDir = '/var/lib/openmediavault/restic' %}
 {% set scriptPrefix = 'restic-job-' %}
+{% set restoreTestPrefix = 'restic-restoretest-' %}
 {% set cronFile = '/etc/cron.d/openmediavault-restic' %}
 
 {# -----------------------------------------------------------------------
@@ -161,6 +162,47 @@ configure_restic_job_script_{{ job.uuid }}:
 {% endif %}
 {% endfor %}
 
+# Generate a script for each enabled restore test job
+{% for job in config.restoretests.restoretest %}
+{% if job.enable | string | lower not in ['false', '0', 'no', 'off'] %}
+{% if job.reporef in repomap %}
+{% set repo = repomap[job.reporef] %}
+
+{# Resolve repository path for local repos #}
+{% if repo.type == 'local' %}
+{% set repo_path = sfolders.get(repo.sharedfolderref, '') %}
+{% else %}
+{% set repo_path = '' %}
+{% endif %}
+
+{# Resolve the verify restore target: a per-test subdirectory inside the
+   selected shared folder, so cleanup only ever removes data we created. #}
+{% set target_path = '' %}
+{% if job.mode == 'verify' and job.targetref in sfolders %}
+{% set target_path = sfolders[job.targetref] ~ '/' ~ restoreTestPrefix ~ job.uuid %}
+{% endif %}
+
+{% set scriptFile = scriptsDir ~ '/' ~ restoreTestPrefix ~ job.uuid ~ '.sh' %}
+
+configure_restic_restoretest_script_{{ job.uuid }}:
+  file.managed:
+    - name: "{{ scriptFile }}"
+    - source:
+      - salt://{{ tpldir }}/files/restic-restoretest.sh.j2
+    - context:
+        job: {{ job | json }}
+        repo: {{ repo | json }}
+        repo_path: "{{ repo_path }}"
+        target_path: "{{ target_path }}"
+        cachedir: "{{ cacheDir }}"
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: '0700'
+{% endif %}
+{% endif %}
+{% endfor %}
+
 {# Build the list of enabled cron jobs to pass to the cron template #}
 {% set cronjobs = [] %}
 {% for job in config.snapshots.snapshot %}
@@ -192,7 +234,37 @@ configure_restic_job_script_{{ job.uuid }}:
 {% endif %}
 {% endfor %}
 
-# Generate cron file for all enabled, scheduled backup jobs
+{# Append cron entries for enabled restore test jobs #}
+{% for job in config.restoretests.restoretest %}
+{% if job.enable | string | lower not in ['false', '0', 'no', 'off'] and job.reporef in repomap %}
+{% set scriptFile = scriptsDir ~ '/' ~ restoreTestPrefix ~ job.uuid ~ '.sh' %}
+{% set ns = namespace(cronexpr='0 0 * * 0') %}
+{% if job.execution == 'reboot' %}
+{% set ns.cronexpr = '@reboot' %}
+{% elif job.execution == 'hourly' %}
+{% set ns.cronexpr = '0 * * * *' %}
+{% elif job.execution == 'daily' %}
+{% set ns.cronexpr = '0 0 * * *' %}
+{% elif job.execution == 'weekly' %}
+{% set ns.cronexpr = '0 0 * * 0' %}
+{% elif job.execution == 'monthly' %}
+{% set ns.cronexpr = '0 0 1 * *' %}
+{% elif job.execution == 'yearly' %}
+{% set ns.cronexpr = '0 0 1 1 *' %}
+{% else %}
+{% set _min = ('*/' ~ job.minute) if job.everynminute else job.minute %}
+{% set _hour = ('*/' ~ job.hour) if job.everynhour else job.hour %}
+{% set _dom = ('*/' ~ job.dayofmonth) if job.everyndayofmonth else job.dayofmonth %}
+{% set ns.cronexpr = _min ~ ' ' ~ _hour ~ ' ' ~ _dom ~ ' ' ~ job.month ~ ' ' ~ job.dayofweek %}
+{% endif %}
+{% do cronjobs.append({
+    'cronexpr':   ns.cronexpr,
+    'scriptfile': scriptFile
+}) %}
+{% endif %}
+{% endfor %}
+
+# Generate cron file for all enabled, scheduled backup and restore test jobs
 configure_restic_cron:
   file.managed:
     - name: "{{ cronFile }}"
@@ -245,6 +317,26 @@ purge_stale_restic_scripts:
       - "{{ scriptPrefix }}.*"
     - exclude:
 {%- for f in keep_scripts %}
+      - "{{ f }}"
+{%- endfor %}
+    - rmdirs: False
+    - rmlinks: True
+
+
+{% set keep_restoretest_scripts = [] %}
+{% for job in config.restoretests.restoretest %}
+{% if job.enable | string | lower not in ['false', '0', 'no', 'off'] %}
+{% do keep_restoretest_scripts.append(restoreTestPrefix ~ job.uuid ~ '.sh') %}
+{% endif %}
+{% endfor %}
+
+purge_stale_restic_restoretest_scripts:
+  file.tidied:
+    - name: "{{ scriptsDir }}"
+    - matches:
+      - "{{ restoreTestPrefix }}.*"
+    - exclude:
+{%- for f in keep_restoretest_scripts %}
       - "{{ f }}"
 {%- endfor %}
     - rmdirs: False

@@ -44,6 +44,11 @@ if ! omv_config_exists "${SERVICE_XPATH}/snapshots"; then
     omv_config_add_node "${SERVICE_XPATH}" "snapshots" ""
 fi
 
+# Configure the restore tests config
+if ! omv_config_exists "${SERVICE_XPATH}/restoretests"; then
+    omv_config_add_node "${SERVICE_XPATH}" "restoretests" ""
+fi
+
 # Configure the environment variables config
 if ! omv_config_exists "${SERVICE_XPATH}/envvars"; then
     omv_config_add_node "${SERVICE_XPATH}" "envvars" ""

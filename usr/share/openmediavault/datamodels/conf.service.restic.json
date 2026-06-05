@@ -161,6 +161,103 @@
               "keepyearly": {
                 "type": "integer",
                 "default": 0
+              },
+              "sendemail": {
+                "type": "boolean",
+                "default": false
+              },
+              "emailonerror": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "restoretests": {
+      "type": "object",
+      "properties": {
+        "restoretest": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "enable": {
+                "type": "boolean",
+                "default": true
+              },
+              "name": {
+                "type": "string",
+                "default": ""
+              },
+              "reporef": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "mode": {
+                "type": "string",
+                "default": "dryrun"
+              },
+              "targetref": {
+                "type": "string",
+                "default": ""
+              },
+              "cleanup": {
+                "type": "boolean",
+                "default": true
+              },
+              "includepath": {
+                "type": "string",
+                "default": ""
+              },
+              "execution": {
+                "type": "string",
+                "default": "weekly"
+              },
+              "minute": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynminute": {
+                "type": "boolean",
+                "default": false
+              },
+              "hour": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynhour": {
+                "type": "boolean",
+                "default": false
+              },
+              "dayofmonth": {
+                "type": "string",
+                "default": "*"
+              },
+              "everyndayofmonth": {
+                "type": "boolean",
+                "default": false
+              },
+              "month": {
+                "type": "string",
+                "default": "*"
+              },
+              "dayofweek": {
+                "type": "string",
+                "default": "*"
+              },
+              "sendemail": {
+                "type": "boolean",
+                "default": false
+              },
+              "emailonerror": {
+                "type": "boolean",
+                "default": false
               }
             }
           }

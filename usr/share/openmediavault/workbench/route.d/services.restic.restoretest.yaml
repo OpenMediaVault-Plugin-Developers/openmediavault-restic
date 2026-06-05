@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/restoretests"
+  title: _("Restore Tests")
+  component: omv-services-restic-restoretests-datatable-page

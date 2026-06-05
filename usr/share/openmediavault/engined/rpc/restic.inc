@@ -56,6 +56,13 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         // Restore
         $this->registerMethod("restoreSnapshot");
 
+        // Restore test jobs (scheduled dry-run / verify restores)
+        $this->registerMethod("getRestoreTestList");
+        $this->registerMethod("getRestoreTest");
+        $this->registerMethod("setRestoreTest");
+        $this->registerMethod("deleteRestoreTest");
+        $this->registerMethod("runRestoreTest");
+
         // Environment variables
         $this->registerMethod('getEnvVarList');
         $this->registerMethod('getEnvVar');
@@ -318,6 +325,16 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             if ($snapshot->get('reporef') == $params['uuid']) {
                 throw new \OMV\Exception(gettext(
                     "Repository is in use. Please delete the backup jobs associated with this repository first."
+                ));
+            }
+        }
+
+        // Ensure no restore test jobs reference this repo
+        $restoretests = $db->get('conf.service.restic.restoretest');
+        foreach ($restoretests as $restoretest) {
+            if ($restoretest->get('reporef') == $params['uuid']) {
+                throw new \OMV\Exception(gettext(
+                    "Repository is in use. Please delete the restore tests associated with this repository first."
                 ));
             }
         }
@@ -645,6 +662,8 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $params['keepweekly'] = isset($params['keepweekly'])  ? intval($params['keepweekly'])  : 4;
         $params['keepmonthly']= isset($params['keepmonthly']) ? intval($params['keepmonthly']) : 12;
         $params['keepyearly'] = isset($params['keepyearly'])  ? intval($params['keepyearly'])  : 0;
+        $params['sendemail']    = $params['sendemail']    ?? false;
+        $params['emailonerror'] = $params['emailonerror'] ?? false;
 
         $db = \OMV\Config\Database::getInstance();
         $snapshot = new \OMV\Config\ConfigObject('conf.service.restic.snapshot');
@@ -837,6 +856,200 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
             $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
             $this->exec($cmdLine, $output, $bgOutputFilename);
+            return $output;
+        });
+    }
+
+    // =========================================================================
+    // Restore Test Jobs (scheduled dry-run / verify restores)
+    // =========================================================================
+
+    public function getRestoreTestList($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.getlist');
+
+        $db = \OMV\Config\Database::getInstance();
+        $jobs = $db->get('conf.service.restic.restoretest');
+
+        $jobsAssoc = [];
+        foreach ($jobs as &$jobv) {
+            // Resolve repository name
+            try {
+                $repo = $db->get('conf.service.restic.repo', $jobv->get('reporef'));
+                $jobv->add('reponame', 'string', $repo->get('name'));
+            } catch (\Exception $e) {
+                $jobv->add('reponame', 'string', gettext('n/a'));
+            }
+
+            // Resolve target shared folder name (verify mode only)
+            $targetname = '';
+            if (!empty($jobv->get('targetref'))) {
+                try {
+                    $sf = $db->get('conf.system.sharedfolder', $jobv->get('targetref'));
+                    $targetname = $sf->get('name');
+                } catch (\Exception $e) {}
+            }
+            $jobv->add('targetname', 'string', $targetname);
+
+            $jobAssoc = $jobv->getAssoc();
+            // Build a cron expression string for display (fed to cron2human in the UI).
+            switch ($jobAssoc['execution'] ?? 'weekly') {
+                case 'hourly':  $jobAssoc['schedule'] = '0 * * * *';   break;
+                case 'daily':   $jobAssoc['schedule'] = '0 0 * * *';   break;
+                case 'weekly':  $jobAssoc['schedule'] = '0 0 * * 0';   break;
+                case 'monthly': $jobAssoc['schedule'] = '0 0 1 * *';   break;
+                case 'yearly':  $jobAssoc['schedule'] = '0 0 1 1 *';   break;
+                case 'reboot':  $jobAssoc['schedule'] = '@reboot';      break;
+                default: // exactly
+                    $min = ($jobAssoc['everynminute']     ? '*/' : '') . $jobAssoc['minute'];
+                    $hr  = ($jobAssoc['everynhour']       ? '*/' : '') . $jobAssoc['hour'];
+                    $dom = ($jobAssoc['everyndayofmonth'] ? '*/' : '') . $jobAssoc['dayofmonth'];
+                    $jobAssoc['schedule'] = "$min $hr $dom {$jobAssoc['month']} {$jobAssoc['dayofweek']}";
+                    break;
+            }
+            $jobsAssoc[] = $jobAssoc;
+        }
+        unset($jobv);
+
+        return $this->applyFilter(
+            $jobsAssoc, $params['start'], $params['limit'],
+            $params['sortfield'], $params['sortdir']
+        );
+    }
+
+    public function getRestoreTest($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->getAssoc('conf.service.restic.restoretest', $params['uuid']);
+        // Convert comma-separated schedule strings to arrays for the multi-select fields
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $field) {
+            $obj[$field] = array_values(array_filter(array_map('trim', explode(',', $obj[$field] ?? '*'))));
+        }
+        return $obj;
+    }
+
+    public function setRestoreTest($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.restic.setrestoretest');
+
+        // Convert schedule arrays to comma-separated strings for storage
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $field) {
+            if (is_array($params[$field])) {
+                $params[$field] = implode(',', $params[$field]);
+            }
+        }
+
+        // Apply default values for optional fields that may be missing
+        $params['enable']      = $params['enable']      ?? true;
+        $params['name']        = $params['name']        ?? '';
+        $params['mode']        = $params['mode']        ?? 'dryrun';
+        $params['targetref']   = $params['targetref']   ?? '';
+        $params['cleanup']     = $params['cleanup']     ?? true;
+        $params['includepath']  = $params['includepath']  ?? '';
+        $params['execution']    = $params['execution']    ?? 'weekly';
+        $params['sendemail']    = $params['sendemail']    ?? false;
+        $params['emailonerror'] = $params['emailonerror'] ?? false;
+
+        // A verify restore writes files to disk, so it needs a target folder.
+        if ($params['mode'] === 'verify' && empty($params['targetref'])) {
+            throw new \OMV\Exception(
+                'A verify restore test requires a target shared folder.');
+        }
+
+        $db = \OMV\Config\Database::getInstance();
+        $job = new \OMV\Config\ConfigObject('conf.service.restic.restoretest');
+        $job->setAssoc($params);
+        $db->set($job);
+        return $job->getAssoc();
+    }
+
+    public function deleteRestoreTest($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+
+        $db = \OMV\Config\Database::getInstance();
+        $job = $db->get('conf.service.restic.restoretest', $params['uuid']);
+        $db->delete($job);
+        return $job->getAssoc();
+    }
+
+    /**
+     * Manually trigger a restore test by UUID. Runs `restic restore latest`
+     * in either dry-run (preview, no data written) or verify (full restore
+     * with content verification) mode, optionally cleaning up afterwards.
+     */
+    public function runRestoreTest($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+
+        $db = \OMV\Config\Database::getInstance();
+        $job = $db->get('conf.service.restic.restoretest', $params['uuid']);
+        $repo = $db->get('conf.service.restic.repo', $job->get('reporef'));
+
+        $mode = $job->get('mode');
+        $includePath = $job->get('includepath');
+        $cleanup = $job->get('cleanup');
+
+        // Resolve the restore target. For verify mode this is a per-job
+        // subdirectory inside the selected shared folder, so cleanup only ever
+        // removes data we created. For dry-run nothing is written, but restic
+        // still requires a --target, so we point at a path that never exists.
+        if ($mode === 'verify') {
+            if (empty($job->get('targetref'))) {
+                throw new \OMV\Exception(
+                    'A verify restore test requires a target shared folder.');
+            }
+            $base = \OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
+                'uuid' => $job->get('targetref')
+            ], $context);
+            $targetPath = rtrim($base, '/') . '/restic-restoretest-' . $job->get('uuid');
+        } else {
+            $targetPath = '/var/lib/openmediavault-restic/dryrun';
+        }
+
+        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($context, $repo, $mode, $includePath, $cleanup, $targetPath) {
+            $cmdArgs = [
+                $this->getProgram,
+                'restore',
+                '--retry-lock',
+                '5m'
+            ];
+            if ($mode === 'verify') {
+                $cmdArgs[] = '--verify';
+            } else {
+                $cmdArgs[] = '--dry-run';
+                $cmdArgs[] = '--verbose=2';
+            }
+            $cmdArgs[] = 'latest';
+            $cmdArgs[] = '--target';
+            $cmdArgs[] = escapeshellarg($targetPath);
+            if (!empty($includePath)) {
+                $cmdArgs[] = '--include ' . escapeshellarg($includePath);
+            }
+
+            $cmd = new \OMV\System\Process($cmdArgs);
+            $this->buildRepoEnv($repo, $context, $cmd);
+            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
+            $cmd->setEnvFromFile($this->envFile . 'shared');
+            $cmd->setRedirect2to1();
+            $cmdLine = $cmd->getCommandLine();
+
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->exec($cmdLine, $output, $bgOutputFilename);
+
+            // Remove the restored data (verify mode only). We only ever delete
+            // the per-job subdirectory created above, never the shared folder.
+            if ($mode === 'verify' && $cleanup) {
+                $this->writeBgProcOutput($bgOutputFilename, "\nCleaning up restored data ...\n");
+                $this->exec('rm -rf ' . escapeshellarg($targetPath), $rmOutput, $bgOutputFilename);
+            }
+
             return $output;
         });
     }

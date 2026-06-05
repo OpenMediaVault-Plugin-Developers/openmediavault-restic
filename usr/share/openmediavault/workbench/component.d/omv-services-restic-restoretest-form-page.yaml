@@ -1,59 +1,38 @@
 version: "1.0"
 type: component
 data:
-  name: omv-services-restic-snapshot-form-page
+  name: omv-services-restic-restoretest-form-page
   type: formPage
   config:
     request:
       service: Restic
       get:
-        method: getSnapshot
+        method: getRestoreTest
         params:
           uuid: "{{ _routeParams.uuid }}"
       post:
-        method: setSnapshot
+        method: setRestoreTest
     fields:
       - type: confObjUuid
-      - type: hidden
-        name: hash
-        value: ""
 
       # ── Identity ─────────────────────────────────────────────────────────
       - type: divider
-        title: _("Job")
+        title: _("Restore test")
       - type: checkbox
         name: enable
         label: _("Enabled")
         value: true
-        hint: _("Enable or disable this backup job. Disabled jobs are skipped by the scheduler.")
+        hint: _("Enable or disable this restore test. Disabled tests are skipped by the scheduler.")
       - type: textInput
         name: name
-        label: _("Job name")
-        hint: _("Optional human-readable name for this backup job.")
+        label: _("Name")
+        hint: _("Optional human-readable name for this restore test.")
         value: ""
-
-      # ── Source & destination ──────────────────────────────────────────────
-      - type: divider
-        title: _("Source & Destination")
-      - type: select
-        name: sharedfolderrefs
-        label: _("Source folders")
-        placeholder: _("Select one or more shared folders to back up.")
-        hint: _("All selected folders will be included in the same snapshot.")
-        multiple: true
-        valueField: uuid
-        textField: description
-        store:
-          proxy:
-            service: ShareMgmt
-            get:
-              method: enumerateSharedFolders
-        validators:
-          required: true
       - type: select
         name: reporef
         label: _("Repository")
         placeholder: _("Select a repository.")
+        hint: _("The latest snapshot in this repository will be restore-tested.")
         textField: name
         valueField: uuid
         store:
@@ -64,23 +43,52 @@ data:
         validators:
           required: true
 
-      # ── Options ───────────────────────────────────────────────────────────
+      # ── Mode ──────────────────────────────────────────────────────────────
       - type: divider
-        title: _("Options")
-      - type: textInput
-        name: tags
-        label: _("Tags")
-        hint: _("Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite).")
-        value: ""
+        title: _("Test mode")
+      - type: select
+        name: mode
+        label: _("Mode")
+        value: "dryrun"
+        hint: _("Dry run previews what would be restored (fast, reads only metadata, writes nothing). Verify performs a full restore and checks each restored file's contents against the snapshot (reads all data, writes to disk).")
+        store:
+          data:
+            - ["dryrun", _("Dry run (preview only)")]
+            - ["verify", _("Verify (full restore + checksum)")]
+      - type: sharedFolderSelect
+        name: targetref
+        label: _("Verify target folder")
+        hint: _("Verify restores into a per-test subdirectory inside this shared folder. Required for verify mode.")
+        modifiers:
+          - type: hidden
+            constraint:
+              operator: ne
+              arg0:
+                prop: mode
+              arg1: verify
         validators:
-          required: false
+          requiredIf:
+            operator: eq
+            arg0:
+              prop: mode
+            arg1: verify
+      - type: checkbox
+        name: cleanup
+        label: _("Clean up after verify")
+        value: true
+        hint: _("Delete the restored data once the verify completes. Only the per-test subdirectory created in the target folder is removed.")
+        modifiers:
+          - type: hidden
+            constraint:
+              operator: ne
+              arg0:
+                prop: mode
+              arg1: verify
       - type: textInput
-        name: exclude
-        label: _("Exclude patterns")
-        hint: _("Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys).")
+        name: includepath
+        label: _("Path filter (optional)")
+        hint: _("Only restore-test files matching this path prefix within the snapshot (e.g. /home/user/documents). Leave blank to test the whole snapshot.")
         value: ""
-        validators:
-          required: false
 
       # ── Schedule ─────────────────────────────────────────────────────────
       - type: divider
@@ -88,7 +96,7 @@ data:
       - type: select
         name: execution
         label: _("Time of execution")
-        value: "daily"
+        value: "weekly"
         store:
           data:
             - ["exactly", _("Certain date")]
@@ -436,48 +444,6 @@ data:
             - ["6", _("Saturday")]
             - ["7", _("Sunday")]
 
-      # ── Retention policy ──────────────────────────────────────────────────
-      - type: divider
-        title: _("Retention policy")
-      - type: hint
-        hintType: info
-        text: _("After each backup the retention policy is applied. Snapshots outside these limits are forgotten and the repository is pruned. Set a field to 0 to disable that limit.")
-      - type: numberInput
-        name: keeplast
-        label: _("Keep last N")
-        hint: _("Keep this many of the most recent snapshots (0 = disabled).")
-        value: 0
-        validators:
-          min: 0
-      - type: numberInput
-        name: keepdaily
-        label: _("Keep daily")
-        hint: _("Keep one snapshot per day for this many days (0 = disabled).")
-        value: 7
-        validators:
-          min: 0
-      - type: numberInput
-        name: keepweekly
-        label: _("Keep weekly")
-        hint: _("Keep one snapshot per week for this many weeks (0 = disabled).")
-        value: 4
-        validators:
-          min: 0
-      - type: numberInput
-        name: keepmonthly
-        label: _("Keep monthly")
-        hint: _("Keep one snapshot per month for this many months (0 = disabled).")
-        value: 12
-        validators:
-          min: 0
-      - type: numberInput
-        name: keepyearly
-        label: _("Keep yearly")
-        hint: _("Keep one snapshot per year for this many years (0 = disabled).")
-        value: 0
-        validators:
-          min: 0
-
       # ── Notifications ─────────────────────────────────────────────────────
       - type: divider
         title: _("Notifications")
@@ -485,12 +451,12 @@ data:
         name: sendemail
         label: _("Send command output via email")
         value: false
-        hint: _("Email the job output to the root user (and any address aliased to it) after each scheduled run. Requires a working email/notification setup under System.")
+        hint: _("Email the restore test output to the root user (and any address aliased to it) after each scheduled run. Requires a working email/notification setup under System.")
       - type: checkbox
         name: emailonerror
         label: _("Send email on error only")
         value: false
-        hint: _("Only send an email if the scheduled job exits with an error.")
+        hint: _("Only send an email if the scheduled restore test exits with an error (i.e. the backup could not be restored/verified).")
         modifiers:
           - type: disabled
             constraint:
@@ -502,8 +468,8 @@ data:
       - template: submit
         execute:
           type: url
-          url: "/services/restic/snapshots"
+          url: "/services/restic/restoretests"
       - template: cancel
         execute:
           type: url
-          url: "/services/restic/snapshots"
+          url: "/services/restic/restoretests"

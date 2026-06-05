@@ -1,7 +1,7 @@
 #!/bin/bash
 {{ pillar['headers']['auto_generated'] }}
 {{ pillar['headers']['warning'] }}
-# Restic backup job: {{ job.uuid }}{% if job.name %} ({{ job.name }}){% endif %}
+# Restic restore test job: {{ job.uuid }}{% if job.name %} ({{ job.name }}){% endif %}
 {# POSIX single-quote shell escaping: wrap in single quotes and replace any
    embedded single quote with the '\'' sequence. Keeps secrets and paths safe
    from word splitting and shell injection. #}
@@ -19,11 +19,11 @@ log() {
 }
 
 {% if job.sendemail | string | lower not in ['false', '0', 'no', 'off', ''] %}
-# Capture this run's output so it can be emailed to root once the job finishes.
+# Capture this run's output so it can be emailed to root once the test finishes.
 # Output still reaches the log file via the `tee -a` calls throughout the
 # script; redirecting stdout/stderr here just collects a copy for the email.
 EMAIL_MODE="{% if job.emailonerror | string | lower not in ['false', '0', 'no', 'off', ''] %}onerror{% else %}always{% endif %}"
-EMAIL_SUBJECT={{ sq('restic backup' ~ ((': ' ~ job.name) if job.name else '')) }}
+EMAIL_SUBJECT={{ sq('restic restore test' ~ ((': ' ~ job.name) if job.name else '')) }}
 EMAIL_TMP="$(mktemp)"
 _send_email() {
     local rc="$1"
@@ -38,7 +38,7 @@ trap '_send_email $?' EXIT
 exec >"${EMAIL_TMP}" 2>&1
 {% endif %}
 
-log "=== Starting backup job{% if job.name %}: {{ job.name }}{% endif %} ==="
+log "=== Starting restore test{% if job.name %}: {{ job.name }}{% endif %} ({{ job.mode }}) ==="
 
 # Load shared environment variables
 if [ -f /etc/restic/restic-envvar-shared ]; then
@@ -78,65 +78,43 @@ export RESTIC_REPOSITORY={{ sq('rest:' ~ repo.uri) }}
 export RESTIC_REPOSITORY={{ sq('rclone:' ~ repo.uri) }}
 {% endif %}
 
-# Build backup command as an array so paths/patterns with spaces or shell
+# Build the restore command as an array so paths/patterns with spaces or shell
 # metacharacters are passed to restic verbatim.
-BACKUP_ARGS=()
+RESTORE_ARGS=(--retry-lock 5m)
 
-{% if job.tags %}
-{% for tag in job.tags.split(',') %}
-{% if tag | trim %}
-BACKUP_ARGS+=(--tag {{ sq(tag | trim) }})
-{% endif %}
-{% endfor %}
-{% endif %}
-
-{% if job.exclude %}
-{% for excl in job.exclude.split(',') %}
-{% if excl | trim %}
-BACKUP_ARGS+=(--exclude {{ sq(excl | trim) }})
-{% endif %}
-{% endfor %}
+{% set is_verify = job.mode == 'verify' %}
+{% if is_verify %}
+# Verify mode: full restore that checksums each restored file's contents.
+RESTORE_ARGS+=(--verify)
+TARGET={{ sq(target_path) }}
+{% else %}
+# Dry-run mode: preview only. restic writes nothing but still requires a
+# --target, so we point at a path that is never created.
+RESTORE_ARGS+=(--dry-run --verbose=2)
+TARGET='/var/lib/openmediavault-restic/dryrun'
 {% endif %}
 
-{% for path in source_paths %}
-BACKUP_ARGS+=({{ sq(path) }})
-{% endfor %}
+{% if job.includepath %}
+RESTORE_ARGS+=(--include {{ sq(job.includepath) }})
+{% endif %}
 
-log "Running: restic backup --verbose ${BACKUP_ARGS[*]}"
-/usr/bin/restic backup --verbose --retry-lock 5m "${BACKUP_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
-BACKUP_EXIT=${PIPESTATUS[0]}
+log "Running: restic restore latest ${RESTORE_ARGS[*]} --target ${TARGET}"
+/usr/bin/restic restore latest "${RESTORE_ARGS[@]}" --target "${TARGET}" 2>&1 | tee -a "${LOG_FILE}"
+RESTORE_EXIT=${PIPESTATUS[0]}
 
-if [ ${BACKUP_EXIT} -ne 0 ]; then
-    log "ERROR: Backup failed with exit code ${BACKUP_EXIT}"
-    exit ${BACKUP_EXIT}
-fi
-
-{% set has_keeplast    = job.keeplast    | int > 0 %}
-{% set has_keepdaily   = job.keepdaily   | int > 0 %}
-{% set has_keepweekly  = job.keepweekly  | int > 0 %}
-{% set has_keepmonthly = job.keepmonthly | int > 0 %}
-{% set has_keepyearly  = job.keepyearly  | int > 0 %}
-{% if has_keeplast or has_keepdaily or has_keepweekly or has_keepmonthly or has_keepyearly %}
-
-# Apply retention policy, scoped to this job's source paths so it cannot
-# forget snapshots created by other jobs that share the same repository.
-FORGET_ARGS=(--prune --retry-lock 5m)
-{% if has_keeplast    %}FORGET_ARGS+=(--keep-last {{ job.keeplast | int }}){% endif %}
-{% if has_keepdaily   %}FORGET_ARGS+=(--keep-daily {{ job.keepdaily | int }}){% endif %}
-{% if has_keepweekly  %}FORGET_ARGS+=(--keep-weekly {{ job.keepweekly | int }}){% endif %}
-{% if has_keepmonthly %}FORGET_ARGS+=(--keep-monthly {{ job.keepmonthly | int }}){% endif %}
-{% if has_keepyearly  %}FORGET_ARGS+=(--keep-yearly {{ job.keepyearly | int }}){% endif %}
-{% for path in source_paths %}
-FORGET_ARGS+=(--path {{ sq(path) }})
-{% endfor %}
-
-log "Applying retention: restic forget ${FORGET_ARGS[*]}"
-/usr/bin/restic forget "${FORGET_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
-FORGET_EXIT=${PIPESTATUS[0]}
-
-if [ ${FORGET_EXIT} -ne 0 ]; then
-    log "WARNING: Retention policy application failed with exit code ${FORGET_EXIT}"
+{% if is_verify and job.cleanup | string | lower not in ['false', '0', 'no', 'off', ''] %}
+# Clean up restored data. We only ever remove the per-test subdirectory that
+# was created for this job, never the surrounding shared folder. Runs even on
+# failure so partial restores do not accumulate.
+if [ -n "${TARGET}" ]; then
+    log "Cleaning up restored data at ${TARGET}"
+    rm -rf "${TARGET}"
 fi
 {% endif %}
 
-log "=== Backup job completed successfully ==="
+if [ ${RESTORE_EXIT} -ne 0 ]; then
+    log "ERROR: Restore test failed with exit code ${RESTORE_EXIT}"
+    exit ${RESTORE_EXIT}
+fi
+
+log "=== Restore test completed successfully ==="

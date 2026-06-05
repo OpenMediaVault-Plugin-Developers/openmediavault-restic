@@ -198,6 +198,12 @@
         },
         "keepyearly": {
           "type": "integer"
+        },
+        "sendemail": {
+          "type": "boolean"
+        },
+        "emailonerror": {
+          "type": "boolean"
         }
       }
     }
@@ -268,6 +274,111 @@
         "dryrun": {
           "type": "boolean",
           "default": false
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.setrestoretest",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "enable": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "reporef": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["dryrun", "verify"],
+          "required": true
+        },
+        "targetref": {
+          "type": "string"
+        },
+        "cleanup": {
+          "type": "boolean"
+        },
+        "includepath": {
+          "type": "string"
+        },
+        "execution": {
+          "type": "string",
+          "enum": [
+            "exactly",
+            "hourly",
+            "daily",
+            "weekly",
+            "monthly",
+            "yearly",
+            "reboot"
+          ],
+          "required": true
+        },
+        "minute": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true
+        },
+        "everynminute": {
+          "type": "boolean",
+          "required": true
+        },
+        "hour": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true
+        },
+        "everynhour": {
+          "type": "boolean",
+          "required": true
+        },
+        "dayofmonth": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true
+        },
+        "everyndayofmonth": {
+          "type": "boolean",
+          "required": true
+        },
+        "month": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true
+        },
+        "dayofweek": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true
+        },
+        "sendemail": {
+          "type": "boolean"
+        },
+        "emailonerror": {
+          "type": "boolean"
         }
       }
     }

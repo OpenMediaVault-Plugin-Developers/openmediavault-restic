@@ -1,9 +1,9 @@
 {
   "type": "config",
-  "id": "conf.service.restic.snapshot",
-  "title": "Restic backup job",
+  "id": "conf.service.restic.restoretest",
+  "title": "Restic restore test job",
   "queryinfo": {
-    "xpath": "//services/restic/snapshots/snapshot",
+    "xpath": "//services/restic/restoretests/restoretest",
     "iterable": true,
     "idproperty": "uuid"
   },
@@ -20,30 +20,31 @@
       "type": "string",
       "default": ""
     },
-    "hash": {
-      "type": "string",
-      "default": ""
-    },
-    "tags": {
-      "type": "string",
-      "default": ""
-    },
-    "csvsharedfolderrefs": {
-      "type": "string",
-      "default": ""
-    },
     "reporef": {
       "type": "string",
       "format": "uuidv4"
     },
-    "exclude": {
+    "mode": {
+      "type": "string",
+      "enum": ["dryrun", "verify"],
+      "default": "dryrun"
+    },
+    "targetref": {
+      "type": "string",
+      "default": ""
+    },
+    "cleanup": {
+      "type": "boolean",
+      "default": true
+    },
+    "includepath": {
       "type": "string",
       "default": ""
     },
     "execution": {
       "type": "string",
       "enum": ["exactly", "hourly", "daily", "weekly", "monthly", "yearly", "reboot"],
-      "default": "daily"
+      "default": "weekly"
     },
     "minute": {
       "type": "string",
@@ -76,26 +77,6 @@
     "dayofweek": {
       "type": "string",
       "default": "*"
-    },
-    "keeplast": {
-      "type": "integer",
-      "default": 0
-    },
-    "keepdaily": {
-      "type": "integer",
-      "default": 7
-    },
-    "keepweekly": {
-      "type": "integer",
-      "default": 4
-    },
-    "keepmonthly": {
-      "type": "integer",
-      "default": 12
-    },
-    "keepyearly": {
-      "type": "integer",
-      "default": 0
     },
     "sendemail": {
       "type": "boolean",
