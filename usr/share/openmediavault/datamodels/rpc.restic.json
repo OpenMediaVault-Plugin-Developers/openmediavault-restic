@@ -260,12 +260,14 @@
           "required": true
         },
         "targetref": {
-          "type": "string",
-          "format": "uuidv4",
-          "required": true
+          "type": "string"
         },
         "includepath": {
           "type": "string"
+        },
+        "dryrun": {
+          "type": "boolean",
+          "default": false
         }
       }
     }

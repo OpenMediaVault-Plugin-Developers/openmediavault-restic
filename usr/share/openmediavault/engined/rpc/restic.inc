@@ -790,20 +790,38 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['reporef']);
 
-        $targetPath = \OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
-            'uuid' => $params['targetref']
-        ], $context);
+        $dryRun = !empty($params['dryrun']);
+        if ($dryRun) {
+            // A dry run writes nothing, but restic still requires a --target to
+            // diff against. Point at a path that is never created or written to.
+            $targetPath = '/var/lib/openmediavault-restic/dryrun';
+        } else {
+            if (empty($params['targetref'])) {
+                throw new \OMV\Exception(
+                    'A restore target folder is required.');
+            }
+            $targetPath = \OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
+                'uuid' => $params['targetref']
+            ], $context);
+        }
 
-        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo, $targetPath) {
+        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo, $targetPath, $dryRun) {
             $cmdArgs = [
                 $this->getProgram,
                 'restore',
                 '--retry-lock',
-                '5m',
-                escapeshellarg($params['snapshotid']),
-                '--target',
-                escapeshellarg($targetPath)
+                '5m'
             ];
+
+            // Preview only: report what would be restored without writing data.
+            if ($dryRun) {
+                $cmdArgs[] = '--dry-run';
+                $cmdArgs[] = '--verbose=2';
+            }
+
+            $cmdArgs[] = escapeshellarg($params['snapshotid']);
+            $cmdArgs[] = '--target';
+            $cmdArgs[] = escapeshellarg($targetPath);
 
             // Optional path filter within the snapshot
             if (!empty($params['includepath'])) {

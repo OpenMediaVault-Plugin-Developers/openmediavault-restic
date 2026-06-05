@@ -23,12 +23,28 @@ data:
         value: "{{ _routeParams.snapshotid }}"
         submitValue: false
         readonly: true
+      - type: checkbox
+        name: dryrun
+        label: _("Dry run")
+        hint: _("Preview what would be restored without writing any files. Useful for verifying a snapshot's contents are intact and browsable.")
+        value: false
       - type: sharedFolderSelect
         name: targetref
         label: _("Restore target folder")
         hint: _("Files will be restored into this shared folder. Existing files may be overwritten.")
+        modifiers:
+          - type: hidden
+            constraint:
+              operator: eq
+              arg0:
+                prop: dryrun
+              arg1: true
         validators:
-          required: true
+          requiredIf:
+            operator: eq
+            arg0:
+              prop: dryrun
+            arg1: false
       - type: textInput
         name: includepath
         label: _("Path filter (optional)")
