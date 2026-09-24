@@ -111,6 +111,8 @@ SNAPSHOT_UUID=""
 RESTORETEST_UUID=""
 ENVVAR_UUID=""
 ENVVAR_SHARED_UUID=""
+RESTUSER_UUID=""
+ORIG_RESTSERVER=""
 
 LIST_PARAMS='{"start":0,"limit":25,"sortfield":null,"sortdir":null}'
 
@@ -122,11 +124,31 @@ OMV_NEW_UUID=$(. /etc/default/openmediavault 2>/dev/null; \
 FAKE_SF_UUID=$(python3 -c "import uuid; print(uuid.uuid4())" 2>/dev/null || \
     echo "12345678-1234-4234-8234-123456789abc")
 
+# The fake REST repos point at closed local ports. restic keeps retrying a
+# refused connection for several minutes, so every background task started
+# against them would otherwise outlive the test and tie up an omv-engined
+# worker each (enough of them make the web UI unresponsive). Kill them by
+# matching the repository URL in the `sh -c` wrapper, then its restic child.
+FAKE_REST_URL_RE="RESTIC_REPOSITORY='rest:http://localhost:1800[01]/'"
+
+kill_test_restic_procs() {
+    local pid n=0
+    for pid in $(pgrep -f "$FAKE_REST_URL_RE"); do
+        pkill -TERM -P "$pid" 2>/dev/null || true
+        kill -TERM "$pid" 2>/dev/null || true
+        ((n++)) || true
+    done
+    [ "$n" -gt 0 ] && info "Stopped $n leftover restic task(s) for the fake test repos"
+    return 0
+}
+
 # ---------------------------------------------------------------------------
 # Cleanup — always runs on exit
 # ---------------------------------------------------------------------------
 cleanup() {
     section "Cleanup"
+
+    kill_test_restic_procs
 
     # Backup jobs must go before repos (deleteRepo checks for references)
     if [ -n "$SNAPSHOT_UUID" ]; then
@@ -145,6 +167,16 @@ cleanup() {
         info "Deleting env var $uuid"
         rpc "Restic" "deleteEnvVar" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
     done
+
+    if [ -n "$RESTUSER_UUID" ]; then
+        info "Deleting REST server user $RESTUSER_UUID"
+        rpc "Restic" "deleteRestUser" "{\"uuid\":\"$RESTUSER_UUID\"}" &>/dev/null || true
+    fi
+
+    if [ -n "$ORIG_RESTSERVER" ]; then
+        info "Restoring REST server settings"
+        rpc "Restic" "setRestServer" "$ORIG_RESTSERVER" &>/dev/null || true
+    fi
 
     for uuid in "$REST_REPO_UUID" "$SFTP_REPO_UUID" "$S3_REPO_UUID" "$B2_REPO_UUID" "$RCLONE_REPO_UUID"; do
         [ -z "$uuid" ] && continue
@@ -167,6 +199,9 @@ trap cleanup EXIT
 # Pre-flight
 # ---------------------------------------------------------------------------
 section "Pre-flight"
+
+# Clear anything left behind by an interrupted earlier run.
+kill_test_restic_procs
 
 for cmd in omv-rpc python3; do
     if command -v "$cmd" &>/dev/null; then
@@ -198,8 +233,23 @@ section "Settings"
 assert_rpc "getSettings" "Restic" "getSettings" '{}' >/dev/null
 ORIG_CACHEDIR=$(json_field "$RPC_OUT" "cachedir")
 
+ORIG_SETTINGS=$RPC_OUT
+
 assert_rpc "setSettings (roundtrip)" "Restic" "setSettings" \
     "{\"cachedir\":\"${ORIG_CACHEDIR}\"}" >/dev/null
+
+assert_rpc "setSettings (default excludes)" "Restic" "setSettings" "$(python3 -c "
+import json; print(json.dumps({
+    'cachedir': '$ORIG_CACHEDIR',
+    'exclude': '*.tmp\\n.Trash-*',
+    'excludecaches': True,
+}))")" >/dev/null
+
+assert_rpc "getSettings — default excludes persisted" "Restic" "getSettings" '{}' \
+    '"excludecaches":true' >/dev/null
+
+# Restore the original settings so the test leaves no trace.
+assert_rpc "setSettings (restore original)" "Restic" "setSettings" "$ORIG_SETTINGS" >/dev/null
 
 # ---------------------------------------------------------------------------
 # Repository CRUD — REST (skipinit=true, no restic server required)
@@ -857,6 +907,83 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# REST server settings and users. The server is never enabled here, so the
+# cleanup deploy does not install restic-rest-server.
+# ---------------------------------------------------------------------------
+section "REST server"
+
+assert_rpc "getRestServer" "Restic" "getRestServer" '{}' '"auth"' >/dev/null
+ORIG_RESTSERVER=$RPC_OUT
+
+assert_rpc "setRestServer (roundtrip)" "Restic" "setRestServer" "$ORIG_RESTSERVER" >/dev/null
+
+assert_rpc_fails "setRestServer — enable without shared folder rejected" \
+    "Restic" "setRestServer" \
+    '{"enable":true,"sharedfolderref":"","port":8000,"auth":true}'
+
+assert_rpc_fails "setRestServer — TLS without certificate rejected" \
+    "Restic" "setRestServer" \
+    '{"enable":false,"sharedfolderref":"","port":8000,"auth":true,"tls":true,"sslcertificateref":""}'
+
+assert_rpc_fails "setRestServer — private repos without login rejected" \
+    "Restic" "setRestServer" \
+    '{"enable":false,"sharedfolderref":"","port":8000,"auth":false,"privaterepos":true}'
+
+assert_rpc_fails "setRestServer — invalid port rejected" \
+    "Restic" "setRestServer" \
+    '{"enable":false,"sharedfolderref":"","port":70000,"auth":true}'
+
+assert_rpc_fails "setRestUser — password required for new user" \
+    "Restic" "setRestUser" \
+    "{\"uuid\":\"$OMV_NEW_UUID\",\"username\":\"restic-test-user\",\"password\":\"\"}"
+
+assert_rpc_fails "setRestUser — invalid username rejected" \
+    "Restic" "setRestUser" \
+    "{\"uuid\":\"$OMV_NEW_UUID\",\"username\":\"bad:name\",\"password\":\"x\"}"
+
+assert_rpc "setRestUser (new)" "Restic" "setRestUser" \
+    "{\"uuid\":\"$OMV_NEW_UUID\",\"username\":\"restic-test-user\",\"password\":\"s3cret pass\"}" >/dev/null
+RESTUSER_UUID=$(json_field "$RPC_OUT" "uuid")
+
+if [ -n "$RESTUSER_UUID" ] && [ "$RESTUSER_UUID" != "$OMV_NEW_UUID" ]; then
+    _pass "setRestUser — got real UUID ($RESTUSER_UUID)"
+
+    assert_rpc "getRestUserList includes user" "Restic" "getRestUserList" \
+        "$LIST_PARAMS" "restic-test-user" >/dev/null
+    if echo "$RPC_OUT" | grep -q 'passwordhash\|\$2y\$'; then
+        _fail "getRestUserList — password hash leaked to the UI"
+    else
+        _pass "getRestUserList — no password hash in output"
+    fi
+
+    assert_rpc "getRestUser — password blank" "Restic" "getRestUser" \
+        "{\"uuid\":\"$RESTUSER_UUID\"}" '"password":""' >/dev/null
+
+    HASH_BEFORE=$(omv-confdbadm read --uuid "$RESTUSER_UUID" conf.service.restic.restuser 2>/dev/null | \
+        python3 -c "import sys,json; print(json.load(sys.stdin).get('passwordhash',''))" 2>/dev/null)
+    case "$HASH_BEFORE" in
+        '$2y$'*) _pass "setRestUser — password stored as bcrypt hash" ;;
+        *)       _fail "setRestUser — password not stored as bcrypt hash" "${HASH_BEFORE:0:20}" ;;
+    esac
+
+    assert_rpc "setRestUser (edit, blank password)" "Restic" "setRestUser" \
+        "{\"uuid\":\"$RESTUSER_UUID\",\"username\":\"restic-test-user\",\"password\":\"\"}" >/dev/null
+    HASH_AFTER=$(omv-confdbadm read --uuid "$RESTUSER_UUID" conf.service.restic.restuser 2>/dev/null | \
+        python3 -c "import sys,json; print(json.load(sys.stdin).get('passwordhash',''))" 2>/dev/null)
+    if [ -n "$HASH_BEFORE" ] && [ "$HASH_BEFORE" = "$HASH_AFTER" ]; then
+        _pass "setRestUser — blank password on edit keeps existing hash"
+    else
+        _fail "setRestUser — blank password on edit changed the hash"
+    fi
+
+    assert_rpc_fails "setRestUser — duplicate username rejected" "Restic" "setRestUser" \
+        "{\"uuid\":\"$OMV_NEW_UUID\",\"username\":\"restic-test-user\",\"password\":\"x\"}"
+else
+    _fail "setRestUser — no real UUID returned"
+    RESTUSER_UUID=""
+fi
+
+# ---------------------------------------------------------------------------
 # Negative tests
 # ---------------------------------------------------------------------------
 section "Negative tests"
@@ -918,6 +1045,41 @@ import json; print(json.dumps({
     'skipinit': True,
 }))")"
 
+# Scheduled check options
+if [ -n "$REST_REPO_UUID" ]; then
+    assert_rpc "setRepo — scheduled check options" "Restic" "setRepo" "$(python3 -c "
+import json; print(json.dumps({
+    'uuid': '$REST_REPO_UUID',
+    'name': 'restic-test-rest',
+    'type': 'rest',
+    'passphrase': 'testpassword123',
+    'uri': 'http://localhost:18000/',
+    'sharedfolderref': '',
+    'accesskey': '',
+    'secretkey': '',
+    'skipinit': True,
+    'checkschedule': 'weekly',
+    'checkreaddata': '5%',
+    'checkemail': 'always',
+}))")" '"checkschedule":"weekly"' >/dev/null
+
+    assert_rpc_fails "setRepo — invalid read data subset rejected" "Restic" "setRepo" "$(python3 -c "
+import json; print(json.dumps({
+    'uuid': '$REST_REPO_UUID',
+    'name': 'restic-test-rest',
+    'type': 'rest',
+    'passphrase': 'testpassword123',
+    'uri': 'http://localhost:18000/',
+    'sharedfolderref': '',
+    'accesskey': '',
+    'secretkey': '',
+    'skipinit': True,
+    'checkschedule': 'weekly',
+    'checkreaddata': '5%; rm -rf /',
+    'checkemail': 'always',
+}))")"
+fi
+
 # getRepoSnapshotList — missing reporef
 assert_rpc_fails "getRepoSnapshotList — missing reporef" \
     "Restic" "getRepoSnapshotList" \
@@ -978,6 +1140,124 @@ else
             _fail "$op — RPC failed or returned exception" "${BG_OUT:0:200}"
         fi
     done
+fi
+
+# ---------------------------------------------------------------------------
+# Single-snapshot operations: inspect / list files / forget
+# The snapshot ID is validated as hex before any command is built, so
+# anything else (including shell metacharacters) must be rejected up front.
+# ---------------------------------------------------------------------------
+section "Snapshot operations (inspect / ls / forget)"
+
+if [ -z "$REST_REPO_UUID" ]; then
+    _skip "snapshot operations" "no test repo available"
+else
+    for op in inspectRepoSnapshot listRepoSnapshotFiles; do
+        assert_rpc_fails "$op — non-hex snapshot ID rejected" "Restic" "$op" \
+            "{\"reporef\":\"$REST_REPO_UUID\",\"snapshotid\":\"abcdef12;id\"}"
+        assert_rpc_fails "$op — missing snapshot ID rejected" "Restic" "$op" \
+            "{\"reporef\":\"$REST_REPO_UUID\"}"
+    done
+    for ids in "abcdef12;id" "abcdef12," "" "abcdef12,xyz"; do
+        assert_rpc_fails "forgetRepoSnapshots — invalid ID list '$ids' rejected" \
+            "Restic" "forgetRepoSnapshots" \
+            "{\"reporef\":\"$REST_REPO_UUID\",\"snapshotids\":\"$ids\"}"
+    done
+
+    if ! $RESTIC_AVAILABLE; then
+        _skip "snapshot operations — accepted" "restic binary not installed"
+    else
+        for call in \
+            "inspectRepoSnapshot|{\"reporef\":\"$REST_REPO_UUID\",\"snapshotid\":\"abcdef12\"}" \
+            "listRepoSnapshotFiles|{\"reporef\":\"$REST_REPO_UUID\",\"snapshotid\":\"abcdef12\"}" \
+            "forgetRepoSnapshots|{\"reporef\":\"$REST_REPO_UUID\",\"snapshotids\":\"abcdef12,0123abcd\",\"prune\":false}"; do
+            op=${call%%|*}
+            OP_OUT=$(rpc "Restic" "$op" "${call#*|}" 2>&1) || true
+            if [ -n "$OP_OUT" ] && ! echo "$OP_OUT" | grep -qi "exception\|error"; then
+                _pass "$op — RPC accepted (background task started)"
+            else
+                _fail "$op — RPC failed or returned exception" "${OP_OUT:0:200}"
+            fi
+        done
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Task output must never contain secrets. The "Command:" line used to print
+# the full environment, including RESTIC_PASSWORD.
+# ---------------------------------------------------------------------------
+section "Secrets masked in task output"
+
+if [ -z "$REST_REPO_UUID" ]; then
+    _skip "secret masking" "no test repo available"
+elif ! $RESTIC_AVAILABLE; then
+    _skip "secret masking" "restic binary not installed"
+else
+    BG_FILE=$(rpc "Restic" "testRepo" "{\"uuid\":\"$REST_REPO_UUID\"}" 2>/dev/null | \
+        python3 -c "import sys,json; print(json.load(sys.stdin))" 2>/dev/null)
+    sleep 2
+    # The RPC returns JSON (which escapes "/" as "\/"), so decode it and
+    # check the plain task output text.
+    TASK_OUT=$(rpc "Exec" "getOutput" "{\"filename\":\"$BG_FILE\",\"pos\":0}" 2>&1 | \
+        python3 -c "import sys,json; print(json.load(sys.stdin).get('output',''))" 2>&1 || true)
+    if [ -z "$BG_FILE" ] || ! echo "$TASK_OUT" | grep -q "Command: /usr/bin/restic"; then
+        _fail "task output — could not read Command line" "${TASK_OUT:0:200}"
+    elif echo "$TASK_OUT" | grep -q "testpassword123\|RESTIC_PASSWORD"; then
+        _fail "task output — repository password leaked"
+    else
+        _pass "task output — command shown without password or environment"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Scheduled retention policy per repository
+# ---------------------------------------------------------------------------
+section "Repository retention policy"
+
+if [ -z "$REST_REPO_UUID" ]; then
+    _skip "retention policy" "no test repo available"
+else
+    RETENTION_BASE="'uuid': '$REST_REPO_UUID', 'name': 'restic-test-rest', 'type': 'rest',
+    'passphrase': 'testpassword123', 'uri': 'http://localhost:18000/', 'sharedfolderref': '',
+    'accesskey': '', 'secretkey': '', 'skipinit': True"
+
+    assert_rpc "setRepo — retention disabled, no keep rules" "Restic" "setRepo" "$(python3 -c "
+import json; print(json.dumps({$RETENTION_BASE, 'forgetschedule': 'disabled',
+    'forgetkeeplast': 0, 'forgetkeepdaily': 0, 'forgetkeepweekly': 0,
+    'forgetkeepmonthly': 0, 'forgetkeepyearly': 0}))")" >/dev/null
+
+    assert_rpc_fails "applyRepoForget — no policy rejected" "Restic" "applyRepoForget" \
+        "{\"uuid\":\"$REST_REPO_UUID\",\"dryrun\":true}"
+
+    assert_rpc_fails "setRepo — schedule without keep rules rejected" "Restic" "setRepo" "$(python3 -c "
+import json; print(json.dumps({$RETENTION_BASE, 'forgetschedule': 'weekly',
+    'forgetkeeplast': 0, 'forgetkeepdaily': 0, 'forgetkeepweekly': 0,
+    'forgetkeepmonthly': 0, 'forgetkeepyearly': 0}))")"
+
+    assert_rpc_fails "setRepo — invalid retention host rejected" "Restic" "setRepo" "$(python3 -c "
+import json; print(json.dumps({$RETENTION_BASE, 'forgetschedule': 'weekly',
+    'forgetkeepdaily': 7, 'forgethost': 'bad host;id'}))")"
+
+    assert_rpc "setRepo — retention policy saved" "Restic" "setRepo" "$(python3 -c "
+import json; print(json.dumps({$RETENTION_BASE, 'forgetschedule': 'weekly',
+    'forgetkeeplast': 3, 'forgetkeepdaily': 7, 'forgetkeepweekly': 4,
+    'forgetkeepmonthly': 0, 'forgetkeepyearly': 0, 'forgethost': 'client-1',
+    'forgettag': 'daily', 'forgetprune': True, 'forgetemail': 'onerror'}))")" \
+        '"forgetschedule":"weekly"' >/dev/null
+
+    if ! $RESTIC_AVAILABLE; then
+        _skip "applyRepoForget — accepted" "restic binary not installed"
+    else
+        for dry in true false; do
+            AF_OUT=$(rpc "Restic" "applyRepoForget" \
+                "{\"uuid\":\"$REST_REPO_UUID\",\"dryrun\":$dry}" 2>&1) || true
+            if [ -n "$AF_OUT" ] && ! echo "$AF_OUT" | grep -qi "exception\|error"; then
+                _pass "applyRepoForget (dryrun=$dry) — RPC accepted (background task started)"
+            else
+                _fail "applyRepoForget (dryrun=$dry) — RPC rejected" "${AF_OUT:0:200}"
+            fi
+        done
+    fi
 fi
 
 # ---------------------------------------------------------------------------
