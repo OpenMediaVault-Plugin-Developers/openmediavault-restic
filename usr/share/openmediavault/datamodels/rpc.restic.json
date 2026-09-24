@@ -8,6 +8,12 @@
         "cachedir": {
           "type": "string",
           "required": true
+        },
+        "exclude": {
+          "type": "string"
+        },
+        "excludecaches": {
+          "type": "boolean"
         }
       }
     }
@@ -69,6 +75,57 @@
         "skipinit": {
           "type": "boolean",
           "required": true
+        },
+        "checkschedule": {
+          "type": "string",
+          "enum": ["disabled", "daily", "weekly", "monthly"]
+        },
+        "checkreaddata": {
+          "type": "string",
+          "pattern": "^$|^([1-9][0-9]?(\\.[0-9]+)?|100)%$|^[1-9][0-9]*\\/[1-9][0-9]*$|^[1-9][0-9]*[KMGT]?$"
+        },
+        "checkemail": {
+          "type": "string",
+          "enum": ["never", "always", "onerror"]
+        },
+        "forgetschedule": {
+          "type": "string",
+          "enum": ["disabled", "daily", "weekly", "monthly"]
+        },
+        "forgetkeeplast": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forgetkeepdaily": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forgetkeepweekly": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forgetkeepmonthly": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forgetkeepyearly": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forgethost": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9._-]*$"
+        },
+        "forgettag": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9._:=@+-]*$"
+        },
+        "forgetprune": {
+          "type": "boolean"
+        },
+        "forgetemail": {
+          "type": "string",
+          "enum": ["never", "always", "onerror"]
         }
       }
     }
@@ -379,6 +436,149 @@
         },
         "emailonerror": {
           "type": "boolean"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.reposnapshot",
+    "params": {
+      "type": "object",
+      "properties": {
+        "reporef": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "snapshotid": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8,64}$",
+          "required": true
+        },
+        "prune": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.setrestserver",
+    "params": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "required": true
+        },
+        "sharedfolderref": {
+          "type": "string",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uuidv4"
+            },
+            {
+              "type": "string",
+              "maxLength": 0
+            }
+          ],
+          "required": true
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "required": true
+        },
+        "auth": {
+          "type": "boolean",
+          "required": true
+        },
+        "privaterepos": {
+          "type": "boolean"
+        },
+        "appendonly": {
+          "type": "boolean"
+        },
+        "tls": {
+          "type": "boolean"
+        },
+        "sslcertificateref": {
+          "type": "string",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uuidv4"
+            },
+            {
+              "type": "string",
+              "maxLength": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.setrestuser",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "username": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$",
+          "required": true
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.forgetreposnapshots",
+    "params": {
+      "type": "object",
+      "properties": {
+        "reporef": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "snapshotids": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8,64}(,[0-9a-f]{8,64})*$",
+          "required": true
+        },
+        "prune": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.applyrepoforget",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "dryrun": {
+          "type": "boolean",
+          "required": true
         }
       }
     }

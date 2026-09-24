@@ -1,0 +1,31 @@
+{{ pillar['headers']['auto_generated'] }}
+{{ pillar['headers']['warning'] }}
+{#- systemd quoting for a single value: wrap in double quotes, escape
+    backslashes and quotes, and double % so it is not expanded as a
+    specifier. qx() additionally doubles $, which only ExecStart expands. #}
+{%- macro q(val) -%}
+"{{ val | string | replace('\\', '\\\\') | replace('"', '\\"') | replace('%', '%%') }}"
+{%- endmacro %}
+{%- macro qx(val) -%}
+{{ q(val | string | replace('$', '$$')) }}
+{%- endmacro %}
+[Service]
+# Run as root so the server can write to repositories that the plugin also
+# maintains locally (check/prune run as root). Writes are confined to the
+# data directory by ProtectSystem=strict + ReadWritePaths below.
+User=root
+Group=root
+PrivateUsers=false
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_FOWNER CAP_CHOWN
+ProtectSystem=strict
+ReadWritePaths={{ q(datapath) }}
+
+# Replace the packaged command line (which reads /etc/default/restic-rest-server).
+EnvironmentFile=
+ExecCondition=
+ExecStart=
+ExecStart=/usr/bin/restic-rest-server --path {{ qx(datapath) }} --listen ":{{ config.port | int }}"
+{%- if config.auth | to_bool %} --htpasswd-file {{ qx(htpasswdfile) }}{% else %} --no-auth{% endif %}
+{%- if config.privaterepos | to_bool %} --private-repos{% endif %}
+{%- if config.appendonly | to_bool %} --append-only{% endif %}
+{%- if config.tls | to_bool and config.sslcertificateref %} --tls --tls-cert {{ qx(tlscert) }} --tls-key {{ qx(tlskey) }}{% endif %}

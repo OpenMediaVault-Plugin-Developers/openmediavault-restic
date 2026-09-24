@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/restusers/create"
+  title: _("Create")
+  notificationTitle: _("Created REST server user.")
+  component: omv-services-restic-restuser-form-page

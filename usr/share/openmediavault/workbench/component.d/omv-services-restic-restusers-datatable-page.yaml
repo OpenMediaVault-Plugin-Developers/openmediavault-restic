@@ -1,0 +1,39 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-restusers-datatable-page
+  type: datatablePage
+  config:
+    autoReload: false
+    hasSearchField: true
+    stateId: 6f1d3c2a-8b47-4e59-9a0c-3d2e7f4b1a86
+    sorters:
+      - dir: asc
+        prop: username
+    store:
+      proxy:
+        service: Restic
+        get:
+          method: getRestUserList
+    columns:
+      - name: _("Username")
+        prop: username
+        flexGrow: 1
+        sortable: true
+    actions:
+      - template: create
+        execute:
+          type: url
+          url: "/services/restic/restusers/create"
+      - template: edit
+        execute:
+          type: url
+          url: "/services/restic/restusers/edit/{{ _selected[0].uuid }}"
+      - template: delete
+        execute:
+          type: request
+          request:
+            service: Restic
+            method: deleteRestUser
+            params:
+              uuid: "{{ _selected[0].uuid }}"

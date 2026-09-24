@@ -13,6 +13,14 @@
         "cachedir": {
           "type": "string",
           "default": "/var/cache/restic"
+        },
+        "exclude": {
+          "type": "string",
+          "default": ""
+        },
+        "excludecaches": {
+          "type": "boolean",
+          "default": false
         }
       }
     },
@@ -41,7 +49,8 @@
                   "s3",
                   "sftp",
                   "b2",
-                  "rest"
+                  "rest",
+                  "rclone"
                 ],
                 "default": "local"
               },
@@ -60,6 +69,71 @@
               "secretkey": {
                 "type": "string",
                 "default": ""
+              },
+              "checkschedule": {
+                "type": "string",
+                "enum": [
+                  "disabled",
+                  "daily",
+                  "weekly",
+                  "monthly"
+                ],
+                "default": "disabled"
+              },
+              "checkreaddata": {
+                "type": "string",
+                "default": ""
+              },
+              "checkemail": {
+                "type": "string",
+                "enum": [
+                  "never",
+                  "always",
+                  "onerror"
+                ],
+                "default": "onerror"
+              },
+              "forgetschedule": {
+                "type": "string",
+                "enum": ["disabled", "daily", "weekly", "monthly"],
+                "default": "disabled"
+              },
+              "forgetkeeplast": {
+                "type": "integer",
+                "default": 0
+              },
+              "forgetkeepdaily": {
+                "type": "integer",
+                "default": 7
+              },
+              "forgetkeepweekly": {
+                "type": "integer",
+                "default": 4
+              },
+              "forgetkeepmonthly": {
+                "type": "integer",
+                "default": 12
+              },
+              "forgetkeepyearly": {
+                "type": "integer",
+                "default": 0
+              },
+              "forgethost": {
+                "type": "string",
+                "default": ""
+              },
+              "forgettag": {
+                "type": "string",
+                "default": ""
+              },
+              "forgetprune": {
+                "type": "boolean",
+                "default": true
+              },
+              "forgetemail": {
+                "type": "string",
+                "enum": ["never", "always", "onerror"],
+                "default": "onerror"
               }
             }
           }
@@ -300,6 +374,67 @@
                     "maxLength": 0
                   }
                 ],
+                "default": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "restserver": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false
+        },
+        "sharedfolderref": {
+          "type": "string",
+          "default": ""
+        },
+        "port": {
+          "type": "integer",
+          "default": 8000
+        },
+        "auth": {
+          "type": "boolean",
+          "default": true
+        },
+        "privaterepos": {
+          "type": "boolean",
+          "default": false
+        },
+        "appendonly": {
+          "type": "boolean",
+          "default": false
+        },
+        "tls": {
+          "type": "boolean",
+          "default": false
+        },
+        "sslcertificateref": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "restusers": {
+      "type": "object",
+      "properties": {
+        "restuser": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "username": {
+                "type": "string"
+              },
+              "passwordhash": {
+                "type": "string",
                 "default": ""
               }
             }

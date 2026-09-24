@@ -20,6 +20,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 {
     private $getProgram = '/usr/bin/restic';
     private $envFile = '/etc/restic/restic-envvar-';
+    private $defaultExcludeFile = '/etc/restic/exclude-default';
 
     public function getName()
     {
@@ -44,6 +45,10 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod("testRepo");
         $this->registerMethod("getRepoStats");
         $this->registerMethod("getRepoSnapshotList");
+        $this->registerMethod("inspectRepoSnapshot");
+        $this->registerMethod("listRepoSnapshotFiles");
+        $this->registerMethod("forgetRepoSnapshots");
+        $this->registerMethod("applyRepoForget");
 
         // Backup jobs (referred to as "snapshots" for backward compatibility)
         $this->registerMethod("getSnapshotList");
@@ -62,6 +67,14 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod("setRestoreTest");
         $this->registerMethod("deleteRestoreTest");
         $this->registerMethod("runRestoreTest");
+
+        // REST server
+        $this->registerMethod('getRestServer');
+        $this->registerMethod('setRestServer');
+        $this->registerMethod('getRestUserList');
+        $this->registerMethod('getRestUser');
+        $this->registerMethod('setRestUser');
+        $this->registerMethod('deleteRestUser');
 
         // Environment variables
         $this->registerMethod('getEnvVarList');
@@ -90,6 +103,8 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $object = $db->get("conf.service.restic.settings");
         $object->setFlatAssoc([
             "cachedir" => $params['cachedir'],
+            "exclude" => $params['exclude'] ?? $object->get('exclude'),
+            "excludecaches" => $params['excludecaches'] ?? $object->get('excludecaches'),
         ]);
         $db->set($object);
         return $object->getAssoc();
@@ -162,6 +177,17 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
+     * Human-readable form of a restic command for task output and error
+     * messages. It deliberately leaves out the environment, which holds the
+     * repository password, backend keys and any user-defined variables
+     * (\OMV\System\Process::getCommandLine() would print them all).
+     */
+    private function displayCommand(array $cmdArgs)
+    {
+        return implode(' ', $cmdArgs);
+    }
+
+    /**
      * Apply a retention policy via `restic forget --prune`.
      * Called after a successful backup. Only runs if any keep-* value > 0.
      */
@@ -203,7 +229,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $forgetCmdLine = $forgetCmd->getCommandLine();
         $this->writeBgProcOutput($bgOutputFilename, sprintf(
             "\n\nApplying retention policy: %s\n\n",
-            $forgetCmdLine
+            $this->displayCommand($forgetArgs)
         ));
         $this->exec($forgetCmdLine, $output, $bgOutputFilename);
     }
@@ -278,6 +304,12 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         unset($params['skipinit']);
         $repo->setAssoc($params);
 
+        // A retention schedule without any keep rule would silently do nothing.
+        if ($repo->get('forgetschedule') !== 'disabled' && is_null($this->buildRepoForgetArgs($repo))) {
+            throw new \OMV\Exception(gettext(
+                'Scheduled retention requires at least one keep value greater than 0.'));
+        }
+
         $isNew = $repo->isNew();
         if ($isNew) {
             $db->assertIsUnique($repo, 'name');
@@ -304,7 +336,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmdLine = $cmd->getCommandLine();
             $cmd->execute($output, $exitStatus);
             if (0 !== $exitStatus) {
-                throw new \OMV\ExecException($cmdLine, $output);
+                throw new \OMV\ExecException($this->displayCommand($cmdArgs), $output, $exitStatus);
             }
         }
 
@@ -381,7 +413,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setEnvFromFile($this->envFile . 'shared');
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
             return $output;
         });
@@ -403,7 +435,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setEnvFromFile($this->envFile . 'shared');
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
             return $output;
         });
@@ -428,7 +460,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setEnvFromFile($this->envFile . 'shared');
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
             $this->writeBgProcOutput($bgOutputFilename, "\nDone.\n");
             return $output;
@@ -455,7 +487,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setEnvFromFile($this->envFile . 'shared');
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
             $this->writeBgProcOutput($bgOutputFilename,
                 "\nConnection successful: repository is reachable and the passphrase is correct.\n");
@@ -479,7 +511,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setEnvFromFile($this->envFile . 'shared');
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
             return $output;
         });
@@ -551,6 +583,149 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $sortdir    = $params['sortdir']   ?? 'desc';
 
         return $this->applyFilter($snapshots, $start, $limit, $sortfield, $sortdir);
+    }
+
+    /**
+     * Load a repository and validate a restic snapshot ID taken from
+     * $params['reporef'] / $params['snapshotid'].
+     */
+    private function getRepoAndSnapshotId($params)
+    {
+        $this->validateMethodParams($params, 'rpc.restic.reposnapshot');
+        $db = \OMV\Config\Database::getInstance();
+        $repo = $db->get('conf.service.restic.repo', $params['reporef']);
+        return [$repo, $params['snapshotid']];
+    }
+
+    /**
+     * Run a list of restic commands against a repository in a background
+     * process, streaming each command's output into the task dialog.
+     */
+    private function execRepoCommands($repo, $context, array $cmds)
+    {
+        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($context, $repo, $cmds) {
+            $output = [];
+            foreach ($cmds as $i => $cmdArgs) {
+                $cmdArgs = array_merge([$this->getProgram], $cmdArgs);
+                $cmd = new \OMV\System\Process($cmdArgs);
+                $this->buildRepoEnv($repo, $context, $cmd);
+                $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
+                $cmd->setEnvFromFile($this->envFile . 'shared');
+                $cmd->setRedirect2to1();
+                $cmdLine = $cmd->getCommandLine();
+                $this->writeBgProcOutput($bgOutputFilename,
+                    sprintf("%sCommand: %s\n\n", ($i > 0 ? "\n\n" : ''),
+                        $this->displayCommand($cmdArgs)));
+                // Stop at the first failure: running the remaining commands
+                // against an unreachable or broken repository would only
+                // keep this background task (and an engined worker) busy.
+                $exitStatus = $this->exec($cmdLine, $output, $bgOutputFilename);
+                if (0 !== $exitStatus) {
+                    throw new \OMV\ExecException(
+                        $this->displayCommand($cmdArgs), $output, $exitStatus);
+                }
+            }
+            return $output;
+        });
+    }
+
+    /**
+     * Show the metadata (`restic cat snapshot`) and size statistics
+     * (`restic stats`) of a single snapshot.
+     */
+    public function inspectRepoSnapshot($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        [$repo, $id] = $this->getRepoAndSnapshotId($params);
+        return $this->execRepoCommands($repo, $context, [
+            ['cat', 'snapshot', '--retry-lock', '5m', $id],
+            ['stats', '--retry-lock', '5m', '--mode', 'restore-size', $id],
+            ['stats', '--retry-lock', '5m', '--mode', 'raw-data', $id],
+        ]);
+    }
+
+    /**
+     * List the files contained in a single snapshot (`restic ls --long`).
+     */
+    public function listRepoSnapshotFiles($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        [$repo, $id] = $this->getRepoAndSnapshotId($params);
+        return $this->execRepoCommands($repo, $context, [
+            ['ls', '--long', '--retry-lock', '5m', $id],
+        ]);
+    }
+
+    /**
+     * Forget (delete) one or more snapshots, given as a comma-separated list of
+     * IDs, optionally pruning the data that is no longer referenced afterwards.
+     */
+    public function forgetRepoSnapshots($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.restic.forgetreposnapshots');
+        $db = \OMV\Config\Database::getInstance();
+        $repo = $db->get('conf.service.restic.repo', $params['reporef']);
+        $cmdArgs = ['forget', '--retry-lock', '5m'];
+        if (!empty($params['prune'])) {
+            $cmdArgs[] = '--prune';
+        }
+        // IDs are validated as hex by the schema, so they are shell-safe.
+        $cmdArgs = array_merge($cmdArgs, array_unique(explode(',', $params['snapshotids'])));
+        return $this->execRepoCommands($repo, $context, [$cmdArgs]);
+    }
+
+    /**
+     * Build the `restic forget` arguments for a repository's retention
+     * policy. Returns null when no keep-* rule is set, since restic would
+     * then remove nothing.
+     */
+    private function buildRepoForgetArgs($repo)
+    {
+        $keep = [];
+        foreach (['last', 'daily', 'weekly', 'monthly', 'yearly'] as $k) {
+            $n = intval($repo->get('forgetkeep' . $k));
+            if ($n > 0) {
+                $keep[] = '--keep-' . $k;
+                $keep[] = $n;
+            }
+        }
+        if (empty($keep)) {
+            return null;
+        }
+        $cmdArgs = array_merge(['forget', '--retry-lock', '5m'], $keep);
+        if (!empty($repo->get('forgethost'))) {
+            $cmdArgs[] = '--host';
+            $cmdArgs[] = escapeshellarg($repo->get('forgethost'));
+        }
+        if (!empty($repo->get('forgettag'))) {
+            $cmdArgs[] = '--tag';
+            $cmdArgs[] = escapeshellarg($repo->get('forgettag'));
+        }
+        if ($repo->get('forgetprune')) {
+            $cmdArgs[] = '--prune';
+        }
+        return $cmdArgs;
+    }
+
+    /**
+     * Apply (or preview with a dry run) a repository's retention policy.
+     */
+    public function applyRepoForget($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.restic.applyrepoforget');
+        $db = \OMV\Config\Database::getInstance();
+        $repo = $db->get('conf.service.restic.repo', $params['uuid']);
+        $cmdArgs = $this->buildRepoForgetArgs($repo);
+        if (is_null($cmdArgs)) {
+            throw new \OMV\Exception(gettext(
+                'No retention policy is configured for this repository. Edit the repository and set at least one keep value.'));
+        }
+        if ($params['dryrun']) {
+            $cmdArgs[] = '--dry-run';
+        }
+        return $this->execRepoCommands($repo, $context, [$cmdArgs]);
     }
 
     // =========================================================================
@@ -694,6 +869,17 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
                 $cmdArgs[] = '--exclude ' . escapeshellarg($excl);
             }
 
+            // Default excludes from the plugin settings (apply to every job)
+            $settings = \OMV\Config\Database::getInstance()->get('conf.service.restic.settings');
+            // The file is written by salt, so it only exists once the settings
+            // have been applied.
+            if (!empty(trim($settings->get('exclude'))) && file_exists($this->defaultExcludeFile)) {
+                $cmdArgs[] = '--exclude-file ' . escapeshellarg($this->defaultExcludeFile);
+            }
+            if ($settings->get('excludecaches')) {
+                $cmdArgs[] = '--exclude-caches';
+            }
+
             // Source paths
             foreach ($params['sharedfolderrefs'] as $uuid) {
                 $sfpath = \OMV\Rpc\Rpc::call("ShareMgmt", "getPath", ["uuid" => $uuid], $context);
@@ -707,7 +893,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
 
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
 
             // Extract the snapshot hash from the output
@@ -854,7 +1040,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
 
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
             return $output;
         });
@@ -1040,7 +1226,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmd->setRedirect2to1();
             $cmdLine = $cmd->getCommandLine();
 
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $cmdLine));
+            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
             $this->exec($cmdLine, $output, $bgOutputFilename);
 
             // Remove the restored data (verify mode only). We only ever delete
@@ -1052,6 +1238,129 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
             return $output;
         });
+    }
+
+    // =========================================================================
+    // REST server (serves a shared folder to remote restic clients)
+    // =========================================================================
+
+    public function getRestServer($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $db = \OMV\Config\Database::getInstance();
+        return $db->getAssoc('conf.service.restic.restserver');
+    }
+
+    public function setRestServer($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.restic.setrestserver');
+
+        $params['privaterepos'] = $params['privaterepos'] ?? false;
+        $params['appendonly'] = $params['appendonly'] ?? false;
+        $params['tls'] = $params['tls'] ?? false;
+        $params['sslcertificateref'] = $params['sslcertificateref'] ?? '';
+
+        if ($params['enable'] && empty($params['sharedfolderref'])) {
+            throw new \OMV\Exception(
+                gettext('A shared folder is required to enable the REST server.'));
+        }
+        if ($params['tls'] && empty($params['sslcertificateref'])) {
+            throw new \OMV\Exception(
+                gettext('A certificate is required when TLS is enabled.'));
+        }
+        // Private repositories are keyed by the authenticated username.
+        if ($params['privaterepos'] && !$params['auth']) {
+            throw new \OMV\Exception(
+                gettext('Private repositories require authentication.'));
+        }
+
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get('conf.service.restic.restserver');
+        $object->setAssoc($params);
+        $db->set($object);
+        return $object->getAssoc();
+    }
+
+    public function getRestUserList($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.getlist');
+
+        $db = \OMV\Config\Database::getInstance();
+        $objectsAssoc = [];
+        foreach ($db->get('conf.service.restic.restuser') as $user) {
+            // Never hand password hashes to the UI.
+            $objectsAssoc[] = [
+                'uuid' => $user->get('uuid'),
+                'username' => $user->get('username'),
+            ];
+        }
+        return $this->applyFilter(
+            $objectsAssoc, $params['start'], $params['limit'],
+            $params['sortfield'], $params['sortdir']
+        );
+    }
+
+    public function getRestUser($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $user = $db->get('conf.service.restic.restuser', $params['uuid']);
+        return [
+            'uuid' => $user->get('uuid'),
+            'username' => $user->get('username'),
+            'password' => '',
+        ];
+    }
+
+    /**
+     * Create or update a REST server user. Only a bcrypt hash of the password
+     * is stored. On edit an empty password keeps the existing one.
+     */
+    public function setRestUser($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.restic.setrestuser');
+
+        $db = \OMV\Config\Database::getInstance();
+        $user = new \OMV\Config\ConfigObject('conf.service.restic.restuser');
+        $user->setAssoc([
+            'uuid' => $params['uuid'],
+            'username' => $params['username'],
+        ]);
+
+        $password = $params['password'] ?? '';
+        if ($user->isNew()) {
+            if ($password === '') {
+                throw new \OMV\Exception(gettext('A password is required.'));
+            }
+        } else {
+            $existing = $db->get('conf.service.restic.restuser', $params['uuid']);
+            $user->set('passwordhash', $existing->get('passwordhash'));
+        }
+        $db->assertIsUnique($user, 'username');
+
+        if ($password !== '') {
+            $user->set('passwordhash', password_hash($password, PASSWORD_BCRYPT));
+        }
+
+        $db->set($user);
+        return [
+            'uuid' => $user->get('uuid'),
+            'username' => $user->get('username'),
+        ];
+    }
+
+    public function deleteRestUser($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $user = $db->get('conf.service.restic.restuser', $params['uuid']);
+        $db->delete($user);
+        return ['uuid' => $user->get('uuid'), 'username' => $user->get('username')];
     }
 
     // =========================================================================

@@ -92,6 +92,195 @@ data:
         value: false
         disabled: "{{ _routeConfig.data.editing | toboolean }}"
         hint: _("Tick this to import an existing restic repository. The passphrase must match the one already used by that repository.")
+      - type: divider
+        title: _("Scheduled integrity check")
+      - type: select
+        name: checkschedule
+        label: _("Schedule")
+        value: "disabled"
+        store:
+          data:
+            - ["disabled", _("Disabled")]
+            - ["daily", _("Daily (03:00)")]
+            - ["weekly", _("Weekly (Sunday 03:00)")]
+            - ["monthly", _("Monthly (1st, 03:00)")]
+        hint: _("Periodically run 'restic check' against this repository.")
+      - type: textInput
+        name: checkreaddata
+        label: _("Read data subset")
+        value: ""
+        hint: _("Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 or 500M. Leave blank to only check the repository structure. Reading data from cloud storage may incur egress costs.")
+        validators:
+          pattern:
+            pattern: '^$|^([1-9][0-9]?(\.[0-9]+)?|100)%$|^[1-9][0-9]*/[1-9][0-9]*$|^[1-9][0-9]*[KMGT]?$'
+            errorData: _("Use a percentage (5%), a fraction (1/7) or a size (500M).")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: checkschedule
+              arg1: "disabled"
+      - type: select
+        name: checkemail
+        label: _("Send email")
+        value: "onerror"
+        store:
+          data:
+            - ["never", _("Never")]
+            - ["onerror", _("Only on error")]
+            - ["always", _("Always")]
+        hint: _("Email the check output to the root user. Requires notifications to be configured.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: checkschedule
+              arg1: "disabled"
+      - type: divider
+        title: _("Scheduled retention")
+      - type: select
+        name: forgetschedule
+        label: _("Schedule")
+        value: "disabled"
+        store:
+          data:
+            - ["disabled", _("Disabled")]
+            - ["daily", _("Daily (02:00)")]
+            - ["weekly", _("Weekly (Sunday 02:00)")]
+            - ["monthly", _("Monthly (1st, 02:00)")]
+        hint: _("Forget old snapshots from every host using this repository.")
+      - type: numberInput
+        name: forgetkeeplast
+        label: _("Keep last N")
+        value: 0
+        hint: _("0 = disabled.")
+        validators:
+          min: 0
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: numberInput
+        name: forgetkeepdaily
+        label: _("Keep daily")
+        value: 7
+        hint: _("Days with one snapshot each. 0 = disabled.")
+        validators:
+          min: 0
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: numberInput
+        name: forgetkeepweekly
+        label: _("Keep weekly")
+        value: 4
+        hint: _("Weeks with one snapshot each. 0 = disabled.")
+        validators:
+          min: 0
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: numberInput
+        name: forgetkeepmonthly
+        label: _("Keep monthly")
+        value: 12
+        hint: _("Months with one snapshot each. 0 = disabled.")
+        validators:
+          min: 0
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: numberInput
+        name: forgetkeepyearly
+        label: _("Keep yearly")
+        value: 0
+        hint: _("Years with one snapshot each. 0 = disabled.")
+        validators:
+          min: 0
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: textInput
+        name: forgethost
+        label: _("Only host")
+        value: ""
+        hint: _("Optional. Only apply to snapshots from this hostname.")
+        validators:
+          pattern:
+            pattern: '^[a-zA-Z0-9._-]*$'
+            errorData: _("Use letters, digits, dot, dash and underscore only.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: textInput
+        name: forgettag
+        label: _("Only tag")
+        value: ""
+        hint: _("Optional. Only apply to snapshots with this tag.")
+        validators:
+          pattern:
+            pattern: '^[a-zA-Z0-9._:=@+-]*$'
+            errorData: _("Invalid tag.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: checkbox
+        name: forgetprune
+        label: _("Prune")
+        value: true
+        hint: _("Free the space of forgotten snapshots right away. Can take a long time on large repositories.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
+      - type: select
+        name: forgetemail
+        label: _("Send email")
+        value: "onerror"
+        store:
+          data:
+            - ["never", _("Never")]
+            - ["onerror", _("Only on error")]
+            - ["always", _("Always")]
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: eq
+              arg0:
+                prop: forgetschedule
+              arg1: "disabled"
     buttons:
       - template: submit
         execute:

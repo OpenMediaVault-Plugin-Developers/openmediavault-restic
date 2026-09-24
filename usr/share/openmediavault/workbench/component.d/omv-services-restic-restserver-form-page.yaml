@@ -1,0 +1,94 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-restserver-form-page
+  type: formPage
+  config:
+    request:
+      service: Restic
+      get:
+        method: getRestServer
+      post:
+        method: setRestServer
+    fields:
+      - type: checkbox
+        name: enable
+        label: _("Enabled")
+        value: false
+        hint: _("Installs restic-rest-server when the changes are applied.")
+      - type: sharedFolderSelect
+        name: sharedfolderref
+        label: _("Shared folder")
+        hint: _("Folder holding the served repositories.")
+        value: ""
+        hasEmptyOption: true
+        validators:
+          requiredIf:
+            operator: truthy
+            arg0:
+              prop: enable
+      - type: numberInput
+        name: port
+        label: _("Port")
+        value: 8000
+        validators:
+          min: 1
+          max: 65535
+          patternType: port
+          required: true
+      - type: divider
+        title: _("Access")
+      - type: checkbox
+        name: auth
+        label: _("Require login")
+        value: true
+        hint: _("Clients must log in as one of the users on the Users page.")
+      - type: checkbox
+        name: privaterepos
+        label: _("Private repositories")
+        value: false
+        hint: _("Each user only sees repositories under a path named after their username.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: falsy
+              arg0:
+                prop: auth
+      - type: checkbox
+        name: appendonly
+        label: _("Append-only")
+        value: false
+        hint: _("Clients can add snapshots but cannot delete existing data.")
+      - type: divider
+        title: _("Secure connection")
+      - type: checkbox
+        name: tls
+        label: _("TLS enabled")
+        value: false
+        hint: _("Recommended when login is required.")
+      - type: sslCertSelect
+        name: sslcertificateref
+        label: _("Certificate")
+        hasEmptyOption: true
+        value: ""
+        modifiers:
+          - type: enabled
+            constraint:
+              operator: truthy
+              arg0:
+                prop: tls
+        validators:
+          requiredIf:
+            operator: truthy
+            arg0:
+              prop: tls
+    buttons:
+      - template: submit
+      - text: _("Users")
+        execute:
+          type: url
+          url: "/services/restic/restusers"
+      - text: _("Help")
+        execute:
+          type: url
+          url: '/externalRedirect/https%3A%2F%2Fwiki.omv-extras.org%2Fdoku.php%3Fid%3Domv8%3Aomv8_plugins%3Arestic'

@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/restserver"
+  title: _("REST Server")
+  editing: true
+  component: omv-services-restic-restserver-form-page

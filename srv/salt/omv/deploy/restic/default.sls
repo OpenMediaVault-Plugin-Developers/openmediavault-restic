@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+include:
+  - .restserver
+
 {% set config = salt['omv_conf.get']('conf.service.restic') %}
 {% set envVarDir = '/etc/restic' %}
 {% set envVarPrefix = 'restic-envvar-' %}
@@ -23,6 +26,11 @@
 {% set scriptsDir = '/var/lib/openmediavault/restic' %}
 {% set scriptPrefix = 'restic-job-' %}
 {% set restoreTestPrefix = 'restic-restoretest-' %}
+{% set checkPrefix = 'restic-check-' %}
+{% set forgetPrefix = 'restic-forget-' %}
+{% set excludeFile = envVarDir ~ '/exclude-default' %}
+{% set excludeText = config.settings.exclude | default('') | string %}
+{% set excludeCaches = config.settings.excludecaches | default(false) | string | lower not in ['false', '0', 'no', 'off', ''] %}
 {% set cronFile = '/etc/cron.d/openmediavault-restic' %}
 
 {# -----------------------------------------------------------------------
@@ -117,6 +125,25 @@ configure_restic_envvar_shared:
     - group: root
     - mode: '0600'
 
+# Default exclude patterns (Settings), passed to every backup via --exclude-file
+{% if excludeText | trim %}
+configure_restic_exclude_default:
+  file.managed:
+    - name: "{{ excludeFile }}"
+    - source:
+      - salt://{{ tpldir }}/files/etc-restic_exclude.j2
+    - context:
+        exclude: {{ excludeText | json }}
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: '0644'
+{% else %}
+remove_restic_exclude_default:
+  file.absent:
+    - name: "{{ excludeFile }}"
+{% endif %}
+
 # Generate a backup script for each enabled backup job
 {% for job in config.snapshots.snapshot %}
 {% if job.enable | string | lower not in ['false', '0', 'no', 'off'] %}
@@ -154,6 +181,8 @@ configure_restic_job_script_{{ job.uuid }}:
         repo_path: "{{ repo_path }}"
         source_paths: {{ source_paths | json }}
         cachedir: "{{ cacheDir }}"
+        excludefile: "{{ excludeFile if excludeText | trim else '' }}"
+        excludecaches: {{ excludeCaches | json }}
     - template: jinja
     - user: root
     - group: root
@@ -200,6 +229,58 @@ configure_restic_restoretest_script_{{ job.uuid }}:
     - group: root
     - mode: '0700'
 {% endif %}
+{% endif %}
+{% endfor %}
+
+# Generate a scheduled check script for each repository with checks enabled
+{% for repo in config.repos.repo %}
+{% if repo.checkschedule | default('disabled') != 'disabled' %}
+
+{% if repo.type == 'local' %}
+{% set repo_path = sfolders.get(repo.sharedfolderref, '') %}
+{% else %}
+{% set repo_path = '' %}
+{% endif %}
+
+configure_restic_check_script_{{ repo.uuid }}:
+  file.managed:
+    - name: "{{ scriptsDir ~ '/' ~ checkPrefix ~ repo.uuid ~ '.sh' }}"
+    - source:
+      - salt://{{ tpldir }}/files/restic-check.sh.j2
+    - context:
+        repo: {{ repo | json }}
+        repo_path: "{{ repo_path }}"
+        cachedir: "{{ cacheDir }}"
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: '0700'
+{% endif %}
+{% endfor %}
+
+# Generate a scheduled retention script for each repository with it enabled
+{% for repo in config.repos.repo %}
+{% if repo.forgetschedule | default('disabled') != 'disabled' %}
+
+{% if repo.type == 'local' %}
+{% set repo_path = sfolders.get(repo.sharedfolderref, '') %}
+{% else %}
+{% set repo_path = '' %}
+{% endif %}
+
+configure_restic_forget_script_{{ repo.uuid }}:
+  file.managed:
+    - name: "{{ scriptsDir ~ '/' ~ forgetPrefix ~ repo.uuid ~ '.sh' }}"
+    - source:
+      - salt://{{ tpldir }}/files/restic-forget.sh.j2
+    - context:
+        repo: {{ repo | json }}
+        repo_path: "{{ repo_path }}"
+        cachedir: "{{ cacheDir }}"
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: '0700'
 {% endif %}
 {% endfor %}
 
@@ -264,7 +345,31 @@ configure_restic_restoretest_script_{{ job.uuid }}:
 {% endif %}
 {% endfor %}
 
-# Generate cron file for all enabled, scheduled backup and restore test jobs
+{# Append cron entries for scheduled repository checks. These run at 03:00 so
+   they normally do not overlap the default midnight backup schedule. #}
+{% set checkCron = {'daily': '0 3 * * *', 'weekly': '0 3 * * 0', 'monthly': '0 3 1 * *'} %}
+{% for repo in config.repos.repo %}
+{% if repo.checkschedule | default('disabled') in checkCron %}
+{% do cronjobs.append({
+    'cronexpr':   checkCron[repo.checkschedule],
+    'scriptfile': scriptsDir ~ '/' ~ checkPrefix ~ repo.uuid ~ '.sh'
+}) %}
+{% endif %}
+{% endfor %}
+
+{# Scheduled retention runs at 02:00, an hour before the check, so the check
+   normally sees the pruned repository. Both also share a per-repo lock. #}
+{% set forgetCron = {'daily': '0 2 * * *', 'weekly': '0 2 * * 0', 'monthly': '0 2 1 * *'} %}
+{% for repo in config.repos.repo %}
+{% if repo.forgetschedule | default('disabled') in forgetCron %}
+{% do cronjobs.append({
+    'cronexpr':   forgetCron[repo.forgetschedule],
+    'scriptfile': scriptsDir ~ '/' ~ forgetPrefix ~ repo.uuid ~ '.sh'
+}) %}
+{% endif %}
+{% endfor %}
+
+# Generate cron file for all enabled, scheduled backup, restore test and check jobs
 configure_restic_cron:
   file.managed:
     - name: "{{ cronFile }}"
@@ -337,6 +442,46 @@ purge_stale_restic_restoretest_scripts:
       - "{{ restoreTestPrefix }}.*"
     - exclude:
 {%- for f in keep_restoretest_scripts %}
+      - "{{ f }}"
+{%- endfor %}
+    - rmdirs: False
+    - rmlinks: True
+
+
+{% set keep_check_scripts = [] %}
+{% for repo in config.repos.repo %}
+{% if repo.checkschedule | default('disabled') != 'disabled' %}
+{% do keep_check_scripts.append(checkPrefix ~ repo.uuid ~ '.sh') %}
+{% endif %}
+{% endfor %}
+
+purge_stale_restic_check_scripts:
+  file.tidied:
+    - name: "{{ scriptsDir }}"
+    - matches:
+      - "{{ checkPrefix }}.*"
+    - exclude:
+{%- for f in keep_check_scripts %}
+      - "{{ f }}"
+{%- endfor %}
+    - rmdirs: False
+    - rmlinks: True
+
+
+{% set keep_forget_scripts = [] %}
+{% for repo in config.repos.repo %}
+{% if repo.forgetschedule | default('disabled') != 'disabled' %}
+{% do keep_forget_scripts.append(forgetPrefix ~ repo.uuid ~ '.sh') %}
+{% endif %}
+{% endfor %}
+
+purge_stale_restic_forget_scripts:
+  file.tidied:
+    - name: "{{ scriptsDir }}"
+    - matches:
+      - "{{ forgetPrefix }}.*"
+    - exclude:
+{%- for f in keep_forget_scripts %}
       - "{{ f }}"
 {%- endfor %}
     - rmdirs: False

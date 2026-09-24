@@ -1,0 +1,8 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/restusers/edit/:uuid"
+  title: _("Edit")
+  editing: true
+  notificationTitle: _("Edited REST server user.")
+  component: omv-services-restic-restuser-form-page

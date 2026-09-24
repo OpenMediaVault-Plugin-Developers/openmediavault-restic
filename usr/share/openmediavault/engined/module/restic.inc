@@ -52,5 +52,15 @@ class OMVModuleRestic extends \OMV\Engine\Module\ServiceAbstract implements \OMV
             "org.openmediavault.conf.service.restic.envvar",
             [ $this, "setDirty" ]
         );
+        $dispatcher->addListener(
+            OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
+            "org.openmediavault.conf.service.restic.restserver",
+            [ $this, "setDirty" ]
+        );
+        $dispatcher->addListener(
+            OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
+            "org.openmediavault.conf.service.restic.restuser",
+            [ $this, "setDirty" ]
+        );
     }
 }

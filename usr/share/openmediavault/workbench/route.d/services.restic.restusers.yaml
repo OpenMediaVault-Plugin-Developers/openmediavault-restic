@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/restic/restusers"
+  title: _("REST Users")
+  component: omv-services-restic-restusers-datatable-page

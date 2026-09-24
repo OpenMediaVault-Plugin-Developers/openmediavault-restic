@@ -6,6 +6,9 @@ data:
   config:
     autoReload: false
     hasSearchField: true
+    # Snapshots have no "uuid"; key rows by the restic snapshot ID so
+    # multi-selection (forget several snapshots) works.
+    rowId: id
     stateId: a4d2f8c1-9e30-4b17-a5c6-8f2e1d7b3c09
     sorters:
       - dir: desc
@@ -48,6 +51,84 @@ data:
         enabledConstraints:
           minSelected: 1
           maxSelected: 1
+      - type: iconButton
+        icon: mdi:information-outline
+        tooltip: _("Inspect snapshot")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Inspecting snapshot ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: inspectRepoSnapshot
+                params:
+                  reporef: "{{ _routeParams.uuid }}"
+                  snapshotid: "{{ _selected[0].id }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
+        icon: mdi:file-tree
+        tooltip: _("List files in snapshot")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Listing snapshot files ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: listRepoSnapshotFiles
+                params:
+                  reporef: "{{ _routeParams.uuid }}"
+                  snapshotid: "{{ _selected[0].id }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: menu
+        icon: mdi:delete
+        tooltip: _("Forget (delete) selected snapshots")
+        enabledConstraints:
+          minSelected: 1
+        actions:
+          - text: _("Forget")
+            icon: mdi:delete-outline
+            confirmationDialogConfig:
+              template: confirmation-danger
+              message: _("Remove the selected snapshots from the repository? The data they reference is kept until the repository is pruned.")
+            execute:
+              type: taskDialog
+              taskDialog:
+                config:
+                  title: _("Forgetting snapshots ...")
+                  startOnInit: true
+                  request:
+                    service: Restic
+                    method: forgetRepoSnapshots
+                    params:
+                      reporef: "{{ _routeParams.uuid }}"
+                      snapshotids: "{{ _selected | map('get', 'id') | join(',') }}"
+                      prune: false
+          - text: _("Forget and prune")
+            icon: mdi:delete-forever
+            confirmationDialogConfig:
+              template: confirmation-danger
+              message: _("Remove the selected snapshots and prune the data no longer referenced by any snapshot? This cannot be undone and may take a long time.")
+            execute:
+              type: taskDialog
+              taskDialog:
+                config:
+                  title: _("Forgetting snapshots and pruning ...")
+                  startOnInit: true
+                  request:
+                    service: Restic
+                    method: forgetRepoSnapshots
+                    params:
+                      reporef: "{{ _routeParams.uuid }}"
+                      snapshotids: "{{ _selected | map('get', 'id') | join(',') }}"
+                      prune: true
       - type: iconButton
         icon: mdi:refresh
         tooltip: _("Refresh snapshot list")

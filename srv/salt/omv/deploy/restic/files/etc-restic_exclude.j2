@@ -1,0 +1,8 @@
+{{ pillar['headers']['auto_generated'] }}
+{{ pillar['headers']['warning'] }}
+# Default exclude patterns applied to every restic backup job.
+{%- for line in exclude.splitlines() %}
+{%- if line | trim %}
+{{ line | trim }}
+{%- endif %}
+{%- endfor %}

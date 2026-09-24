@@ -23,6 +23,16 @@ case "$1" in
         rm -rf /var/lib/openmediavault/restic
         # remove cron.d file
         rm -f /etc/cron.d/openmediavault-restic
+        # stop the REST server the plugin configured and drop our overrides;
+        # the restic-rest-server package itself is left installed
+        if [ -e /etc/systemd/system/restic-rest-server.service.d/openmediavault.conf ]; then
+            deb-systemd-invoke stop restic-rest-server.service >/dev/null 2>&1 || :
+            systemctl disable restic-rest-server.service >/dev/null 2>&1 || :
+            rm -f /etc/systemd/system/restic-rest-server.service.d/openmediavault.conf
+            rmdir --ignore-fail-on-non-empty /etc/systemd/system/restic-rest-server.service.d 2>/dev/null || :
+            systemctl daemon-reload >/dev/null 2>&1 || :
+        fi
+        rm -f /etc/restic/rest-server.htpasswd /etc/restic/exclude-default
     ;;
 
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)

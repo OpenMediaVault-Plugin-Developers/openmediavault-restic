@@ -10,6 +10,14 @@
     "cachedir": {
       "type": "string",
       "default": "/var/cache/restic"
+    },
+    "exclude": {
+      "type": "string",
+      "default": ""
+    },
+    "excludecaches": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

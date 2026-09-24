@@ -18,6 +18,14 @@ log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') [${JOB_ID}] $*" | tee -a "${LOG_FILE}"
 }
 
+# Skip this run if the previous one is still going (e.g. a short schedule or a
+# slow backend), so runs never pile up on top of each other.
+exec 9>"/run/lock/openmediavault-restic-${JOB_ID}.lock"
+if ! flock -n 9; then
+    log "Previous run is still in progress, skipping this run"
+    exit 0
+fi
+
 {% if job.sendemail | string | lower not in ['false', '0', 'no', 'off', ''] %}
 # Capture this run's output so it can be emailed to root once the job finishes.
 # Output still reaches the log file via the `tee -a` calls throughout the
@@ -96,6 +104,14 @@ BACKUP_ARGS+=(--tag {{ sq(tag | trim) }})
 BACKUP_ARGS+=(--exclude {{ sq(excl | trim) }})
 {% endif %}
 {% endfor %}
+{% endif %}
+
+{% if excludefile %}
+# Default exclude patterns from the plugin settings
+BACKUP_ARGS+=(--exclude-file {{ sq(excludefile) }})
+{% endif %}
+{% if excludecaches %}
+BACKUP_ARGS+=(--exclude-caches)
 {% endif %}
 
 {% for path in source_paths %}

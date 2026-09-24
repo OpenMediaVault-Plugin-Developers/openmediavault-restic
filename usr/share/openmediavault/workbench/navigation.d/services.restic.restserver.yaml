@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "services.restic.restserver"
+  text: _("REST Server")
+  position: 35
+  icon: mdi:server-network
+  url: "/services/restic/restserver"

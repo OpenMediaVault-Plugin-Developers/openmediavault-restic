@@ -1,0 +1,112 @@
+#!/bin/bash
+{{ pillar['headers']['auto_generated'] }}
+{{ pillar['headers']['warning'] }}
+# Restic scheduled repository check: {{ repo.uuid }} ({{ repo.name }})
+{# POSIX single-quote shell escaping: wrap in single quotes and replace any
+   embedded single quote with the '\'' sequence. Keeps secrets and paths safe
+   from word splitting and shell injection. #}
+{% macro sq(val) -%}
+'{{ val | string | replace("'", "'\\''") }}'
+{%- endmacro %}
+LOG_DIR="/var/log/restic"
+LOG_FILE="${LOG_DIR}/restic.log"
+JOB_ID="{{ repo.uuid }}"
+
+mkdir -p "${LOG_DIR}"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [${JOB_ID}] $*" | tee -a "${LOG_FILE}"
+}
+
+# Skip this run if the previous one is still going (e.g. a short schedule or a
+# slow backend), so runs never pile up on top of each other.
+exec 9>"/run/lock/openmediavault-restic-${JOB_ID}.lock"
+if ! flock -n 9; then
+    log "Previous run is still in progress, skipping this run"
+    exit 0
+fi
+
+# Serialise repository maintenance (retention/prune and check) for this
+# repository, so a long prune and a check never run at the same time.
+exec 8>"/run/lock/openmediavault-restic-repo-{{ repo.uuid }}.lock"
+if ! flock -w 21600 8; then
+    log "Timed out waiting for other maintenance on this repository"
+    exit 1
+fi
+
+{% if repo.checkemail in ['always', 'onerror'] %}
+# Capture this run's output so it can be emailed to root once the check finishes.
+# Output still reaches the log file via the `tee -a` calls throughout the
+# script; redirecting stdout/stderr here just collects a copy for the email.
+EMAIL_MODE="{{ repo.checkemail }}"
+EMAIL_SUBJECT={{ sq('restic repository check: ' ~ repo.name) }}
+EMAIL_TMP="$(mktemp)"
+_send_email() {
+    local rc="$1"
+    if [ -f "${EMAIL_TMP}" ]; then
+        if [ "${EMAIL_MODE}" = "always" ] || { [ "${EMAIL_MODE}" = "onerror" ] && [ "${rc}" -ne 0 ]; }; then
+            mail -E -s "${EMAIL_SUBJECT}" -a "From: Cron Daemon <root>" root < "${EMAIL_TMP}" || true
+        fi
+        rm -f "${EMAIL_TMP}"
+    fi
+}
+trap '_send_email $?' EXIT
+exec >"${EMAIL_TMP}" 2>&1
+{% endif %}
+
+log "=== Starting repository check: {{ repo.name }} ==="
+
+# Load shared environment variables
+if [ -f /etc/restic/restic-envvar-shared ]; then
+    set -a
+    source /etc/restic/restic-envvar-shared
+    set +a
+fi
+
+# Load repository-specific environment variables
+if [ -f /etc/restic/restic-envvar-{{ repo.uuid }} ]; then
+    set -a
+    source /etc/restic/restic-envvar-{{ repo.uuid }}
+    set +a
+fi
+
+# Set repository credentials and cache
+export RESTIC_PASSWORD={{ sq(repo.passphrase) }}
+{% if cachedir %}
+export RESTIC_CACHE_DIR={{ sq(cachedir) }}
+{% endif %}
+
+{% if repo.type == 'local' %}
+export RESTIC_REPOSITORY={{ sq(repo_path) }}
+{% elif repo.type == 's3' %}
+export RESTIC_REPOSITORY={{ sq('s3:' ~ repo.uri) }}
+export AWS_ACCESS_KEY_ID={{ sq(repo.accesskey) }}
+export AWS_SECRET_ACCESS_KEY={{ sq(repo.secretkey) }}
+{% elif repo.type == 'b2' %}
+export RESTIC_REPOSITORY={{ sq('b2:' ~ repo.uri) }}
+export B2_ACCOUNT_ID={{ sq(repo.accesskey) }}
+export B2_ACCOUNT_KEY={{ sq(repo.secretkey) }}
+{% elif repo.type == 'sftp' %}
+export RESTIC_REPOSITORY={{ sq('sftp:' ~ repo.uri) }}
+{% elif repo.type == 'rest' %}
+export RESTIC_REPOSITORY={{ sq('rest:' ~ repo.uri) }}
+{% elif repo.type == 'rclone' %}
+export RESTIC_REPOSITORY={{ sq('rclone:' ~ repo.uri) }}
+{% endif %}
+
+CHECK_ARGS=(--retry-lock 5m)
+{% if repo.checkreaddata %}
+# Also read back and verify this portion of the pack files.
+CHECK_ARGS+=(--read-data-subset {{ sq(repo.checkreaddata) }})
+{% endif %}
+
+log "Running: restic check ${CHECK_ARGS[*]}"
+/usr/bin/restic check "${CHECK_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
+CHECK_EXIT=${PIPESTATUS[0]}
+
+if [ ${CHECK_EXIT} -ne 0 ]; then
+    log "ERROR: Repository check failed with exit code ${CHECK_EXIT}"
+    exit ${CHECK_EXIT}
+fi
+
+log "=== Repository check completed successfully ==="

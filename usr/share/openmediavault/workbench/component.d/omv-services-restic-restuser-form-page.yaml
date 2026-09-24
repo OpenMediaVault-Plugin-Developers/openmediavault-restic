@@ -1,0 +1,39 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-restic-restuser-form-page
+  type: formPage
+  config:
+    request:
+      service: Restic
+      get:
+        method: getRestUser
+        params:
+          uuid: "{{ _routeParams.uuid }}"
+      post:
+        method: setRestUser
+    fields:
+      - type: confObjUuid
+      - type: textInput
+        name: username
+        label: _("Username")
+        hint: _("Letters, digits, dot, dash and underscore. With private repositories enabled this is also the user's repository sub-path.")
+        validators:
+          required: true
+          pattern:
+            pattern: '^[a-zA-Z0-9][a-zA-Z0-9._-]*$'
+            errorData: _("Use letters, digits, dot, dash and underscore only.")
+      - type: passwordInput
+        name: password
+        label: _("Password")
+        value: ""
+        hint: _("Only a hash of the password is stored. When editing, leave blank to keep the current password.")
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/services/restic/restusers"
+      - template: cancel
+        execute:
+          type: url
+          url: "/services/restic/restusers"

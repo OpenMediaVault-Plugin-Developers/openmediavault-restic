@@ -156,6 +156,44 @@ data:
           minSelected: 1
           maxSelected: 1
       - type: menu
+        icon: mdi:calendar-remove-outline
+        tooltip: _("Retention policy")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        actions:
+          - text: _("Preview (dry run)")
+            icon: mdi:eye-outline
+            execute:
+              type: taskDialog
+              taskDialog:
+                config:
+                  title: _("Retention policy preview ...")
+                  startOnInit: true
+                  request:
+                    service: Restic
+                    method: applyRepoForget
+                    params:
+                      uuid: "{{ _selected[0].uuid }}"
+                      dryrun: true
+          - text: _("Apply now")
+            icon: mdi:delete-clock-outline
+            confirmationDialogConfig:
+              template: confirmation-danger
+              message: _("Forget all snapshots outside this repository's retention policy? This cannot be undone.")
+            execute:
+              type: taskDialog
+              taskDialog:
+                config:
+                  title: _("Applying retention policy ...")
+                  startOnInit: true
+                  request:
+                    service: Restic
+                    method: applyRepoForget
+                    params:
+                      uuid: "{{ _selected[0].uuid }}"
+                      dryrun: false
+      - type: menu
         icon: mdi:link
         tooltip: _("Help")
         actions:
@@ -168,4 +206,4 @@ data:
             icon: mdi:link-box
             execute:
               type: url
-              url: '/externalRedirect/https%3A%2F%2Fwiki.omv-extras.org'
+              url: '/externalRedirect/https%3A%2F%2Fwiki.omv-extras.org%2Fdoku.php%3Fid%3Domv8%3Aomv8_plugins%3Arestic'
