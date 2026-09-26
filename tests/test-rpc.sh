@@ -611,6 +611,8 @@ import json; print(json.dumps({
     'keepyearly': 0,
     'sendemail': True,
     'emailonerror': True,
+    'prescript': '  /usr/local/bin/pre.sh --flag \"a b\"  ',
+    'postscript': 'echo done',
 }))")" >/dev/null
 
         assert_rpc "getSnapshotList — schedule for exactly" "Restic" "getSnapshotList" \
@@ -637,6 +639,15 @@ for s in data:
             _pass "setSnapshot — email fields persisted"
         else
             _fail "setSnapshot — email fields" "Expected True/True, got sendemail=$SNAP_SE emailonerror=$SNAP_EOE"
+        fi
+
+        # Hook scripts must round-trip (trimmed on save)
+        SNAP_PRE=$(json_field "$RPC_OUT" "prescript")
+        SNAP_POST=$(json_field "$RPC_OUT" "postscript")
+        if [ "$SNAP_PRE" = '/usr/local/bin/pre.sh --flag "a b"' ] && [ "$SNAP_POST" = "echo done" ]; then
+            _pass "setSnapshot — hook scripts persisted"
+        else
+            _fail "setSnapshot — hook scripts" "Got prescript='$SNAP_PRE' postscript='$SNAP_POST'"
         fi
     fi
 fi
@@ -739,6 +750,8 @@ import json; print(json.dumps({
     'dayofweek': ['*'],
     'sendemail': True,
     'emailonerror': True,
+    'prescript': '  /usr/local/bin/pre.sh --flag \"a b\"  ',
+    'postscript': 'echo done',
 }))")" >/dev/null
 
         # Email notification fields must round-trip
@@ -750,6 +763,15 @@ import json; print(json.dumps({
             _pass "setRestoreTest — email fields persisted"
         else
             _fail "setRestoreTest — email fields" "Expected True/True, got sendemail=$RT_SE emailonerror=$RT_EOE"
+        fi
+
+        # Hook scripts must round-trip (trimmed on save)
+        RT_PRE=$(json_field "$RPC_OUT" "prescript")
+        RT_POST=$(json_field "$RPC_OUT" "postscript")
+        if [ "$RT_PRE" = '/usr/local/bin/pre.sh --flag "a b"' ] && [ "$RT_POST" = "echo done" ]; then
+            _pass "setRestoreTest — hook scripts persisted"
+        else
+            _fail "setRestoreTest — hook scripts" "Got prescript='$RT_PRE' postscript='$RT_POST'"
         fi
 
         # Negative: verify mode without a target folder must be rejected
