@@ -106,9 +106,25 @@ TARGET='/var/lib/openmediavault-restic/dryrun'
 RESTORE_ARGS+=(--include {{ sq(job.includepath) }})
 {% endif %}
 
-log "Running: restic restore latest ${RESTORE_ARGS[*]} --target ${TARGET}"
-/usr/bin/restic restore latest "${RESTORE_ARGS[@]}" --target "${TARGET}" 2>&1 | tee -a "${LOG_FILE}"
-RESTORE_EXIT=${PIPESTATUS[0]}
+{% set prescript = (job.prescript or '') | trim %}
+{% set postscript = (job.postscript or '') | trim %}
+{% if prescript %}
+# Pre-script: runs with the repository environment above. A non-zero exit
+# skips the restore (but the post-script still runs).
+log "Running pre-script"
+/bin/sh -c {{ sq(prescript) }} 2>&1 | tee -a "${LOG_FILE}"
+PRE_EXIT=${PIPESTATUS[0]}
+if [ ${PRE_EXIT} -ne 0 ]; then
+    log "ERROR: Pre-script failed with exit code ${PRE_EXIT}, skipping restore test"
+    RESTORE_EXIT=${PRE_EXIT}
+fi
+
+{% endif %}
+if [ -z "${RESTORE_EXIT:-}" ]; then
+    log "Running: restic restore latest ${RESTORE_ARGS[*]} --target ${TARGET}"
+    /usr/bin/restic restore latest "${RESTORE_ARGS[@]}" --target "${TARGET}" 2>&1 | tee -a "${LOG_FILE}"
+    RESTORE_EXIT=${PIPESTATUS[0]}
+fi
 
 {% if is_verify and job.cleanup | string | lower not in ['false', '0', 'no', 'off', ''] %}
 # Clean up restored data. We only ever remove the per-test subdirectory that
@@ -120,9 +136,24 @@ if [ -n "${TARGET}" ]; then
 fi
 {% endif %}
 
+{% if postscript %}
+# Post-script: always runs, after cleanup. RESTIC_JOB_EXIT holds the result.
+log "Running post-script"
+RESTIC_JOB_EXIT=${RESTORE_EXIT} /bin/sh -c {{ sq(postscript) }} 2>&1 | tee -a "${LOG_FILE}"
+POST_EXIT=${PIPESTATUS[0]}
+if [ ${POST_EXIT} -ne 0 ]; then
+    log "ERROR: Post-script failed with exit code ${POST_EXIT}"
+fi
+{% else %}
+POST_EXIT=0
+{% endif %}
+
 if [ ${RESTORE_EXIT} -ne 0 ]; then
     log "ERROR: Restore test failed with exit code ${RESTORE_EXIT}"
     exit ${RESTORE_EXIT}
+fi
+if [ ${POST_EXIT} -ne 0 ]; then
+    exit ${POST_EXIT}
 fi
 
 log "=== Restore test completed successfully ==="

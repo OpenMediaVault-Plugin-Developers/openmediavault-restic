@@ -243,6 +243,14 @@
               "emailonerror": {
                 "type": "boolean",
                 "default": false
+              },
+              "prescript": {
+                "type": "string",
+                "default": ""
+              },
+              "postscript": {
+                "type": "string",
+                "default": ""
               }
             }
           }
@@ -332,6 +340,14 @@
               "emailonerror": {
                 "type": "boolean",
                 "default": false
+              },
+              "prescript": {
+                "type": "string",
+                "default": ""
+              },
+              "postscript": {
+                "type": "string",
+                "default": ""
               }
             }
           }

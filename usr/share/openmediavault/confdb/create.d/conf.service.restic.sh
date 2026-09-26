@@ -80,6 +80,12 @@ if ! omv_config_exists "${SERVICE_XPATH}/restoretests"; then
     omv_config_add_node "${SERVICE_XPATH}" "restoretests" ""
 fi
 
+# Pre/post hook scripts on existing backup jobs and restore tests.
+for job in snapshots/snapshot restoretests/restoretest; do
+    omv_config_add_key "${SERVICE_XPATH}/${job}[not(prescript)]" "prescript" ""
+    omv_config_add_key "${SERVICE_XPATH}/${job}[not(postscript)]" "postscript" ""
+done
+
 # Configure the REST server config
 if ! omv_config_exists "${SERVICE_XPATH}/restserver"; then
     omv_config_add_node "${SERVICE_XPATH}" "restserver"

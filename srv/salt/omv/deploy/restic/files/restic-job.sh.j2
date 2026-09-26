@@ -118,13 +118,50 @@ BACKUP_ARGS+=(--exclude-caches)
 BACKUP_ARGS+=({{ sq(path) }})
 {% endfor %}
 
-log "Running: restic backup --verbose ${BACKUP_ARGS[*]}"
-/usr/bin/restic backup --verbose --retry-lock 5m "${BACKUP_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
-BACKUP_EXIT=${PIPESTATUS[0]}
+{% set prescript = (job.prescript or '') | trim %}
+{% set postscript = (job.postscript or '') | trim %}
+# Exit status of the job so far (pre-script, then backup). Passed to the
+# post-script as RESTIC_JOB_EXIT so it can react to failures.
+JOB_EXIT=0
 
-if [ ${BACKUP_EXIT} -ne 0 ]; then
-    log "ERROR: Backup failed with exit code ${BACKUP_EXIT}"
-    exit ${BACKUP_EXIT}
+{% if prescript %}
+# Pre-script: runs with the repository environment above. A non-zero exit
+# skips the backup (but the post-script still runs, so it can undo anything
+# the pre-script did, e.g. restart a stopped service).
+log "Running pre-script"
+/bin/sh -c {{ sq(prescript) }} 2>&1 | tee -a "${LOG_FILE}"
+PRE_EXIT=${PIPESTATUS[0]}
+if [ ${PRE_EXIT} -ne 0 ]; then
+    log "ERROR: Pre-script failed with exit code ${PRE_EXIT}, skipping backup"
+    JOB_EXIT=${PRE_EXIT}
+fi
+
+{% endif %}
+if [ ${JOB_EXIT} -eq 0 ]; then
+    log "Running: restic backup --verbose ${BACKUP_ARGS[*]}"
+    /usr/bin/restic backup --verbose --retry-lock 5m "${BACKUP_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
+    BACKUP_EXIT=${PIPESTATUS[0]}
+    if [ ${BACKUP_EXIT} -ne 0 ]; then
+        log "ERROR: Backup failed with exit code ${BACKUP_EXIT}"
+        JOB_EXIT=${BACKUP_EXIT}
+    fi
+fi
+
+{% if postscript %}
+# Post-script: always runs, before retention so services stopped by the
+# pre-script are not kept down while old snapshots are pruned.
+log "Running post-script"
+RESTIC_JOB_EXIT=${JOB_EXIT} /bin/sh -c {{ sq(postscript) }} 2>&1 | tee -a "${LOG_FILE}"
+POST_EXIT=${PIPESTATUS[0]}
+if [ ${POST_EXIT} -ne 0 ]; then
+    log "ERROR: Post-script failed with exit code ${POST_EXIT}"
+fi
+{% else %}
+POST_EXIT=0
+{% endif %}
+
+if [ ${JOB_EXIT} -ne 0 ]; then
+    exit ${JOB_EXIT}
 fi
 
 {% set has_keeplast    = job.keeplast    | int > 0 %}
@@ -154,5 +191,9 @@ if [ ${FORGET_EXIT} -ne 0 ]; then
     log "WARNING: Retention policy application failed with exit code ${FORGET_EXIT}"
 fi
 {% endif %}
+
+if [ ${POST_EXIT} -ne 0 ]; then
+    exit ${POST_EXIT}
+fi
 
 log "=== Backup job completed successfully ==="

@@ -261,6 +261,12 @@
         },
         "emailonerror": {
           "type": "boolean"
+        },
+        "prescript": {
+          "type": "string"
+        },
+        "postscript": {
+          "type": "string"
         }
       }
     }
@@ -436,6 +442,12 @@
         },
         "emailonerror": {
           "type": "boolean"
+        },
+        "prescript": {
+          "type": "string"
+        },
+        "postscript": {
+          "type": "string"
         }
       }
     }
