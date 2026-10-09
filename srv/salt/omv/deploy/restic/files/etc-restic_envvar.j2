@@ -2,7 +2,18 @@
 {{ pillar['headers']['warning'] }}
 {#- Values are single-quoted, so the file can be sourced by bash and its
     lines used as-is in the `export NAME=value;` statements built by the RPC
-    service, without the shell expanding $, ` or \ in a value. #}
+    service, without the shell expanding $, ` or \ in a value.
+    Entries the RPC would reject today (a name that is not a shell variable
+    name, a value spanning lines) are skipped: a single `export MY-VAR=...;`
+    makes every restic command of every repository fail. #}
 {%- for envvar in config.envvars.envvar | selectattr("reporef", "equalto", repouuid) %}
-{{ envvar.envname }}='{{ envvar.envvalue | string | replace("'", "'\\''") }}'
+{%- set name = envvar.envname | string %}
+{%- set value = envvar.envvalue | string %}
+{%- if name.isascii() and name.isidentifier() and '\n' not in value and '\r' not in value %}
+{{ name }}='{{ value | replace("'", "'\\''") }}'
+{%- else %}
+{#- No name here: setEnvFromFile() in PHP treats any line with a "=" as a
+    variable, comment or not. #}
+# Skipped an invalid environment variable, fix or delete it in the web UI
+{%- endif %}
 {%- endfor %}

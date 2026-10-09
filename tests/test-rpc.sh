@@ -86,12 +86,18 @@ assert_rpc() {
     return 0
 }
 
+# Objects created by an RPC that was expected to fail, as "method uuid".
+# They are deleted on exit so a failing run leaves nothing behind.
+declare -a LEAKED=()
+
 assert_rpc_fails() {
     local desc=$1 svc=$2 method=$3 params=${4:-'{}'}
-    local out ec=0
+    local out ec=0 uuid
     out=$(omv-rpc -u admin "$svc" "$method" "$params" 2>&1) || ec=$?
     if [ $ec -eq 0 ] && ! echo "$out" | grep -qi "exception"; then
         _fail "$desc" "Expected failure but RPC succeeded: ${out:0:200}"
+        uuid=$(json_field "$out" "uuid")
+        [ -n "$uuid" ] && [ "$uuid" != "$OMV_NEW_UUID" ] && LEAKED+=("$method $uuid")
         return 1
     fi
     _pass "$desc"
@@ -220,10 +226,105 @@ kill_test_restic_procs() {
 # ---------------------------------------------------------------------------
 # Cleanup — always runs on exit
 # ---------------------------------------------------------------------------
+# The delete RPC for an object created by the given set RPC.
+delete_method_for() {
+    case $1 in
+        setSnapshot)    echo deleteSnapshot ;;
+        setRestoreTest) echo deleteRestoreTest ;;
+        setEnvVar)      echo deleteEnvVar ;;
+        setRestUser)    echo deleteRestUser ;;
+        setRepo)        echo deleteRepo ;;
+    esac
+}
+
+# Delete objects left behind by earlier runs that were interrupted or ran
+# against an older plugin version: anything named restic-test*, everything
+# referencing such a repository, the env vars the tests create, and the
+# temporary shared folders of the end-to-end test (matched by their comment).
+purge_test_leftovers() {
+    local list='{"start":0,"limit":null,"sortfield":null,"sortdir":null}'
+    local svc method uuid n=0
+    while read -r svc method uuid; do
+        [ -z "$uuid" ] && continue
+        info "Removing leftover from an earlier run: $svc.$method $uuid"
+        if [ "$method" = "delete" ]; then
+            rpc "$svc" "$method" "{\"uuid\":\"$uuid\",\"recursive\":true}" &>/dev/null || true
+        else
+            rpc "$svc" "$method" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
+        fi
+        ((n++)) || true
+    done < <(python3 - \
+        "$(rpc Restic getRepoList "$list" 2>/dev/null)" \
+        "$(rpc Restic getSnapshotList "$list" 2>/dev/null)" \
+        "$(rpc Restic getRestoreTestList "$list" 2>/dev/null)" \
+        "$(rpc Restic getEnvVarList "$list" 2>/dev/null)" \
+        "$(rpc Restic getRestUserList "$list" 2>/dev/null)" \
+        "$(rpc ShareMgmt getList "$list" 2>/dev/null)" <<'EOF'
+import json, sys
+
+def data(s):
+    try:
+        return json.loads(s).get('data', [])
+    except Exception:
+        return []
+
+repos, jobs, rtests, envs, users, folders = (data(a) for a in sys.argv[1:7])
+
+def is_test_name(name):
+    name = name or ''
+    return name.startswith(('restic-test', 'restic_test')) or '\n' in name or '\r' in name
+
+test_repos = {r['uuid'] for r in repos if is_test_name(r.get('name'))}
+test_env_names = {'MY-VAR', 'A=B', 'MY_TEST_ENVVAR'}
+
+for j in jobs:
+    if is_test_name(j.get('name')) or j.get('reporef') in test_repos:
+        print('Restic deleteSnapshot', j['uuid'])
+for t in rtests:
+    if is_test_name(t.get('name')) or t.get('reporef') in test_repos:
+        print('Restic deleteRestoreTest', t['uuid'])
+for e in envs:
+    name = e.get('envname') or ''
+    if e.get('reporef') in test_repos or name in test_env_names or name.startswith('RESTIC_TEST') \
+            or name == 'RESTIC_SHARED_TEST':
+        print('Restic deleteEnvVar', e['uuid'])
+for u in users:
+    if is_test_name(u.get('username')):
+        print('Restic deleteRestUser', u['uuid'])
+for uuid in test_repos:
+    print('Restic deleteRepo', uuid)
+for f in folders:
+    if f.get('name', '').startswith(('restic-test-repo-', 'restic-test-src-')) and \
+            f.get('comment') == 'openmediavault-restic test, safe to delete':
+        print('ShareMgmt delete', f['uuid'])
+EOF
+    )
+    if [ "$n" -gt 0 ]; then
+        # The env var files on disk still hold the removed variables until
+        # restic is deployed again, and the RPC service reads those files.
+        info "Removed $n leftover object(s); redeploying restic to refresh /etc/restic"
+        omv-salt deploy run --quiet restic >/dev/null 2>&1 || \
+            info "omv-salt deploy run restic failed — later tests may be affected"
+    fi
+    return 0
+}
+
 cleanup() {
     section "Cleanup"
 
     kill_test_restic_procs
+
+    # Objects that should have been rejected but were created. Repos last,
+    # as deleteRepo refuses while jobs still reference them.
+    local entry
+    for pass in other repo; do
+        for entry in "${LEAKED[@]}"; do
+            if [ "$pass" = repo ] && [ "${entry%% *}" != setRepo ]; then continue; fi
+            if [ "$pass" = other ] && [ "${entry%% *}" = setRepo ]; then continue; fi
+            info "Deleting object created by an unexpectedly accepted ${entry%% *}: ${entry#* }"
+            rpc "Restic" "$(delete_method_for "${entry%% *}")" "{\"uuid\":\"${entry#* }\"}" &>/dev/null || true
+        done
+    done
 
     # Backup jobs must go before repos (deleteRepo checks for references)
     for uuid in "$SNAPSHOT_UUID" "$FAIL_JOB_UUID" "$E2E_JOB_UUID"; do
@@ -287,6 +388,7 @@ section "Pre-flight"
 
 # Clear anything left behind by an interrupted earlier run.
 kill_test_restic_procs
+purge_test_leftovers
 
 for cmd in omv-rpc python3; do
     if command -v "$cmd" &>/dev/null; then

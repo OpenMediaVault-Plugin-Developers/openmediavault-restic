@@ -352,6 +352,54 @@ class EnvVarFileTest(unittest.TestCase):
             self.assertEqual(env.get(k), v, k)
 
 
+class EnvVarFileInvalidEntriesTest(unittest.TestCase):
+    """Entries stored before validation existed must not break the file."""
+
+    INVALID = [('MY-VAR', 'x'), ('A=B', 'x'), ('RESTIC_TEST_NL', 'a\nb'),
+               ('1ABC', 'x'), ('A B', 'x'), ('ÄÖ', 'x'), ('CR', 'a\rb')]
+
+    def setUp(self):
+        self.dir = tempfile.mkdtemp(prefix='restic-env-test-')
+        self.addCleanup(shutil.rmtree, self.dir, True)
+        entries = [('GOOD_BEFORE', 'one')] + self.INVALID + [('GOOD_AFTER', 'two')]
+        config = {'envvars': {'envvar': [
+            {'envname': k, 'envvalue': v, 'reporef': 'shared'} for k, v in entries]}}
+        self.file = os.path.join(self.dir, 'restic-envvar-shared')
+        with open(self.file, 'w') as f:
+            f.write(render('etc-restic_envvar.j2', config=config, repouuid='shared'))
+
+    def test_comment_lines_have_no_equals_sign(self):
+        # PHP's setEnvFromFile() turns any line containing "=" into an
+        # `export ...;` statement, comment lines included.
+        with open(self.file) as f:
+            for line in f:
+                if line.lstrip().startswith('#'):
+                    self.assertNotIn('=', line)
+
+    def test_invalid_entries_skipped_for_bash(self):
+        p = subprocess.run(
+            ['bash', '-c', 'set -a; source "$1"; set +a; printf "%s|%s" "$GOOD_BEFORE" "$GOOD_AFTER"',
+             'bash', self.file], capture_output=True, text=True)
+        self.assertEqual(p.stderr, '')
+        self.assertEqual(p.stdout, 'one|two')
+
+    @unittest.skipUnless(shutil.which('php') and
+                         os.path.exists('/usr/share/php/openmediavault/autoloader.inc'),
+                         'php / openmediavault PHP library not available')
+    def test_invalid_entries_skipped_for_omv_process(self):
+        php = r'''
+            require_once "openmediavault/autoloader.inc";
+            require_once "openmediavault/functions.inc";
+            $p = new \OMV\System\Process(["printenv", "GOOD_AFTER"]);
+            $p->setEnvFromFile($argv[1]);
+            passthru($p->getCommandLine(), $rc);
+            exit($rc);
+        '''
+        p = subprocess.run(['php', '-r', php, self.file], capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        self.assertEqual(p.stdout.strip(), 'two')
+
+
 class DefaultStateTest(unittest.TestCase):
     """Render default.sls with stubbed Salt functions and inspect the result."""
 
