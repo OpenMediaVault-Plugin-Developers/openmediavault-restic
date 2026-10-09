@@ -1,5 +1,5 @@
-openmediavault-restic (8.0) UNRELEASED; urgency=medium
+openmediavault-restic (8.0) unstable; urgency=low
 
   * Initial release
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 23 Jul 2024 11:58:30 -0500
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 09 Oct 2026 20:53:24 +0000
