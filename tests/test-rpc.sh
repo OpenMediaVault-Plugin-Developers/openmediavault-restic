@@ -5,8 +5,13 @@
 #
 # Exercises all plugin RPC methods against the live OMV configuration database.
 # Creates test repositories, backup jobs, and env vars, then removes them on
-# exit. No actual restic backups are performed against live data — all repos
-# are registered with skipinit=true so no real restic server is required.
+# exit. Most repos are registered with skipinit=true so no real restic server
+# is required. The end-to-end section creates two temporary shared folders
+# (restic-test-repo-*/restic-test-src-*) next to an existing shared folder,
+# backs up a single test file into a local repository there, and deletes both
+# folders afterwards. No existing data is read or written.
+#
+# Tests that need no root: tests/test-unit.php and tests/test-templates.py.
 #
 # Requirements:
 #   - Run as root
@@ -99,6 +104,68 @@ json_field() {
         "import sys,json; print(json.load(sys.stdin).get('$field',''))" 2>/dev/null || echo ""
 }
 
+# Start a background task RPC and print the status filename it returns.
+start_task() {
+    local svc=$1 method=$2 params=${3:-'{}'}
+    omv-rpc -u admin "$svc" "$method" "$params" 2>/dev/null | \
+        python3 -c "import sys,json; v=json.load(sys.stdin); print(v if isinstance(v,str) else '')" \
+        2>/dev/null || true
+}
+
+# Wait for a background task to finish. Sets TASK_STATE to "ok", "error" or
+# "timeout", TASK_OUTPUT to the task output (or the error it raised), and
+# TASK_RAW_OUTPUT to the output file content, which is also there on error.
+TASK_STATE=""
+TASK_OUTPUT=""
+TASK_RAW_OUTPUT=""
+wait_task() {
+    local file=$1 timeout=${2:-120} out ec i
+    TASK_STATE="timeout"
+    TASK_OUTPUT=""
+    TASK_RAW_OUTPUT=""
+    [ -z "$file" ] && { TASK_STATE="error"; TASK_OUTPUT="no task started"; return; }
+    for ((i = 0; i < timeout; i++)); do
+        ec=0
+        out=$(omv-rpc -u admin "Exec" "getOutput" "{\"filename\":\"$file\",\"pos\":0}" 2>&1) || ec=$?
+        if [ $ec -ne 0 ]; then
+            TASK_STATE="error"
+            TASK_OUTPUT=$out
+            TASK_RAW_OUTPUT=$(python3 -c "
+import sys,json
+print(open(json.load(open(sys.argv[1]))['outputfilename']).read())" "$file" 2>/dev/null)
+            return
+        fi
+        if echo "$out" | python3 -c "import sys,json; sys.exit(0 if json.load(sys.stdin).get('running') else 1)" 2>/dev/null; then
+            sleep 1
+            continue
+        fi
+        TASK_STATE="ok"
+        TASK_OUTPUT=$(echo "$out" | python3 -c "import sys,json; print(json.load(sys.stdin).get('output',''))" 2>/dev/null)
+        return
+    done
+}
+
+# Run a background task RPC and assert how it ends ("ok" or "error").
+# Optional 6th arg: grep pattern that must appear in the output; optional
+# 7th arg: grep pattern that must NOT appear.
+assert_task() {
+    local desc=$1 expect=$2 svc=$3 method=$4 params=$5 want=${6:-} unwanted=${7:-}
+    wait_task "$(start_task "$svc" "$method" "$params")"
+    if [ "$TASK_STATE" != "$expect" ]; then
+        _fail "$desc" "expected task to end '$expect', got '$TASK_STATE': ${TASK_OUTPUT:0:300}"
+        return 1
+    fi
+    if [ -n "$want" ] && ! echo "$TASK_OUTPUT" | grep -q -- "$want"; then
+        _fail "$desc" "'$want' not in task output: ${TASK_OUTPUT:0:300}"
+        return 1
+    fi
+    if [ -n "$unwanted" ] && echo "$TASK_OUTPUT" | grep -q -- "$unwanted"; then
+        _fail "$desc" "'$unwanted' unexpectedly in task output: ${TASK_OUTPUT:0:300}"
+        return 1
+    fi
+    _pass "$desc"
+}
+
 # ---------------------------------------------------------------------------
 # State
 # ---------------------------------------------------------------------------
@@ -113,6 +180,14 @@ ENVVAR_UUID=""
 ENVVAR_SHARED_UUID=""
 RESTUSER_UUID=""
 ORIG_RESTSERVER=""
+# Failure reporting / end-to-end tests
+FAIL_REPO_UUID=""
+FAIL_JOB_UUID=""
+FAIL_RT_UUID=""
+E2E_REPO_UUID=""
+E2E_JOB_UUID=""
+E2E_SF_REPO_UUID=""
+E2E_SF_SRC_UUID=""
 
 LIST_PARAMS='{"start":0,"limit":25,"sortfield":null,"sortdir":null}'
 
@@ -151,16 +226,18 @@ cleanup() {
     kill_test_restic_procs
 
     # Backup jobs must go before repos (deleteRepo checks for references)
-    if [ -n "$SNAPSHOT_UUID" ]; then
-        info "Deleting test backup job $SNAPSHOT_UUID"
-        rpc "Restic" "deleteSnapshot" "{\"uuid\":\"$SNAPSHOT_UUID\"}" &>/dev/null || true
-    fi
+    for uuid in "$SNAPSHOT_UUID" "$FAIL_JOB_UUID" "$E2E_JOB_UUID"; do
+        [ -z "$uuid" ] && continue
+        info "Deleting test backup job $uuid"
+        rpc "Restic" "deleteSnapshot" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
+    done
 
     # Restore tests must also go before repos (deleteRepo checks for references)
-    if [ -n "$RESTORETEST_UUID" ]; then
-        info "Deleting test restore test $RESTORETEST_UUID"
-        rpc "Restic" "deleteRestoreTest" "{\"uuid\":\"$RESTORETEST_UUID\"}" &>/dev/null || true
-    fi
+    for uuid in "$RESTORETEST_UUID" "$FAIL_RT_UUID"; do
+        [ -z "$uuid" ] && continue
+        info "Deleting test restore test $uuid"
+        rpc "Restic" "deleteRestoreTest" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
+    done
 
     for uuid in "$ENVVAR_UUID" "$ENVVAR_SHARED_UUID"; do
         [ -z "$uuid" ] && continue
@@ -178,10 +255,18 @@ cleanup() {
         rpc "Restic" "setRestServer" "$ORIG_RESTSERVER" &>/dev/null || true
     fi
 
-    for uuid in "$REST_REPO_UUID" "$SFTP_REPO_UUID" "$S3_REPO_UUID" "$B2_REPO_UUID" "$RCLONE_REPO_UUID"; do
+    for uuid in "$REST_REPO_UUID" "$SFTP_REPO_UUID" "$S3_REPO_UUID" "$B2_REPO_UUID" \
+            "$RCLONE_REPO_UUID" "$FAIL_REPO_UUID" "$E2E_REPO_UUID"; do
         [ -z "$uuid" ] && continue
         info "Deleting repo $uuid"
         rpc "Restic" "deleteRepo" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
+    done
+
+    # Temporary shared folders of the end-to-end test, with their content
+    for uuid in "$E2E_SF_REPO_UUID" "$E2E_SF_SRC_UUID"; do
+        [ -z "$uuid" ] && continue
+        info "Deleting temporary shared folder $uuid"
+        rpc "ShareMgmt" "delete" "{\"uuid\":\"$uuid\",\"recursive\":true}" &>/dev/null || true
     done
 
     info "Done."
@@ -1112,7 +1197,7 @@ assert_rpc_fails "getRepoSnapshotList — missing reporef" \
 # With a fake REST URL restic may hang waiting for a connection, so wrap in
 # a timeout. A timeout is treated as a skip rather than a failure.
 # ---------------------------------------------------------------------------
-section "getRepoSnapshotList (fake repo — expects empty list or connection timeout)"
+section "getRepoSnapshotList (fake repo — expects an error or connection timeout)"
 
 if [ -z "$REST_REPO_UUID" ]; then
     _skip "getRepoSnapshotList" "no test repo available"
@@ -1124,20 +1209,14 @@ else
     SL_EC=0
     SL_OUT=$(timeout 15 omv-rpc -u admin "Restic" "getRepoSnapshotList" "$SL_PARAMS" 2>&1) || SL_EC=$?
 
+    # An unreachable repository must be reported as an error, not shown as
+    # an empty snapshot list.
     if [ $SL_EC -eq 124 ]; then
         _pass "getRepoSnapshotList — timed out as expected (fake REST URL, synchronous call)"
     elif [ $SL_EC -ne 0 ] || echo "$SL_OUT" | grep -qi "exception"; then
-        _fail "getRepoSnapshotList — RPC error" "${SL_OUT:0:200}"
+        _pass "getRepoSnapshotList — unreachable repository reported as an error"
     else
-        IS_ARRAY=$(echo "$SL_OUT" | python3 -c "
-import sys,json; d=json.load(sys.stdin)
-print('yes' if isinstance(d,list) or isinstance(d.get('data',[]),list) else 'no'
-" 2>/dev/null || echo no)
-        if [ "$IS_ARRAY" = "yes" ]; then
-            _pass "getRepoSnapshotList — returned list (not exception)"
-        else
-            _fail "getRepoSnapshotList — unexpected response format"
-        fi
+        _fail "getRepoSnapshotList — unreachable repository returned a result" "${SL_OUT:0:200}"
     fi
 fi
 
@@ -1324,6 +1403,276 @@ else
         else
             _fail "restoreSnapshot — dry-run with include-path rejected" "${DR_OUT2:0:200}"
         fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Input validation added with the bug fixes: values that end up in generated
+# shell scripts, cron lines or htpasswd must not carry newlines or shell
+# syntax, and an "every N" schedule needs exactly one positive number.
+# ---------------------------------------------------------------------------
+section "Input validation"
+
+# Backup job parameters shared by the tests below (python dict literal body).
+JOB_BASE="'uuid': '$OMV_NEW_UUID', 'enable': False, 'name': 'restic-test-validation',
+    'hash': '', 'tags': '', 'sharedfolderrefs': ['$FAKE_SF_UUID'],
+    'reporef': '${REST_REPO_UUID:-$FAKE_SF_UUID}', 'exclude': '', 'execution': 'exactly',
+    'minute': ['0'], 'everynminute': False, 'hour': ['0'], 'everynhour': False,
+    'dayofmonth': ['*'], 'everyndayofmonth': False, 'month': ['*'], 'dayofweek': ['*']"
+
+assert_rpc_fails "setSnapshot — name with a newline rejected" "Restic" "setSnapshot" \
+    "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'name': 'a\nb'}))")"
+assert_rpc_fails "setSnapshot — cron line injection in a schedule value rejected" "Restic" "setSnapshot" \
+    "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'minute': ['0\n* * * * * root id']}))")"
+for kw in "'minute': ['0', '30'], 'everynminute': True" \
+          "'minute': ['*'], 'everynminute': True" \
+          "'hour': ['0'], 'everynhour': True" \
+          "'dayofmonth': ['1', '15'], 'everyndayofmonth': True"; do
+    assert_rpc_fails "setSnapshot — invalid 'every N' schedule rejected ($kw)" "Restic" "setSnapshot" \
+        "$(python3 -c "import json; print(json.dumps({$JOB_BASE, $kw}))")"
+done
+assert_rpc_fails "setRestoreTest — name with a newline rejected" "Restic" "setRestoreTest" \
+    "$(python3 -c "import json; print(json.dumps({'uuid': '$OMV_NEW_UUID', 'name': 'a\nb',
+    'reporef': '$FAKE_SF_UUID', 'mode': 'dryrun', 'execution': 'weekly', 'minute': ['0'],
+    'everynminute': False, 'hour': ['0'], 'everynhour': False, 'dayofmonth': ['*'],
+    'everyndayofmonth': False, 'month': ['*'], 'dayofweek': ['*']}))")"
+
+if [ -n "$REST_REPO_UUID" ]; then
+    assert_rpc "setSnapshot — 'every 15 minutes' accepted" "Restic" "setSnapshot" \
+        "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'name': 'restic-test-every-n',
+        'minute': ['15'], 'everynminute': True, 'hour': ['*']}))")" >/dev/null
+    EVERY_N_UUID=$(json_field "$RPC_OUT" "uuid")
+    if [ -n "$EVERY_N_UUID" ]; then
+        assert_rpc "getSnapshotList — 'every N' schedule shown as */N" "Restic" "getSnapshotList" \
+            "$LIST_PARAMS" '"schedule":"\*\\/15 \* \* \* \*"' >/dev/null
+        rpc "Restic" "deleteSnapshot" "{\"uuid\":\"$EVERY_N_UUID\"}" &>/dev/null || true
+    fi
+fi
+
+assert_rpc_fails "setEnvVar — name with a dash rejected" "Restic" "setEnvVar" \
+    '{"uuid":"'"$OMV_NEW_UUID"'","envname":"MY-VAR","envvalue":"x","reporef":"shared"}'
+assert_rpc_fails "setEnvVar — name with = rejected" "Restic" "setEnvVar" \
+    '{"uuid":"'"$OMV_NEW_UUID"'","envname":"A=B","envvalue":"x","reporef":"shared"}'
+assert_rpc_fails "setEnvVar — value with a newline rejected" "Restic" "setEnvVar" \
+    '{"uuid":"'"$OMV_NEW_UUID"'","envname":"RESTIC_TEST_NL","envvalue":"a\nb","reporef":"shared"}'
+assert_rpc "setEnvVar — value with shell metacharacters accepted" "Restic" "setEnvVar" \
+    "$(python3 -c "import json; print(json.dumps({'uuid': '$OMV_NEW_UUID',
+    'envname': 'RESTIC_TEST_META', 'envvalue': 'pa\$\$ \`x\` \"y\" \\'z\\'', 'reporef': 'shared'}))")" >/dev/null
+META_UUID=$(json_field "$RPC_OUT" "uuid")
+[ -n "$META_UUID" ] && rpc "Restic" "deleteEnvVar" "{\"uuid\":\"$META_UUID\"}" &>/dev/null
+
+assert_rpc_fails "setRepo — local repository without a shared folder rejected" "Restic" "setRepo" \
+    '{"uuid":"'"$OMV_NEW_UUID"'","name":"restic-test-nosf","type":"local","sharedfolderref":"","passphrase":"x","skipinit":true}'
+assert_rpc_fails "setRepo — name with a newline rejected" "Restic" "setRepo" \
+    '{"uuid":"'"$OMV_NEW_UUID"'","name":"restic-test\nx","type":"rest","uri":"http://localhost:18001/","sharedfolderref":"","passphrase":"x","skipinit":true}'
+assert_rpc_fails "setRestUser — username with a trailing newline rejected" "Restic" "setRestUser" \
+    '{"uuid":"'"$OMV_NEW_UUID"'","username":"restic-test-nl\n","password":"x"}'
+if [ -n "$REST_REPO_UUID" ]; then
+    assert_rpc_fails "inspectRepoSnapshot — ID with a trailing newline rejected" "Restic" \
+        "inspectRepoSnapshot" '{"reporef":"'"$REST_REPO_UUID"'","snapshotid":"abcdef12\n"}'
+fi
+assert_rpc_fails "deleteRepo — non-boolean deletedata rejected" "Restic" "deleteRepo" \
+    '{"uuid":"00000000-0000-4000-8000-000000000001","deletedata":"yes"}'
+assert_rpc_fails "createSnapshot — no longer callable over RPC" "Restic" "createSnapshot" \
+    '{"reporef":"'"$FAKE_SF_UUID"'","sharedfolderrefs":[],"prescript":"id"}'
+
+# ---------------------------------------------------------------------------
+# Failures must be reported. An rclone repository whose remote does not exist
+# makes restic fail within a second, so every operation against it must end
+# with an error instead of a "successful" task.
+# ---------------------------------------------------------------------------
+section "Failures are reported (repository that cannot be opened)"
+
+# A real shared folder, used only as a backup source that is never read
+# (restic fails to open the repository first) and for name resolution.
+REAL_SF_UUID=$(rpc "ShareMgmt" "enumerateSharedFolders" '{}' 2>/dev/null | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+print(d[0]['uuid'] if d else '')" 2>/dev/null || echo "")
+REAL_SF_NAME=$(rpc "ShareMgmt" "enumerateSharedFolders" '{}' 2>/dev/null | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+print(d[0]['name'] if d else '')" 2>/dev/null || echo "")
+
+if ! $RESTIC_AVAILABLE || ! command -v rclone &>/dev/null; then
+    _skip "failure reporting" "restic or rclone not installed"
+else
+    assert_rpc "setRepo (rclone, missing remote)" "Restic" "setRepo" \
+        '{"uuid":"'"$OMV_NEW_UUID"'","name":"restic-test-failing","type":"rclone","uri":"restic-test-missing-remote:repo","sharedfolderref":"","accesskey":"","secretkey":"","passphrase":"x","skipinit":true}' >/dev/null
+    FAIL_REPO_UUID=$(json_field "$RPC_OUT" "uuid")
+fi
+
+if [ -n "$FAIL_REPO_UUID" ]; then
+    P="{\"uuid\":\"$FAIL_REPO_UUID\"}"
+    assert_task "testRepo — failure reported, no 'Connection successful'" error \
+        "Restic" "testRepo" "$P" "" "Connection successful"
+    for op in checkRepo pruneRepo getRepoStats unlockRepo; do
+        assert_task "$op — failure reported" error "Restic" "$op" "$P"
+    done
+    assert_rpc "setRepo (failing repo, retention policy)" "Restic" "setRepo" \
+        '{"uuid":"'"$FAIL_REPO_UUID"'","name":"restic-test-failing","type":"rclone","uri":"restic-test-missing-remote:repo","sharedfolderref":"","accesskey":"","secretkey":"","passphrase":"x","skipinit":true,"forgetschedule":"disabled","forgetkeeplast":1}' >/dev/null
+    assert_task "applyRepoForget (dry run) — failure reported" error "Restic" "applyRepoForget" \
+        "{\"uuid\":\"$FAIL_REPO_UUID\",\"dryrun\":true}"
+    assert_task "restoreSnapshot (dry run) — failure reported" error "Restic" "restoreSnapshot" \
+        "{\"reporef\":\"$FAIL_REPO_UUID\",\"snapshotid\":\"latest\",\"dryrun\":true}"
+    assert_rpc_fails "getRepoSnapshotList — failure reported, not an empty list" \
+        "Restic" "getRepoSnapshotList" \
+        "{\"reporef\":\"$FAIL_REPO_UUID\",\"start\":0,\"limit\":25,\"sortfield\":\"time\",\"sortdir\":\"desc\"}"
+
+    assert_rpc "setRestoreTest (dry run, failing repo)" "Restic" "setRestoreTest" \
+        "$(python3 -c "import json; print(json.dumps({'uuid': '$OMV_NEW_UUID', 'enable': False,
+        'name': 'restic-test-failing-rt', 'reporef': '$FAIL_REPO_UUID', 'mode': 'dryrun',
+        'execution': 'weekly', 'minute': ['0'], 'everynminute': False, 'hour': ['0'],
+        'everynhour': False, 'dayofmonth': ['*'], 'everyndayofmonth': False,
+        'month': ['*'], 'dayofweek': ['*']}))")" >/dev/null
+    FAIL_RT_UUID=$(json_field "$RPC_OUT" "uuid")
+    [ -n "$FAIL_RT_UUID" ] && assert_task "runRestoreTest — failed restore reported" error \
+        "Restic" "runRestoreTest" "{\"uuid\":\"$FAIL_RT_UUID\"}"
+
+    if [ -z "$REAL_SF_UUID" ]; then
+        _skip "runSnapshot — failed backup" "no shared folder to use as a source"
+    else
+        assert_rpc "setSnapshot (failing repo, retention on)" "Restic" "setSnapshot" \
+            "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'name': 'restic-test-failing-job',
+            'sharedfolderrefs': ['$FAKE_SF_UUID', '$REAL_SF_UUID'], 'reporef': '$FAIL_REPO_UUID',
+            'execution': 'daily', 'keepdaily': 7, 'postscript': 'echo post-ran'}))")" >/dev/null
+        FAIL_JOB_UUID=$(json_field "$RPC_OUT" "uuid")
+    fi
+    if [ -n "$FAIL_JOB_UUID" ]; then
+        # The job's first source folder does not exist; the list must still
+        # not start with a separator.
+        assert_rpc "getSnapshotList — failing job listed" "Restic" "getSnapshotList" "$LIST_PARAMS" >/dev/null
+        SRC_NAME=$(echo "$RPC_OUT" | python3 -c "
+import sys,json
+for s in json.load(sys.stdin).get('data',[]):
+    if s.get('uuid')=='$FAIL_JOB_UUID': print(s.get('sourcename',''))" 2>/dev/null)
+        if [ "$SRC_NAME" = "$REAL_SF_NAME" ]; then
+            _pass "getSnapshotList — source names have no leading separator"
+        else
+            _fail "getSnapshotList — source names" "expected '$REAL_SF_NAME', got '$SRC_NAME'"
+        fi
+
+        # A failed manual backup must fail the task and must not go on to
+        # apply the retention policy; the post-script still runs. Drop the
+        # missing source folder first, so the backup really runs restic.
+        assert_rpc "setSnapshot (failing repo, existing source only)" "Restic" "setSnapshot" \
+            "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'uuid': '$FAIL_JOB_UUID',
+            'name': 'restic-test-failing-job', 'sharedfolderrefs': ['$REAL_SF_UUID'],
+            'reporef': '$FAIL_REPO_UUID', 'execution': 'daily', 'keepdaily': 7,
+            'postscript': 'echo post-ran'}))")" >/dev/null
+        assert_task "runSnapshot — failed backup reported" error \
+            "Restic" "runSnapshot" "{\"uuid\":\"$FAIL_JOB_UUID\"}"
+        if ! echo "$TASK_RAW_OUTPUT" | grep -q "Command: /usr/bin/restic backup"; then
+            _fail "runSnapshot — could not read the task output" "${TASK_RAW_OUTPUT:0:200}"
+        elif echo "$TASK_RAW_OUTPUT" | grep -q "Applying retention policy"; then
+            _fail "runSnapshot — retention applied after a failed backup"
+        else
+            _pass "runSnapshot — no retention after a failed backup"
+        fi
+        if echo "$TASK_RAW_OUTPUT" | grep -q "post-ran"; then
+            _pass "runSnapshot — post-script still runs after a failed backup"
+        else
+            _fail "runSnapshot — post-script did not run after a failed backup"
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# End to end against a real local repository in temporary shared folders:
+# init, test, backup (snapshot ID recorded), list, delete the job (snapshots
+# kept), delete the repo (data kept), re-import, delete with its data.
+# ---------------------------------------------------------------------------
+section "End to end (temporary local repository)"
+
+MNTENT_UUID=""
+if [ -n "$REAL_SF_UUID" ]; then
+    MNTENT_UUID=$(omv-confdbadm read --uuid "$REAL_SF_UUID" conf.system.sharedfolder 2>/dev/null | \
+        python3 -c "import sys,json; print(json.load(sys.stdin).get('mntentref',''))" 2>/dev/null)
+fi
+
+if ! $RESTIC_AVAILABLE; then
+    _skip "end to end" "restic binary not installed"
+elif [ -z "$MNTENT_UUID" ]; then
+    _skip "end to end" "no mounted file system with a shared folder found"
+else
+    SUFFIX=$(python3 -c "import uuid; print(uuid.uuid4().hex[:8])")
+    for kind in repo src; do
+        assert_rpc "create temporary shared folder ($kind)" "ShareMgmt" "set" \
+            "{\"uuid\":\"$OMV_NEW_UUID\",\"name\":\"restic-test-$kind-$SUFFIX\",\"reldirpath\":\"restic-test-$kind-$SUFFIX/\",\"comment\":\"openmediavault-restic test, safe to delete\",\"mntentref\":\"$MNTENT_UUID\",\"mode\":\"700\"}" >/dev/null
+        if [ "$kind" = repo ]; then E2E_SF_REPO_UUID=$(json_field "$RPC_OUT" "uuid");
+        else E2E_SF_SRC_UUID=$(json_field "$RPC_OUT" "uuid"); fi
+    done
+fi
+
+if [ -n "$E2E_SF_REPO_UUID" ] && [ -n "$E2E_SF_SRC_UUID" ]; then
+    REPO_PATH=$(rpc "ShareMgmt" "getPath" "{\"uuid\":\"$E2E_SF_REPO_UUID\"}" | python3 -c "import sys,json; print(json.load(sys.stdin))")
+    SRC_PATH=$(rpc "ShareMgmt" "getPath" "{\"uuid\":\"$E2E_SF_SRC_UUID\"}" | python3 -c "import sys,json; print(json.load(sys.stdin))")
+    mkdir -p "$SRC_PATH" && echo "restic test data" > "$SRC_PATH/file.txt"
+
+    E2E_REPO_JSON="'name': 'restic-test-e2e-$SUFFIX', 'type': 'local',
+        'sharedfolderref': '$E2E_SF_REPO_UUID', 'passphrase': \"e2e pa\$\$ 'word\\\"\""
+    assert_rpc "setRepo (local, initialise)" "Restic" "setRepo" \
+        "$(python3 -c "import json; print(json.dumps({'uuid': '$OMV_NEW_UUID', $E2E_REPO_JSON, 'skipinit': False}))")" >/dev/null
+    E2E_REPO_UUID=$(json_field "$RPC_OUT" "uuid")
+    [ -f "$REPO_PATH/config" ] && _pass "setRepo — repository initialised" || \
+        _fail "setRepo — no repository config in $REPO_PATH"
+fi
+
+if [ -n "$E2E_REPO_UUID" ]; then
+    assert_task "testRepo — reachable repository reports success" ok \
+        "Restic" "testRepo" "{\"uuid\":\"$E2E_REPO_UUID\"}" "Connection successful"
+
+    assert_rpc "setSnapshot (local e2e job)" "Restic" "setSnapshot" \
+        "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'name': 'restic-test-e2e-job',
+        'sharedfolderrefs': ['$E2E_SF_SRC_UUID'], 'reporef': '$E2E_REPO_UUID',
+        'execution': 'daily', 'keepdaily': 7}))")" >/dev/null
+    E2E_JOB_UUID=$(json_field "$RPC_OUT" "uuid")
+fi
+
+if [ -n "$E2E_JOB_UUID" ]; then
+    HASH_FILE="/var/lib/openmediavault/restic/hash-$E2E_JOB_UUID"
+    assert_task "runSnapshot — backup succeeds and applies retention" ok \
+        "Restic" "runSnapshot" "{\"uuid\":\"$E2E_JOB_UUID\"}" "Applying retention policy"
+    if [ -s "$HASH_FILE" ]; then
+        _pass "runSnapshot — snapshot ID recorded ($(cat "$HASH_FILE"))"
+    else
+        _fail "runSnapshot — no snapshot ID recorded in $HASH_FILE"
+    fi
+
+    SL_PARAMS="{\"reporef\":\"$E2E_REPO_UUID\",\"start\":0,\"limit\":25,\"sortfield\":\"time\",\"sortdir\":\"desc\"}"
+    assert_rpc "getRepoSnapshotList — backup listed" "Restic" "getRepoSnapshotList" "$SL_PARAMS" '"total":1' >/dev/null
+    assert_task "restoreSnapshot (dry run) — succeeds" ok "Restic" "restoreSnapshot" \
+        "{\"reporef\":\"$E2E_REPO_UUID\",\"snapshotid\":\"latest\",\"dryrun\":true}"
+
+    assert_rpc "deleteSnapshot — job deleted" "Restic" "deleteSnapshot" "{\"uuid\":\"$E2E_JOB_UUID\"}" >/dev/null
+    E2E_JOB_UUID=""
+    assert_rpc "deleteSnapshot — the job's snapshots are kept" "Restic" "getRepoSnapshotList" \
+        "$SL_PARAMS" '"total":1' >/dev/null
+    [ -e "$HASH_FILE" ] && _fail "deleteSnapshot — snapshot ID file left behind" || \
+        _pass "deleteSnapshot — snapshot ID file removed"
+
+    assert_rpc "deleteRepo (default) — removed from config" "Restic" "deleteRepo" \
+        "{\"uuid\":\"$E2E_REPO_UUID\"}" >/dev/null
+    E2E_REPO_UUID=""
+    [ -f "$REPO_PATH/config" ] && [ -d "$REPO_PATH/data" ] && \
+        _pass "deleteRepo (default) — repository data kept" || \
+        _fail "deleteRepo (default) — repository data was deleted"
+
+    assert_rpc "setRepo (re-import with skipinit)" "Restic" "setRepo" \
+        "$(python3 -c "import json; print(json.dumps({'uuid': '$OMV_NEW_UUID', $E2E_REPO_JSON, 'skipinit': True}))")" >/dev/null
+    E2E_REPO_UUID=$(json_field "$RPC_OUT" "uuid")
+    assert_rpc "getRepoSnapshotList — re-imported repository still has its snapshot" \
+        "Restic" "getRepoSnapshotList" \
+        "{\"reporef\":\"$E2E_REPO_UUID\",\"start\":0,\"limit\":25,\"sortfield\":\"time\",\"sortdir\":\"desc\"}" \
+        '"total":1' >/dev/null
+
+    assert_rpc "deleteRepo (deletedata) — removed" "Restic" "deleteRepo" \
+        "{\"uuid\":\"$E2E_REPO_UUID\",\"deletedata\":true}" >/dev/null
+    E2E_REPO_UUID=""
+    if [ ! -e "$REPO_PATH/config" ] && [ ! -e "$REPO_PATH/data" ] && [ -d "$REPO_PATH" ]; then
+        _pass "deleteRepo (deletedata) — repository data deleted, shared folder kept"
+    else
+        _fail "deleteRepo (deletedata) — unexpected state of $REPO_PATH"
     fi
 fi
 
