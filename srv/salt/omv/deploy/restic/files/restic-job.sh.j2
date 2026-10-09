@@ -1,7 +1,7 @@
 #!/bin/bash
 {{ pillar['headers']['auto_generated'] }}
 {{ pillar['headers']['warning'] }}
-# Restic backup job: {{ job.uuid }}{% if job.name %} ({{ job.name }}){% endif %}
+# Restic backup job: {{ job.uuid }}{% if job.name %} ({{ job.name | replace('\r', ' ') | replace('\n', ' ') }}){% endif %}
 {# POSIX single-quote shell escaping: wrap in single quotes and replace any
    embedded single quote with the '\'' sequence. Keeps secrets and paths safe
    from word splitting and shell injection. #}
@@ -46,7 +46,7 @@ trap '_send_email $?' EXIT
 exec >"${EMAIL_TMP}" 2>&1
 {% endif %}
 
-log "=== Starting backup job{% if job.name %}: {{ job.name }}{% endif %} ==="
+log {{ sq('=== Starting backup job' ~ ((': ' ~ job.name) if job.name else '') ~ ' ===') }}
 
 # Load shared environment variables
 if [ -f /etc/restic/restic-envvar-shared ]; then
@@ -138,13 +138,23 @@ fi
 
 {% endif %}
 if [ ${JOB_EXIT} -eq 0 ]; then
-    log "Running: restic backup --verbose ${BACKUP_ARGS[*]}"
-    /usr/bin/restic backup --verbose --retry-lock 5m "${BACKUP_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
+    log "Running: restic backup --verbose --retry-lock 5m ${BACKUP_ARGS[*]}"
+    # Keep a copy of this run's output to pick up the new snapshot ID.
+    BACKUP_OUT="$(mktemp)"
+    /usr/bin/restic backup --verbose --retry-lock 5m "${BACKUP_ARGS[@]}" 2>&1 | tee -a "${LOG_FILE}" "${BACKUP_OUT}"
     BACKUP_EXIT=${PIPESTATUS[0]}
     if [ ${BACKUP_EXIT} -ne 0 ]; then
         log "ERROR: Backup failed with exit code ${BACKUP_EXIT}"
         JOB_EXIT=${BACKUP_EXIT}
+    else
+        # Shown as "Last snapshot" in the backup job list. Kept outside the
+        # config database so a backup does not trigger "Apply changes".
+        SNAPSHOT_ID="$(sed -n 's/^snapshot \([0-9a-f]\{1,\}\) saved$/\1/p' "${BACKUP_OUT}" | tail -n 1)"
+        if [ -n "${SNAPSHOT_ID}" ]; then
+            printf '%s' "${SNAPSHOT_ID}" > {{ sq(hashfile) }}
+        fi
     fi
+    rm -f "${BACKUP_OUT}"
 fi
 
 {% if postscript %}

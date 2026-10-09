@@ -52,7 +52,6 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         // Backup jobs (referred to as "snapshots" for backward compatibility)
         $this->registerMethod("getSnapshotList");
-        $this->registerMethod("createSnapshot");
         $this->registerMethod("getSnapshot");
         $this->registerMethod("setSnapshot");
         $this->registerMethod("deleteSnapshot");
@@ -218,6 +217,8 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
     /**
      * Apply a retention policy via `restic forget --prune`.
      * Called after a successful backup. Only runs if any keep-* value > 0.
+     * A failure is reported in the task output but does not fail the job,
+     * matching the scheduled script.
      */
     private function applyRetentionPolicy($params, $repo, $context, $bgOutputFilename)
     {
@@ -259,7 +260,71 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             "\n\nApplying retention policy: %s\n\n",
             $this->displayCommand($forgetArgs)
         ));
-        $this->exec($forgetCmdLine, $output, $bgOutputFilename);
+        $forgetExit = $this->exec($forgetCmdLine, $output, $bgOutputFilename);
+        if ($forgetExit !== 0) {
+            $this->writeBgProcOutput($bgOutputFilename, sprintf(
+                "\nWARNING: Retention policy application failed with exit code %d\n",
+                $forgetExit));
+        }
+    }
+
+    /**
+     * Build the cron expression of a backup job or restore test, for display
+     * (fed to cron2human in the UI). Must match the logic in default.sls.
+     */
+    private function buildCronSchedule(array $job, $defaultExecution)
+    {
+        switch ($job['execution'] ?? $defaultExecution) {
+            case 'hourly':  return '0 * * * *';
+            case 'daily':   return '0 0 * * *';
+            case 'weekly':  return '0 0 * * 0';
+            case 'monthly': return '0 0 1 * *';
+            case 'yearly':  return '0 0 1 1 *';
+            case 'reboot':  return '@reboot';
+        }
+        // exactly: "every N" only applies to a single positive number, as
+        // `*/0`, `*/*` or `*/1,2` are not valid cron fields.
+        $field = function ($value, $everyN) {
+            $value = strval($value);
+            return ($everyN && ctype_digit($value) && intval($value) > 0)
+                ? '*/' . $value : $value;
+        };
+        return implode(' ', [
+            $field($job['minute'], $job['everynminute']),
+            $field($job['hour'], $job['everynhour']),
+            $field($job['dayofmonth'], $job['everyndayofmonth']),
+            $job['month'],
+            $job['dayofweek'],
+        ]);
+    }
+
+    /**
+     * Convert the schedule multi-select arrays of a backup job or restore
+     * test to comma-separated strings for storage, and reject an "every N"
+     * schedule that does not name exactly one positive number.
+     */
+    private function normaliseSchedule(array &$params)
+    {
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $field) {
+            if (is_array($params[$field])) {
+                $params[$field] = implode(',', $params[$field]);
+            }
+        }
+        if (($params['execution'] ?? '') !== 'exactly') {
+            return;
+        }
+        $labels = [
+            'minute' => gettext('minute'),
+            'hour' => gettext('hour'),
+            'dayofmonth' => gettext('day of month'),
+        ];
+        foreach ($labels as $field => $label) {
+            if (!empty($params['everyn' . $field]) &&
+                    (!ctype_digit(strval($params[$field])) || intval($params[$field]) === 0)) {
+                throw new \OMV\Exception(sprintf(gettext(
+                    "'Every N %s' needs exactly one value greater than 0."), $label));
+            }
+        }
     }
 
     // =========================================================================
@@ -325,6 +390,9 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $type = $params['type'];
         $params['name'] = str_replace(' ', '_', $params['name']);
+        if ($type === 'local' && empty($params['sharedfolderref'])) {
+            throw new \OMV\Exception(gettext('A local repository requires a shared folder.'));
+        }
 
         $repo = new \OMV\Config\ConfigObject('conf.service.restic.repo');
         $db = \OMV\Config\Database::getInstance();
@@ -372,10 +440,16 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         return $repo->getAssoc();
     }
 
+    /**
+     * Remove a repository from the configuration. The repository data is
+     * kept unless `deletedata` is set, so a repository can be removed and
+     * imported again later. Only the data of a local repository is ever
+     * deleted; remote repositories are never touched.
+     */
     public function deleteRepo($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $this->validateMethodParams($params, 'rpc.restic.deleterepo');
 
         $db = \OMV\Config\Database::getInstance();
 
@@ -401,23 +475,28 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
 
-        // For local repos, remove the restic data files from the shared folder
-        if ($repo->get('type') === 'local' && !empty($repo->get('sharedfolderref'))) {
+        // On request, remove the restic data files of a local repository from
+        // its shared folder. Only done when the folder really holds a restic
+        // repository (it has a `config` file), never for remote backends.
+        if (!empty($params['deletedata']) && $repo->get('type') === 'local' &&
+                !empty($repo->get('sharedfolderref'))) {
             try {
-                $path = \OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
+                $path = rtrim(\OMV\Rpc\Rpc::call('ShareMgmt', 'getPath', [
                     'uuid' => $repo->get('sharedfolderref')
-                ], $context);
-                $resticItems = ["config", "data", "index", "keys", "locks", "snapshots"];
-                foreach ($resticItems as $item) {
+                ], $context), '/');
+            } catch (\Exception $e) {
+                throw new \OMV\Exception(sprintf(gettext(
+                    'Cannot delete the repository data, its shared folder could not be resolved: %s'),
+                    $e->getMessage()));
+            }
+            if (is_file($path . '/config')) {
+                foreach (["config", "data", "index", "keys", "locks", "snapshots"] as $item) {
                     $itemPath = $path . "/" . $item;
                     if (file_exists($itemPath)) {
-                        $cmd = new \OMV\System\Process(['rm', '-rf', $itemPath]);
-                        $cmd->setQuiet(true);
+                        $cmd = new \OMV\System\Process(['rm', '-rf', escapeshellarg($itemPath)]);
                         $cmd->execute();
                     }
                 }
-            } catch (\Exception $e) {
-                // Ignore path resolution errors - repo may have been moved
             }
         }
 
@@ -432,19 +511,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
-
-        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'check', '--retry-lock', '5m'];
-            $cmd = new \OMV\System\Process($cmdArgs);
-            $this->buildRepoEnv($repo, $context, $cmd);
-            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
-            $cmd->setEnvFromFile($this->envFile . 'shared');
-            $cmd->setRedirect2to1();
-            $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
-            $this->exec($cmdLine, $output, $bgOutputFilename);
-            return $output;
-        });
+        return $this->execRepoCommands($repo, $context, [['check', '--retry-lock', '5m']]);
     }
 
     public function pruneRepo($params, $context)
@@ -454,19 +521,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
-
-        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'prune', '--retry-lock', '5m'];
-            $cmd = new \OMV\System\Process($cmdArgs);
-            $this->buildRepoEnv($repo, $context, $cmd);
-            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
-            $cmd->setEnvFromFile($this->envFile . 'shared');
-            $cmd->setRedirect2to1();
-            $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
-            $this->exec($cmdLine, $output, $bgOutputFilename);
-            return $output;
-        });
+        return $this->execRepoCommands($repo, $context, [['prune', '--retry-lock', '5m']]);
     }
 
     /**
@@ -479,20 +534,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
-
-        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'unlock'];
-            $cmd = new \OMV\System\Process($cmdArgs);
-            $this->buildRepoEnv($repo, $context, $cmd);
-            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
-            $cmd->setEnvFromFile($this->envFile . 'shared');
-            $cmd->setRedirect2to1();
-            $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
-            $this->exec($cmdLine, $output, $bgOutputFilename);
-            $this->writeBgProcOutput($bgOutputFilename, "\nDone.\n");
-            return $output;
-        });
+        return $this->execRepoCommands($repo, $context, [['unlock']], "\nDone.\n");
     }
 
     /**
@@ -506,21 +548,9 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
-
-        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'cat', 'config', '--retry-lock', '5m'];
-            $cmd = new \OMV\System\Process($cmdArgs);
-            $this->buildRepoEnv($repo, $context, $cmd);
-            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
-            $cmd->setEnvFromFile($this->envFile . 'shared');
-            $cmd->setRedirect2to1();
-            $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
-            $this->exec($cmdLine, $output, $bgOutputFilename);
-            $this->writeBgProcOutput($bgOutputFilename,
-                "\nConnection successful: repository is reachable and the passphrase is correct.\n");
-            return $output;
-        });
+        return $this->execRepoCommands($repo, $context,
+            [['cat', 'config', '--retry-lock', '5m']],
+            "\nConnection successful: repository is reachable and the passphrase is correct.\n");
     }
 
     public function getRepoStats($params, $context)
@@ -530,19 +560,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['uuid']);
-
-        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($params, $context, $repo) {
-            $cmdArgs = [$this->getProgram, 'stats', '--retry-lock', '5m'];
-            $cmd = new \OMV\System\Process($cmdArgs);
-            $this->buildRepoEnv($repo, $context, $cmd);
-            $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
-            $cmd->setEnvFromFile($this->envFile . 'shared');
-            $cmd->setRedirect2to1();
-            $cmdLine = $cmd->getCommandLine();
-            $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
-            $this->exec($cmdLine, $output, $bgOutputFilename);
-            return $output;
-        });
+        return $this->execRepoCommands($repo, $context, [['stats', '--retry-lock', '5m']]);
     }
 
     /**
@@ -565,12 +583,22 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->buildRepoEnv($repo, $context, $cmd);
         $cmd->setEnvFromFile($this->envFile . $repo->get('uuid'));
         $cmd->setEnvFromFile($this->envFile . 'shared');
-        // Do NOT redirect stderr to stdout — we only want the clean JSON on stdout.
+        // Keep stderr out of stdout, which must hold only the JSON, but keep
+        // it so a failure (wrong passphrase, lock, unreachable backend) is
+        // reported instead of looking like an empty repository.
+        $errFile = tempnam(sys_get_temp_dir(), 'restic-snapshots-');
+        $cmd->setRedirect2toFile(escapeshellarg($errFile));
         $cmd->setQuiet(true);
         $cmd->execute($output, $exitStatus);
+        $errOutput = trim(@file_get_contents($errFile) ?: '');
+        @unlink($errFile);
+        if ($exitStatus !== 0) {
+            throw new \OMV\ExecException($this->displayCommand($cmdArgs),
+                explode("\n", $errOutput), $exitStatus);
+        }
 
         $snapshots = [];
-        if ($exitStatus === 0 && !empty($output)) {
+        if (!empty($output)) {
             $raw = implode('', $output);
             // Find the start of the JSON array in case any preamble text was emitted.
             $jsonStart = strpos($raw, '[');
@@ -627,11 +655,13 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
     /**
      * Run a list of restic commands against a repository in a background
-     * process, streaming each command's output into the task dialog.
+     * process, streaming each command's output into the task dialog. The
+     * task fails at the first command that fails; $doneMessage is written
+     * only once every command succeeded.
      */
-    private function execRepoCommands($repo, $context, array $cmds)
+    private function execRepoCommands($repo, $context, array $cmds, $doneMessage = null)
     {
-        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($context, $repo, $cmds) {
+        return $this->execBgProc(function ($bgStatusFilename, $bgOutputFilename) use ($context, $repo, $cmds, $doneMessage) {
             $output = [];
             foreach ($cmds as $i => $cmdArgs) {
                 $cmdArgs = array_merge([$this->getProgram], $cmdArgs);
@@ -652,6 +682,9 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
                     throw new \OMV\ExecException(
                         $this->displayCommand($cmdArgs), $output, $exitStatus);
                 }
+            }
+            if (!is_null($doneMessage)) {
+                $this->writeBgProcOutput($bgOutputFilename, $doneMessage);
             }
             return $output;
         });
@@ -779,16 +812,16 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             }
 
             // Resolve source shared folder names
-            $sharedfoldernames = '';
+            $sharedfoldernames = [];
             $csvRefs = $snapshotv->get('csvsharedfolderrefs');
             $uuids = array_filter(array_map('trim', explode(',', $csvRefs)));
-            foreach ($uuids as $i => $uuid) {
+            foreach ($uuids as $uuid) {
                 try {
                     $sharedfolder = $db->get('conf.system.sharedfolder', $uuid);
-                    $sharedfoldernames .= ($i > 0 ? ', ' : '') . $sharedfolder->get('name');
+                    $sharedfoldernames[] = $sharedfolder->get('name');
                 } catch (\Exception $e) {}
             }
-            $snapshotv->add('sourcename', 'string', $sharedfoldernames);
+            $snapshotv->add('sourcename', 'string', implode(', ', $sharedfoldernames));
 
             $snapshotAssoc = $snapshotv->getAssoc();
             // Override hash with flat-file value if present (avoids config DB writes on backup).
@@ -796,21 +829,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             if (file_exists($hashFile)) {
                 $snapshotAssoc['hash'] = trim(file_get_contents($hashFile));
             }
-            // Build a cron expression string for display (fed to cron2human in the UI).
-            switch ($snapshotAssoc['execution'] ?? 'daily') {
-                case 'hourly':  $snapshotAssoc['schedule'] = '0 * * * *';   break;
-                case 'daily':   $snapshotAssoc['schedule'] = '0 0 * * *';   break;
-                case 'weekly':  $snapshotAssoc['schedule'] = '0 0 * * 0';   break;
-                case 'monthly': $snapshotAssoc['schedule'] = '0 0 1 * *';   break;
-                case 'yearly':  $snapshotAssoc['schedule'] = '0 0 1 1 *';   break;
-                case 'reboot':  $snapshotAssoc['schedule'] = '@reboot';      break;
-                default: // exactly
-                    $min = ($snapshotAssoc['everynminute']     ? '*/' : '') . $snapshotAssoc['minute'];
-                    $hr  = ($snapshotAssoc['everynhour']       ? '*/' : '') . $snapshotAssoc['hour'];
-                    $dom = ($snapshotAssoc['everyndayofmonth'] ? '*/' : '') . $snapshotAssoc['dayofmonth'];
-                    $snapshotAssoc['schedule'] = "$min $hr $dom {$snapshotAssoc['month']} {$snapshotAssoc['dayofweek']}";
-                    break;
-            }
+            $snapshotAssoc['schedule'] = $this->buildCronSchedule($snapshotAssoc, 'daily');
             $snapshotsAssoc[] = $snapshotAssoc;
         }
         unset($snapshotv);
@@ -849,12 +868,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         unset($params['sharedfolderrefs']);
         $params['csvsharedfolderrefs'] = $csvRefs;
 
-        // Convert schedule arrays to comma-separated strings for storage
-        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $field) {
-            if (is_array($params[$field])) {
-                $params[$field] = implode(',', $params[$field]);
-            }
-        }
+        $this->normaliseSchedule($params);
 
         // Apply default values for optional fields that may be missing
         $params['enable']    = $params['enable'] ?? true;
@@ -877,10 +891,12 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         return $snapshot->getAssoc();
     }
 
-    public function createSnapshot($params, $context)
+    /**
+     * Run a backup job in a background task. $params is a stored backup job
+     * (see runSnapshot), so this is deliberately not an RPC method.
+     */
+    private function runBackup($params, $context)
     {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-
         $db = \OMV\Config\Database::getInstance();
         $repo = $db->get('conf.service.restic.repo', $params['reporef']);
 
@@ -940,16 +956,25 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $postExit = $this->runHookScript('post-script', $params['postscript'] ?? '',
                 $repo, $context, $bgOutputFilename, $backupExit);
 
-            // Extract the snapshot hash from the output
-            preg_match('/snapshot (\w+) saved/', file_get_contents($bgOutputFilename), $matches);
+            // A failed backup must fail the task, and must not go on to apply
+            // retention: forgetting old snapshots right after a failed backup
+            // could leave fewer good snapshots than the policy intends.
+            if ($backupExit !== 0) {
+                throw new \OMV\ExecException($this->displayCommand($cmdArgs),
+                    $output, $backupExit);
+            }
+
+            // Extract the snapshot hash from the backup output
+            preg_match('/snapshot ([0-9a-f]+) saved/', implode("\n", $output), $matches);
             $hash = isset($matches[1]) ? $matches[1] : '';
 
             // Persist the hash to a flat file (not the config DB) so we avoid
             // triggering an "Apply changes" notification on every backup run.
+            // The scheduled script writes the same file.
             if (!empty($hash) && !empty($params['uuid'])) {
                 $hashDir = '/var/lib/openmediavault/restic';
                 if (!is_dir($hashDir)) {
-                    mkdir($hashDir, 0750, true);
+                    mkdir($hashDir, 0700, true);
                 }
                 file_put_contents($hashDir . '/hash-' . $params['uuid'], $hash);
             }
@@ -977,17 +1002,23 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $snapshot = $db->get('conf.service.restic.snapshot', $params['uuid']);
 
-        // Convert CSV refs back to array for createSnapshot
+        // Convert CSV refs back to an array for runBackup
         $csvRefs = $snapshot->get('csvsharedfolderrefs');
         $refs = array_filter(array_map('trim', explode(',', $csvRefs)));
 
-        $createParams = $snapshot->getAssoc();
-        $createParams['sharedfolderrefs'] = array_values($refs);
-        unset($createParams['csvsharedfolderrefs']);
+        $backupParams = $snapshot->getAssoc();
+        $backupParams['sharedfolderrefs'] = array_values($refs);
+        unset($backupParams['csvsharedfolderrefs']);
 
-        return $this->callMethod('createSnapshot', $createParams, $context);
+        return $this->runBackup($backupParams, $context);
     }
 
+    /**
+     * Delete a backup job. The snapshots it created stay in the repository:
+     * they are often exactly what is needed for a restore after a job has
+     * been removed. Use the repository's snapshot browser or retention
+     * policy to forget them.
+     */
     public function deleteSnapshot($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
@@ -995,38 +1026,6 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
 
         $db = \OMV\Config\Database::getInstance();
         $snapshot = $db->get('conf.service.restic.snapshot', $params['uuid']);
-        $repo = $db->get('conf.service.restic.repo', $snapshot->get('reporef'));
-
-        // Forget every snapshot this job produced, not just the most recent one.
-        // A job is identified by its source paths, so we scope the forget with
-        // a --path filter for each source folder (the same scoping used by the
-        // retention policy). This avoids leaving orphaned snapshots behind.
-        $pathArgs = [];
-        $csvRefs = $snapshot->get('csvsharedfolderrefs');
-        foreach (array_filter(array_map('trim', explode(',', $csvRefs))) as $uuid) {
-            try {
-                $sfpath = \OMV\Rpc\Rpc::call("ShareMgmt", "getPath", ["uuid" => $uuid], $context);
-                $pathArgs[] = '--path';
-                $pathArgs[] = escapeshellarg($sfpath);
-            } catch (\Exception $e) {
-                // skip unresolvable paths
-            }
-        }
-
-        // Only forget if we could resolve at least one path; otherwise we would
-        // risk operating on the whole repository.
-        if (!empty($pathArgs)) {
-            $cmdArgs = array_merge(
-                [$this->getProgram, 'forget', '--prune', '--retry-lock', '5m'],
-                $pathArgs
-            );
-            $cmd = new \OMV\System\Process($cmdArgs);
-            $this->buildRepoEnv($repo, $context, $cmd);
-            $cmd->setEnvFromFile($this->envFile . $snapshot->get('reporef'));
-            $cmd->setEnvFromFile($this->envFile . 'shared');
-            $cmd->setQuiet(true);
-            $cmd->execute();
-        }
         @unlink('/var/lib/openmediavault/restic/hash-' . $snapshot->get('uuid'));
 
         $db->delete($snapshot);
@@ -1090,7 +1089,11 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $cmdLine = $cmd->getCommandLine();
 
             $this->writeBgProcOutput($bgOutputFilename, sprintf("Command: %s\n\n", $this->displayCommand($cmdArgs)));
-            $this->exec($cmdLine, $output, $bgOutputFilename);
+            $exitStatus = $this->exec($cmdLine, $output, $bgOutputFilename);
+            if ($exitStatus !== 0) {
+                throw new \OMV\ExecException($this->displayCommand($cmdArgs),
+                    $output, $exitStatus);
+            }
             return $output;
         });
     }
@@ -1128,21 +1131,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             $jobv->add('targetname', 'string', $targetname);
 
             $jobAssoc = $jobv->getAssoc();
-            // Build a cron expression string for display (fed to cron2human in the UI).
-            switch ($jobAssoc['execution'] ?? 'weekly') {
-                case 'hourly':  $jobAssoc['schedule'] = '0 * * * *';   break;
-                case 'daily':   $jobAssoc['schedule'] = '0 0 * * *';   break;
-                case 'weekly':  $jobAssoc['schedule'] = '0 0 * * 0';   break;
-                case 'monthly': $jobAssoc['schedule'] = '0 0 1 * *';   break;
-                case 'yearly':  $jobAssoc['schedule'] = '0 0 1 1 *';   break;
-                case 'reboot':  $jobAssoc['schedule'] = '@reboot';      break;
-                default: // exactly
-                    $min = ($jobAssoc['everynminute']     ? '*/' : '') . $jobAssoc['minute'];
-                    $hr  = ($jobAssoc['everynhour']       ? '*/' : '') . $jobAssoc['hour'];
-                    $dom = ($jobAssoc['everyndayofmonth'] ? '*/' : '') . $jobAssoc['dayofmonth'];
-                    $jobAssoc['schedule'] = "$min $hr $dom {$jobAssoc['month']} {$jobAssoc['dayofweek']}";
-                    break;
-            }
+            $jobAssoc['schedule'] = $this->buildCronSchedule($jobAssoc, 'weekly');
             $jobsAssoc[] = $jobAssoc;
         }
         unset($jobv);
@@ -1171,12 +1160,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $this->validateMethodParams($params, 'rpc.restic.setrestoretest');
 
-        // Convert schedule arrays to comma-separated strings for storage
-        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $field) {
-            if (is_array($params[$field])) {
-                $params[$field] = implode(',', $params[$field]);
-            }
-        }
+        $this->normaliseSchedule($params);
 
         // Apply default values for optional fields that may be missing
         $params['enable']      = $params['enable']      ?? true;
@@ -1296,11 +1280,17 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             // the per-job subdirectory created above, never the shared folder.
             if ($mode === 'verify' && $cleanup) {
                 $this->writeBgProcOutput($bgOutputFilename, "\nCleaning up restored data ...\n");
-                $this->exec('rm -rf ' . escapeshellarg($targetPath), $rmOutput, $bgOutputFilename);
+                $this->exec('rm -rf ' . escapeshellarg($targetPath) . ' 2>&1', $rmOutput, $bgOutputFilename);
             }
 
             $postExit = $this->runHookScript('post-script', $postscript,
                 $repo, $context, $bgOutputFilename, $restoreExit);
+            // The restore result is what the test is for, so it takes
+            // precedence over a failing post-script.
+            if ($restoreExit !== 0) {
+                throw new \OMV\ExecException($this->displayCommand($cmdArgs),
+                    $output, $restoreExit);
+            }
             if ($postExit !== 0) {
                 throw new \OMV\Exception(sprintf(
                     'Post-script failed with exit code %d.', $postExit));
@@ -1477,10 +1467,12 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
     public function setEnvVar($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Replace spaces in the name before validating it as a shell
+        // variable name.
+        if (isset($params['envname']) && is_string($params['envname'])) {
+            $params['envname'] = str_replace(' ', '_', trim($params['envname']));
+        }
         $this->validateMethodParams($params, 'rpc.restic.setenvvar');
-
-        // Remove spaces from env var name
-        $params['envname'] = str_replace(' ', '_', $params['envname']);
 
         $envvar = new \OMV\Config\ConfigObject('conf.service.restic.envvar');
         $envvar->setAssoc($params);

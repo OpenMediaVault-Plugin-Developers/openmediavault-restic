@@ -3,6 +3,9 @@
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
+{#- The scripts write their own output to the log (via `tee -a`), so only
+    stderr that escapes them is appended here. Appending stdout as well
+    would log every line twice. #}
 {%- for job in jobs %}
-{{ job.cronexpr }} root {{ job.scriptfile }} >> {{ logdir }}/restic.log 2>&1
+{{ job.cronexpr }} root {{ job.scriptfile }} >/dev/null 2>>{{ logdir }}/restic.log
 {%- endfor %}

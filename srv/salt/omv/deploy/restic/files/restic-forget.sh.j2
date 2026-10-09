@@ -1,7 +1,7 @@
 #!/bin/bash
 {{ pillar['headers']['auto_generated'] }}
 {{ pillar['headers']['warning'] }}
-# Restic scheduled retention policy: {{ repo.uuid }} ({{ repo.name }})
+# Restic scheduled retention policy: {{ repo.uuid }} ({{ repo.name | replace('\r', ' ') | replace('\n', ' ') }})
 {# POSIX single-quote shell escaping: wrap in single quotes and replace any
    embedded single quote with the '\'' sequence. Keeps secrets and paths safe
    from word splitting and shell injection. #}
@@ -54,7 +54,7 @@ trap '_send_email $?' EXIT
 exec >"${EMAIL_TMP}" 2>&1
 {% endif %}
 
-log "=== Applying retention policy: {{ repo.name }} ==="
+log {{ sq('=== Applying retention policy: ' ~ repo.name ~ ' ===') }}
 
 # Load shared environment variables
 if [ -f /etc/restic/restic-envvar-shared ]; then

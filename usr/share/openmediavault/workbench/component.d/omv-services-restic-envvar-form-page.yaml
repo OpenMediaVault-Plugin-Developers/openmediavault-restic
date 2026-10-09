@@ -20,7 +20,9 @@ data:
         hint: _("This must be a valid Restic environment variable.")
         validators:
           required: true
-          patternType: 'shareName'
+          pattern:
+            pattern: '^[A-Za-z_][A-Za-z0-9_ ]*$'
+            errorData: _("Use letters, digits and underscores only, not starting with a digit.")
       - type: textInput
         name: envvalue
         label: _("Value")

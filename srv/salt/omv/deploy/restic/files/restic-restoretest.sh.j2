@@ -1,7 +1,7 @@
 #!/bin/bash
 {{ pillar['headers']['auto_generated'] }}
 {{ pillar['headers']['warning'] }}
-# Restic restore test job: {{ job.uuid }}{% if job.name %} ({{ job.name }}){% endif %}
+# Restic restore test job: {{ job.uuid }}{% if job.name %} ({{ job.name | replace('\r', ' ') | replace('\n', ' ') }}){% endif %}
 {# POSIX single-quote shell escaping: wrap in single quotes and replace any
    embedded single quote with the '\'' sequence. Keeps secrets and paths safe
    from word splitting and shell injection. #}
@@ -46,7 +46,7 @@ trap '_send_email $?' EXIT
 exec >"${EMAIL_TMP}" 2>&1
 {% endif %}
 
-log "=== Starting restore test{% if job.name %}: {{ job.name }}{% endif %} ({{ job.mode }}) ==="
+log {{ sq('=== Starting restore test' ~ ((': ' ~ job.name) if job.name else '') ~ ' (' ~ job.mode ~ ') ===') }}
 
 # Load shared environment variables
 if [ -f /etc/restic/restic-envvar-shared ]; then

@@ -62,5 +62,12 @@ class OMVModuleRestic extends \OMV\Engine\Module\ServiceAbstract implements \OMV
             "org.openmediavault.conf.service.restic.restuser",
             [ $this, "setDirty" ]
         );
+        // The generated scripts and the REST server unit contain the full
+        // paths of shared folders, so redeploy when a shared folder changes.
+        $dispatcher->addListener(
+            OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
+            "org.openmediavault.conf.system.sharedfolder",
+            [ $this, "setDirty" ]
+        );
     }
 }

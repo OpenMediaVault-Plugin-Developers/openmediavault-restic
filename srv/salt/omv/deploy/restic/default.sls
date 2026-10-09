@@ -180,6 +180,7 @@ configure_restic_job_script_{{ job.uuid }}:
         repo: {{ repo | json }}
         repo_path: "{{ repo_path }}"
         source_paths: {{ source_paths | json }}
+        hashfile: "{{ scriptsDir ~ '/hash-' ~ job.uuid }}"
         cachedir: "{{ cacheDir }}"
         excludefile: "{{ excludeFile if excludeText | trim else '' }}"
         excludecaches: {{ excludeCaches | json }}
@@ -284,6 +285,18 @@ configure_restic_forget_script_{{ repo.uuid }}:
 {% endif %}
 {% endfor %}
 
+{# One field of a "certain date" schedule. "Every N" only applies to a single
+   positive number: `*/0`, `*/*` and `*/1,2` are not valid cron fields. Must
+   match buildCronSchedule() in the RPC service. #}
+{% macro cron_field(value, everyn) -%}
+{%- set v = value | string | trim -%}
+{%- if everyn | string | lower not in ['false', '0', 'no', 'off', ''] and v.isdigit() and v | int > 0 -%}
+*/{{ v }}
+{%- else -%}
+{{ v }}
+{%- endif -%}
+{%- endmacro %}
+
 {# Build the list of enabled cron jobs to pass to the cron template #}
 {% set cronjobs = [] %}
 {% for job in config.snapshots.snapshot %}
@@ -303,10 +316,7 @@ configure_restic_forget_script_{{ repo.uuid }}:
 {% elif job.execution == 'yearly' %}
 {% set ns.cronexpr = '0 0 1 1 *' %}
 {% else %}
-{% set _min = ('*/' ~ job.minute) if job.everynminute else job.minute %}
-{% set _hour = ('*/' ~ job.hour) if job.everynhour else job.hour %}
-{% set _dom = ('*/' ~ job.dayofmonth) if job.everyndayofmonth else job.dayofmonth %}
-{% set ns.cronexpr = _min ~ ' ' ~ _hour ~ ' ' ~ _dom ~ ' ' ~ job.month ~ ' ' ~ job.dayofweek %}
+{% set ns.cronexpr = cron_field(job.minute, job.everynminute) ~ ' ' ~ cron_field(job.hour, job.everynhour) ~ ' ' ~ cron_field(job.dayofmonth, job.everyndayofmonth) ~ ' ' ~ job.month ~ ' ' ~ job.dayofweek %}
 {% endif %}
 {% do cronjobs.append({
     'cronexpr':   ns.cronexpr,
@@ -333,10 +343,7 @@ configure_restic_forget_script_{{ repo.uuid }}:
 {% elif job.execution == 'yearly' %}
 {% set ns.cronexpr = '0 0 1 1 *' %}
 {% else %}
-{% set _min = ('*/' ~ job.minute) if job.everynminute else job.minute %}
-{% set _hour = ('*/' ~ job.hour) if job.everynhour else job.hour %}
-{% set _dom = ('*/' ~ job.dayofmonth) if job.everyndayofmonth else job.dayofmonth %}
-{% set ns.cronexpr = _min ~ ' ' ~ _hour ~ ' ' ~ _dom ~ ' ' ~ job.month ~ ' ' ~ job.dayofweek %}
+{% set ns.cronexpr = cron_field(job.minute, job.everynminute) ~ ' ' ~ cron_field(job.hour, job.everynhour) ~ ' ' ~ cron_field(job.dayofmonth, job.everyndayofmonth) ~ ' ' ~ job.month ~ ' ' ~ job.dayofweek %}
 {% endif %}
 {% do cronjobs.append({
     'cronexpr':   ns.cronexpr,

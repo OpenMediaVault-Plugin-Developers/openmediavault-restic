@@ -45,6 +45,8 @@ data:
         execute:
           type: url
           url: "/services/restic/repos/edit/{{ _selected[0].uuid }}"
+      # Removes the repository from the configuration only; its data is kept
+      # so it can be imported again ("Skip initialisation").
       - template: delete
         execute:
           type: request
@@ -53,6 +55,7 @@ data:
             method: deleteRepo
             params:
               uuid: "{{ _selected[0].uuid }}"
+              deletedata: false
         enabledConstraints:
           minSelected: 1
           maxSelected: 1
@@ -61,6 +64,32 @@ data:
               arg0:
                 prop: snapshotCount
               arg1: 0
+      - type: iconButton
+        icon: mdi:delete-forever
+        tooltip: _("Delete repository and its data")
+        confirmationDialogConfig:
+          template: confirmation-danger
+          message: _("Remove this repository and permanently delete all of its backup data from the shared folder? This cannot be undone.")
+        execute:
+          type: request
+          request:
+            service: Restic
+            method: deleteRepo
+            params:
+              uuid: "{{ _selected[0].uuid }}"
+              deletedata: true
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+          constraint:
+            - operator: eq
+              arg0:
+                prop: snapshotCount
+              arg1: 0
+            - operator: eq
+              arg0:
+                prop: type
+              arg1: "local"
       - type: iconButton
         icon: mdi:magnify
         tooltip: _("View snapshots stored in this repository")

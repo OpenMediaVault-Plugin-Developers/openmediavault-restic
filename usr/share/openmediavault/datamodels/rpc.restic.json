@@ -31,6 +31,7 @@
         },
         "name": {
           "type": "string",
+          "pattern": "^[^\\x00-\\x1f]*\\z",
           "required": true
         },
         "type": {
@@ -82,7 +83,7 @@
         },
         "checkreaddata": {
           "type": "string",
-          "pattern": "^$|^([1-9][0-9]?(\\.[0-9]+)?|100)%$|^[1-9][0-9]*\\/[1-9][0-9]*$|^[1-9][0-9]*[KMGT]?$"
+          "pattern": "^\\z|^([1-9][0-9]?(\\.[0-9]+)?|100)%\\z|^[1-9][0-9]*\\/[1-9][0-9]*\\z|^[1-9][0-9]*[KMGT]?\\z"
         },
         "checkemail": {
           "type": "string",
@@ -114,11 +115,11 @@
         },
         "forgethost": {
           "type": "string",
-          "pattern": "^[a-zA-Z0-9._-]*$"
+          "pattern": "^[a-zA-Z0-9._-]*\\z"
         },
         "forgettag": {
           "type": "string",
-          "pattern": "^[a-zA-Z0-9._:=@+-]*$"
+          "pattern": "^[a-zA-Z0-9._:=@+-]*\\z"
         },
         "forgetprune": {
           "type": "boolean"
@@ -145,7 +146,8 @@
           "type": "boolean"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^\\x00-\\x1f]*\\z"
         },
         "hash": {
           "type": "string",
@@ -206,7 +208,7 @@
         },
         "minute": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": { "type": "string", "pattern": "^(\\*|[0-9]{1,2})\\z" },
           "required": true
         },
         "everynminute": {
@@ -215,7 +217,7 @@
         },
         "hour": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": { "type": "string", "pattern": "^(\\*|[0-9]{1,2})\\z" },
           "required": true
         },
         "everynhour": {
@@ -224,7 +226,7 @@
         },
         "dayofmonth": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": { "type": "string", "pattern": "^(\\*|[0-9]{1,2})\\z" },
           "required": true
         },
         "everyndayofmonth": {
@@ -233,12 +235,12 @@
         },
         "month": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": { "type": "string", "pattern": "^(\\*|[0-9]{1,2})\\z" },
           "required": true
         },
         "dayofweek": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": { "type": "string", "pattern": "^(\\*|[0-9]{1,2})\\z" },
           "required": true
         },
         "keeplast": {
@@ -284,10 +286,12 @@
         },
         "envname": {
           "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*\\z",
           "required": true
         },
         "envvalue": {
           "type": "string",
+          "pattern": "^[^\\x00-\\x1f]*\\z",
           "required": true
         },
         "reporef": {
@@ -356,7 +360,8 @@
           "type": "boolean"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^\\x00-\\x1f]*\\z"
         },
         "reporef": {
           "type": "string",
@@ -393,7 +398,8 @@
         "minute": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(\\*|[0-9]{1,2})\\z"
           },
           "required": true
         },
@@ -404,7 +410,8 @@
         "hour": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(\\*|[0-9]{1,2})\\z"
           },
           "required": true
         },
@@ -415,7 +422,8 @@
         "dayofmonth": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(\\*|[0-9]{1,2})\\z"
           },
           "required": true
         },
@@ -426,14 +434,16 @@
         "month": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(\\*|[0-9]{1,2})\\z"
           },
           "required": true
         },
         "dayofweek": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(\\*|[0-9]{1,2})\\z"
           },
           "required": true
         },
@@ -465,7 +475,7 @@
         },
         "snapshotid": {
           "type": "string",
-          "pattern": "^[0-9a-f]{8,64}$",
+          "pattern": "^[0-9a-f]{8,64}\\z",
           "required": true
         },
         "prune": {
@@ -546,7 +556,7 @@
         },
         "username": {
           "type": "string",
-          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*\\z",
           "required": true
         },
         "password": {
@@ -568,7 +578,7 @@
         },
         "snapshotids": {
           "type": "string",
-          "pattern": "^[0-9a-f]{8,64}(,[0-9a-f]{8,64})*$",
+          "pattern": "^[0-9a-f]{8,64}(,[0-9a-f]{8,64})*\\z",
           "required": true
         },
         "prune": {
@@ -591,6 +601,24 @@
         "dryrun": {
           "type": "boolean",
           "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.deleterepo",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "deletedata": {
+          "type": "boolean",
+          "default": false
         }
       }
     }

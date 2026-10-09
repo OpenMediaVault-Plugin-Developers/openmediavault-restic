@@ -1,5 +1,8 @@
 {{ pillar['headers']['auto_generated'] }}
 {{ pillar['headers']['warning'] }}
+{#- Values are single-quoted, so the file can be sourced by bash and its
+    lines used as-is in the `export NAME=value;` statements built by the RPC
+    service, without the shell expanding $, ` or \ in a value. #}
 {%- for envvar in config.envvars.envvar | selectattr("reporef", "equalto", repouuid) %}
-{{ envvar.envname }}="{{ envvar.envvalue }}"
+{{ envvar.envname }}='{{ envvar.envvalue | string | replace("'", "'\\''") }}'
 {%- endfor %}
