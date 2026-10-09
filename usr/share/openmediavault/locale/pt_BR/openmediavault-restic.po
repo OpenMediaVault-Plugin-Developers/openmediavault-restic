@@ -5,15 +5,16 @@
 # 
 # Translators:
 # Jeann Cavalcante <wjeann@gmail.com>, 2026
+# Marcelo Esteves <marcelopge@gmail.com>, 2026
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-31 01:25+0000\n"
+"POT-Creation-Date: 2026-10-09 20:50+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
-"Last-Translator: Jeann Cavalcante <wjeann@gmail.com>, 2026\n"
+"Last-Translator: Marcelo Esteves <marcelopge@gmail.com>, 2026\n"
 "Language-Team: Portuguese (Brazil) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,8 +22,17 @@ msgstr ""
 "Language: pt_BR\n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
+msgid "'Every N %s' needs exactly one value greater than 0."
+msgstr ""
+
+msgid "0 = disabled."
+msgstr ""
+
 msgid "A repository must be specified."
 msgstr "É necessário especificar um repositório."
+
+msgid "Access"
+msgstr ""
 
 msgid "Account ID / Access key"
 msgstr "ID da conta / Chave de acesso"
@@ -39,14 +49,26 @@ msgstr ""
 msgid "All selected folders will be included in the same snapshot."
 msgstr ""
 
-msgid "April"
+msgid "Always"
 msgstr ""
+
+msgid "Append-only"
+msgstr ""
+
+msgid "Apply now"
+msgstr ""
+
+msgid "Applying retention policy ..."
+msgstr ""
+
+msgid "April"
+msgstr "Abril"
 
 msgid "At reboot"
-msgstr ""
+msgstr "No reboot"
 
 msgid "August"
-msgstr ""
+msgstr "Agosto"
 
 msgid "Backblaze B2 (native API)"
 msgstr ""
@@ -63,10 +85,25 @@ msgstr ""
 msgid "Certain date"
 msgstr ""
 
-msgid "Check repository integrity"
+msgid "Certificate"
 msgstr ""
 
+msgid "Check repository integrity"
+msgstr "Verificar integridade do repositório"
+
 msgid "Checking repository integrity ..."
+msgstr "Verificando integridade do repositório ..."
+
+msgid "Clean up after verify"
+msgstr ""
+
+msgid "Cleanup"
+msgstr ""
+
+msgid "Clients can add snapshots but cannot delete existing data."
+msgstr ""
+
+msgid "Clients must log in as one of the users on the Users page."
 msgstr ""
 
 msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
@@ -76,13 +113,37 @@ msgid ""
 "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
 msgstr ""
 
+msgid ""
+"Command run after the backup, even if it failed. The exit code is in "
+"RESTIC_JOB_EXIT."
+msgstr ""
+
+msgid ""
+"Command run after the restore test, even if it failed. The exit code is in "
+"RESTIC_JOB_EXIT."
+msgstr ""
+
+msgid "Command run before the backup. If it fails, the backup is skipped."
+msgstr ""
+
+msgid ""
+"Command run before the restore test. If it fails, the restore test is "
+"skipped."
+msgstr ""
+
 msgid "Create"
 msgstr ""
 
 msgid "Create Backup Job"
 msgstr ""
 
+msgid "Create Restore Test"
+msgstr ""
+
 msgid "Create repository"
+msgstr ""
+
+msgid "Created REST server user."
 msgstr ""
 
 msgid "Created environment variable."
@@ -92,21 +153,41 @@ msgid "Created repository."
 msgstr ""
 
 msgid "Daily"
+msgstr "Diariamente"
+
+msgid "Daily (02:00)"
+msgstr ""
+
+msgid "Daily (03:00)"
 msgstr ""
 
 msgid "Date / Time"
-msgstr ""
+msgstr "Data / Hora"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Data/Hora"
 
 msgid "Day of month"
-msgstr ""
+msgstr "Dia do mês"
 
 msgid "Day of week"
+msgstr "Dia da semana"
+
+msgid "Days with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "December"
+msgstr ""
+
+msgid "Default excludes"
+msgstr ""
+
+msgid "Delete repository and its data"
+msgstr ""
+
+msgid ""
+"Delete the restored data once the verify completes. Only the per-test "
+"subdirectory created in the target folder is removed."
 msgstr ""
 
 msgid ""
@@ -115,13 +196,38 @@ msgid ""
 "caching (not recommended)."
 msgstr ""
 
+msgid "Disabled"
+msgstr ""
+
+msgid "Dry run"
+msgstr ""
+
+msgid "Dry run (preview only)"
+msgstr ""
+
+msgid ""
+"Dry run previews what would be restored (fast, reads only metadata, writes "
+"nothing). Verify performs a full restore and checks each restored file's "
+"contents against the snapshot (reads all data, writes to disk)."
+msgstr ""
+
+msgid ""
+"Each user only sees repositories under a path named after their username."
+msgstr ""
+
 msgid "Edit"
 msgstr ""
 
 msgid "Edit Backup Job"
 msgstr ""
 
+msgid "Edit Restore Test"
+msgstr ""
+
 msgid "Edit repository"
+msgstr ""
+
+msgid "Edited REST server user."
 msgstr ""
 
 msgid "Edited environment variable."
@@ -131,7 +237,29 @@ msgid "Edited repository."
 msgstr ""
 
 msgid ""
+"Email the check output to the root user. Requires notifications to be "
+"configured."
+msgstr ""
+
+msgid ""
+"Email the job output to the root user (and any address aliased to it) after "
+"each scheduled run. Requires a working email/notification setup under "
+"System."
+msgstr ""
+
+msgid ""
+"Email the restore test output to the root user (and any address aliased to "
+"it) after each scheduled run. Requires a working email/notification setup "
+"under System."
+msgstr ""
+
+msgid ""
 "Enable or disable this backup job. Disabled jobs are skipped by the "
+"scheduler."
+msgstr ""
+
+msgid ""
+"Enable or disable this restore test. Disabled tests are skipped by the "
 "scheduler."
 msgstr ""
 
@@ -155,28 +283,65 @@ msgstr ""
 msgid "Every N minute"
 msgstr ""
 
+msgid "Exclude cache directories"
+msgstr ""
+
 msgid "Exclude patterns"
 msgstr ""
 
 msgid "February"
-msgstr ""
+msgstr "Fevereiro"
 
 msgid ""
 "Files will be restored into this shared folder. Existing files may be "
 "overwritten."
 msgstr ""
 
-msgid "Friday"
+msgid "Folder holding the served repositories."
 msgstr ""
 
+msgid "Forget"
+msgstr ""
+
+msgid "Forget (delete) selected snapshots"
+msgstr ""
+
+msgid ""
+"Forget all snapshots outside this repository's retention policy? This cannot"
+" be undone."
+msgstr ""
+
+msgid "Forget and prune"
+msgstr ""
+
+msgid "Forget old snapshots from every host using this repository."
+msgstr ""
+
+msgid "Forgetting snapshots ..."
+msgstr ""
+
+msgid "Forgetting snapshots and pruning ..."
+msgstr ""
+
+msgid ""
+"Free the space of forgotten snapshots right away. Can take a long time on "
+"large repositories."
+msgstr ""
+
+msgid "Friday"
+msgstr "Sexta-feira"
+
 msgid "Help"
+msgstr ""
+
+msgid "Hooks"
 msgstr ""
 
 msgid "Hostname"
 msgstr ""
 
 msgid "Hour"
-msgstr ""
+msgstr "Hora"
 
 msgid "Hourly"
 msgstr ""
@@ -184,8 +349,20 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
-msgid "January"
+msgid "Inspect snapshot"
 msgstr ""
+
+msgid "Inspecting snapshot ..."
+msgstr ""
+
+msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid "Invalid tag."
+msgstr ""
+
+msgid "January"
+msgstr "Janeiro"
 
 msgid "Job"
 msgstr ""
@@ -224,12 +401,23 @@ msgid "Keep this many of the most recent snapshots (0 = disabled)."
 msgstr ""
 
 msgid "Keep weekly"
-msgstr ""
+msgstr "Mantenha semanalmente"
 
 msgid "Keep yearly"
-msgstr ""
+msgstr "Mantenha anualmente"
 
 msgid "Last snapshot"
+msgstr "Último instantâneo"
+
+msgid ""
+"Letters, digits, dot, dash and underscore. With private repositories enabled"
+" this is also the user's repository sub-path."
+msgstr ""
+
+msgid "List files in snapshot"
+msgstr ""
+
+msgid "Listing snapshot files ..."
 msgstr ""
 
 msgid "Local (shared folder)"
@@ -239,15 +427,18 @@ msgid "Location / URI"
 msgstr ""
 
 msgid "March"
-msgstr ""
+msgstr "Março"
 
 msgid "May"
-msgstr ""
+msgstr "Maio"
 
 msgid "Message"
-msgstr ""
+msgstr "Mensagem"
 
 msgid "Minute"
+msgstr "Minuto"
+
+msgid "Mode"
 msgstr ""
 
 msgid "Monday"
@@ -257,18 +448,50 @@ msgid "Month"
 msgstr ""
 
 msgid "Monthly"
+msgstr "Mensalmente"
+
+msgid "Monthly (1st, 02:00)"
+msgstr ""
+
+msgid "Monthly (1st, 03:00)"
+msgstr ""
+
+msgid "Months with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "Name"
+msgstr "Nome"
+
+msgid "Never"
+msgstr ""
+
+msgid "Notifications"
 msgstr ""
 
 msgid "November"
-msgstr ""
+msgstr "Novembro"
 
 msgid "OMV-Extras Wiki"
 msgstr ""
 
 msgid "October"
+msgstr "Outubro"
+
+msgid ""
+"One pattern per line, applied to every backup job in addition to its own "
+"excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are "
+"comments."
+msgstr ""
+
+msgid ""
+"Only a hash of the password is stored. When editing, leave blank to keep the"
+" current password."
+msgstr ""
+
+msgid "Only host"
+msgstr ""
+
+msgid "Only on error"
 msgstr ""
 
 msgid ""
@@ -276,13 +499,47 @@ msgid ""
 "/home/user/documents)."
 msgstr ""
 
+msgid ""
+"Only restore-test files matching this path prefix within the snapshot (e.g. "
+"/home/user/documents). Leave blank to test the whole snapshot."
+msgstr ""
+
+msgid "Only send an email if the scheduled job exits with an error."
+msgstr ""
+
+msgid ""
+"Only send an email if the scheduled restore test exits with an error (i.e. "
+"the backup could not be restored/verified)."
+msgstr ""
+
+msgid "Only tag"
+msgstr ""
+
 msgid "Optional human-readable name for this backup job."
 msgstr ""
 
-msgid "Options"
+msgid "Optional human-readable name for this restore test."
 msgstr ""
 
+msgid ""
+"Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 "
+"or 500M. Leave blank to only check the repository structure. Reading data "
+"from cloud storage may incur egress costs."
+msgstr ""
+
+msgid "Optional. Only apply to snapshots from this hostname."
+msgstr ""
+
+msgid "Optional. Only apply to snapshots with this tag."
+msgstr ""
+
+msgid "Options"
+msgstr "Opções"
+
 msgid "Passphrase"
+msgstr ""
+
+msgid "Password"
 msgstr ""
 
 msgid "Path filter (optional)"
@@ -291,13 +548,51 @@ msgstr ""
 msgid "Paths"
 msgstr ""
 
+msgid "Periodically run 'restic check' against this repository."
+msgstr ""
+
+msgid "Port"
+msgstr ""
+
+msgid "Post-script"
+msgstr ""
+
+msgid "Pre-script"
+msgstr ""
+
+msgid "Preview (dry run)"
+msgstr ""
+
+msgid ""
+"Preview what would be restored without writing any files. Useful for "
+"verifying a snapshot's contents are intact and browsable."
+msgstr ""
+
+msgid "Private repositories"
+msgstr ""
+
+msgid "Prune"
+msgstr ""
+
 msgid "Prune unused data from repository"
 msgstr ""
 
 msgid "Pruning repository ..."
 msgstr ""
 
+msgid "REST Server"
+msgstr ""
+
+msgid "REST Users"
+msgstr ""
+
 msgid "REST server"
+msgstr "Servidor REST"
+
+msgid "Read data subset"
+msgstr ""
+
+msgid "Recommended when login is required."
 msgstr ""
 
 msgid "Refresh snapshot list"
@@ -309,11 +604,26 @@ msgstr ""
 msgid "Remove stale locks (unlock)"
 msgstr ""
 
+msgid ""
+"Remove the selected snapshots and prune the data no longer referenced by any"
+" snapshot? This cannot be undone and may take a long time."
+msgstr ""
+
+msgid ""
+"Remove the selected snapshots from the repository? The data they reference "
+"is kept until the repository is pruned."
+msgstr ""
+
+msgid ""
+"Remove this repository and permanently delete all of its backup data from "
+"the shared folder? This cannot be undone."
+msgstr ""
+
 msgid "Repositories"
 msgstr ""
 
 msgid "Repository"
-msgstr ""
+msgstr "Repositório"
 
 msgid "Repository Snapshots"
 msgstr ""
@@ -323,10 +633,18 @@ msgid ""
 "repository first."
 msgstr ""
 
-msgid "Repository name"
+msgid ""
+"Repository is in use. Please delete the restore tests associated with this "
+"repository first."
 msgstr ""
 
+msgid "Repository name"
+msgstr "Nome do repositório"
+
 msgid "Repository statistics ..."
+msgstr ""
+
+msgid "Require login"
 msgstr ""
 
 msgid "Restic"
@@ -338,7 +656,16 @@ msgstr ""
 msgid "Restore Snapshot"
 msgstr ""
 
+msgid "Restore Tests"
+msgstr ""
+
 msgid "Restore target folder"
+msgstr ""
+
+msgid "Restore test"
+msgstr ""
+
+msgid "Restore test saved."
 msgstr ""
 
 msgid "Restore this snapshot to a shared folder"
@@ -348,31 +675,49 @@ msgid "Restoring snapshot, this may take a while…"
 msgstr ""
 
 msgid "Retention policy"
+msgstr "Política de retenção"
+
+msgid "Retention policy preview ..."
 msgstr ""
 
 msgid "Run backup now"
 msgstr ""
 
+msgid "Run restore test now"
+msgstr ""
+
 msgid "Running backup job ..."
+msgstr ""
+
+msgid "Running restore test ..."
 msgstr ""
 
 msgid "S3 compatible"
 msgstr ""
 
 msgid "SFTP"
-msgstr ""
+msgstr "SFTP"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Sábado"
 
 msgid "Schedule"
+msgstr ""
+
+msgid "Scheduled integrity check"
+msgstr ""
+
+msgid "Scheduled retention"
+msgstr ""
+
+msgid "Secure connection"
 msgstr ""
 
 msgid "Select a repository"
 msgstr ""
 
 msgid "Select a repository."
-msgstr ""
+msgstr "Selecione um repositório"
 
 msgid "Select one or more shared folders to back up."
 msgstr ""
@@ -381,14 +726,32 @@ msgid ""
 "Selecting 'All Repositories' will ensure that the environment variable will "
 "be applied to all repositories."
 msgstr ""
+"Selecionar 'Todos os Repositórios' garantirá que a variável de ambiente seja"
+" aplicada a todos os repositórios."
+
+msgid "Send command output via email"
+msgstr ""
+
+msgid "Send email"
+msgstr ""
+
+msgid "Send email on error only"
+msgstr ""
 
 msgid "September"
-msgstr ""
+msgstr "Setembro"
 
 msgid "Settings"
 msgstr "Configurações"
 
 msgid "Shared Folder"
+msgstr "Pasta compartilhada"
+
+msgid "Shared folder"
+msgstr ""
+
+msgid ""
+"Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches)."
 msgstr ""
 
 msgid "Skip initialisation"
@@ -404,15 +767,27 @@ msgid "Source folders"
 msgstr ""
 
 msgid "Sunday"
+msgstr "Domingo"
+
+msgid "TLS enabled"
 msgstr ""
 
 msgid "Tags"
 msgstr ""
 
+msgid "Target folder"
+msgstr ""
+
 msgid "Test connection"
 msgstr "Testar conexão"
 
+msgid "Test mode"
+msgstr ""
+
 msgid "Testing repository connection ..."
+msgstr ""
+
+msgid "The latest snapshot in this repository will be restore-tested."
 msgstr ""
 
 msgid "The shared folder used as the restic repository location."
@@ -422,7 +797,7 @@ msgid "This must be a valid Restic environment variable."
 msgstr ""
 
 msgid "Thursday"
-msgstr ""
+msgstr "Quinta-feira"
 
 msgid ""
 "Tick this to import an existing restic repository. The passphrase must match"
@@ -441,7 +816,33 @@ msgstr "Tipo"
 msgid "Unlocking repository ..."
 msgstr ""
 
+msgid "Use a percentage (5%), a fraction (1/7) or a size (500M)."
+msgstr ""
+
+msgid "Use letters, digits and underscores only, not starting with a digit."
+msgstr ""
+
+msgid "Use letters, digits, dot, dash and underscore only."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Users"
+msgstr ""
+
 msgid "Value"
+msgstr ""
+
+msgid "Verify (full restore + checksum)"
+msgstr ""
+
+msgid ""
+"Verify restores into a per-test subdirectory inside this shared folder. "
+"Required for verify mode."
+msgstr ""
+
+msgid "Verify target folder"
 msgstr ""
 
 msgid "View repository statistics"
@@ -456,8 +857,20 @@ msgstr "Quarta-feira"
 msgid "Weekly"
 msgstr "Semanal"
 
+msgid "Weekly (Sunday 02:00)"
+msgstr ""
+
+msgid "Weekly (Sunday 03:00)"
+msgstr ""
+
+msgid "Weeks with one snapshot each. 0 = disabled."
+msgstr ""
+
 msgid "Yearly"
 msgstr "Anual"
+
+msgid "Years with one snapshot each. 0 = disabled."
+msgstr ""
 
 msgid "n/a"
 msgstr "n/a"

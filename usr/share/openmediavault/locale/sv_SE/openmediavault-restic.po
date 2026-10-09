@@ -3,13 +3,17 @@
 # This file is distributed under the same license as the openmediavault-restic package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
+# Translators:
+# Jonatan Nyberg, 2026
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 01:34+0000\n"
+"POT-Creation-Date: 2026-10-09 20:50+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
+"Last-Translator: Jonatan Nyberg, 2026\n"
 "Language-Team: Swedish (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,92 +21,179 @@ msgstr ""
 "Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "'Every N %s' needs exactly one value greater than 0."
+msgstr ""
+
+msgid "0 = disabled."
+msgstr ""
+
 msgid "A repository must be specified."
+msgstr "Ett arkiv måste anges."
+
+msgid "Access"
 msgstr ""
 
 msgid "Account ID / Access key"
-msgstr ""
+msgstr "Konto-ID/åtkomstnyckel"
 
 msgid "Account key / Secret key"
-msgstr ""
+msgstr "Kontonyckel/hemlig nyckel"
 
 msgid ""
 "After each backup the retention policy is applied. Snapshots outside these "
 "limits are forgotten and the repository is pruned. Set a field to 0 to "
 "disable that limit."
 msgstr ""
+"Efter varje säkerhetskopiering tillämpas lagringspolicyn. Ögonblicksbilder "
+"utanför gränserna glöms bort och oanvända data rensas ur arkivet. Ange 0 i "
+"ett fält för att inaktivera den gränsen."
 
 msgid "All selected folders will be included in the same snapshot."
+msgstr "Alla valda mappar tas med i samma ögonblicksbild."
+
+msgid "Always"
+msgstr ""
+
+msgid "Append-only"
+msgstr ""
+
+msgid "Apply now"
+msgstr ""
+
+msgid "Applying retention policy ..."
 msgstr ""
 
 msgid "April"
-msgstr ""
+msgstr "April"
 
 msgid "At reboot"
-msgstr ""
+msgstr "Vid omstart"
 
 msgid "August"
-msgstr ""
+msgstr "Augusti"
 
 msgid "Backblaze B2 (native API)"
-msgstr ""
+msgstr "Backblaze B2 (inbyggt API)"
 
 msgid "Backup Jobs"
-msgstr ""
+msgstr "Säkerhetskopieringsjobb"
 
 msgid "Backup job saved."
-msgstr ""
+msgstr "Säkerhetskopieringsjobbet har sparats."
 
 msgid "Cache directory"
-msgstr ""
+msgstr "Cachekatalog"
 
 msgid "Certain date"
+msgstr "Visst datum"
+
+msgid "Certificate"
 msgstr ""
 
 msgid "Check repository integrity"
-msgstr ""
+msgstr "Kontrollera arkivets integritet"
 
 msgid "Checking repository integrity ..."
+msgstr "Kontrollerar arkivets integritet…"
+
+msgid "Clean up after verify"
+msgstr ""
+
+msgid "Cleanup"
+msgstr ""
+
+msgid "Clients can add snapshots but cannot delete existing data."
+msgstr ""
+
+msgid "Clients must log in as one of the users on the Users page."
 msgstr ""
 
 msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
 msgstr ""
+"Kommaseparerad lista över mönster som ska undantas, till exempel "
+"*.tmp,/proc,/sys."
 
 msgid ""
 "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
 msgstr ""
+"Kommaseparerad lista över etiketter som ska läggas till i ögonblicksbilden, "
+"till exempel daily,offsite."
 
-msgid "Create"
+msgid ""
+"Command run after the backup, even if it failed. The exit code is in "
+"RESTIC_JOB_EXIT."
 msgstr ""
 
+msgid ""
+"Command run after the restore test, even if it failed. The exit code is in "
+"RESTIC_JOB_EXIT."
+msgstr ""
+
+msgid "Command run before the backup. If it fails, the backup is skipped."
+msgstr ""
+
+msgid ""
+"Command run before the restore test. If it fails, the restore test is "
+"skipped."
+msgstr ""
+
+msgid "Create"
+msgstr "Skapa"
+
 msgid "Create Backup Job"
+msgstr "Skapa säkerhetskopieringsjobb"
+
+msgid "Create Restore Test"
 msgstr ""
 
 msgid "Create repository"
+msgstr "Skapa arkiv"
+
+msgid "Created REST server user."
 msgstr ""
 
 msgid "Created environment variable."
-msgstr ""
+msgstr "Miljövariabeln har skapats."
 
 msgid "Created repository."
-msgstr ""
+msgstr "Arkivet har skapats."
 
 msgid "Daily"
+msgstr "Daglig"
+
+msgid "Daily (02:00)"
+msgstr ""
+
+msgid "Daily (03:00)"
 msgstr ""
 
 msgid "Date / Time"
-msgstr ""
+msgstr "Datum/tid"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Datum/tid"
 
 msgid "Day of month"
-msgstr ""
+msgstr "Dag i månaden"
 
 msgid "Day of week"
+msgstr "Veckodag"
+
+msgid "Days with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "December"
+msgstr "December"
+
+msgid "Default excludes"
+msgstr ""
+
+msgid "Delete repository and its data"
+msgstr ""
+
+msgid ""
+"Delete the restored data once the verify completes. Only the per-test "
+"subdirectory created in the target folder is removed."
 msgstr ""
 
 msgid ""
@@ -110,353 +201,702 @@ msgid ""
 "operations, especially for remote repositories. Leave blank to disable "
 "caching (not recommended)."
 msgstr ""
+"Katalogen där Restic lagrar sin lokala cache. Cachen påskyndar åtgärder, "
+"särskilt för fjärrarkiv. Lämna fältet tomt för att inaktivera cachning, "
+"vilket inte rekommenderas."
 
-msgid "Edit"
+msgid "Disabled"
 msgstr ""
 
+msgid "Dry run"
+msgstr ""
+
+msgid "Dry run (preview only)"
+msgstr ""
+
+msgid ""
+"Dry run previews what would be restored (fast, reads only metadata, writes "
+"nothing). Verify performs a full restore and checks each restored file's "
+"contents against the snapshot (reads all data, writes to disk)."
+msgstr ""
+
+msgid ""
+"Each user only sees repositories under a path named after their username."
+msgstr ""
+
+msgid "Edit"
+msgstr "Redigera"
+
 msgid "Edit Backup Job"
+msgstr "Redigera säkerhetskopieringsjobb"
+
+msgid "Edit Restore Test"
 msgstr ""
 
 msgid "Edit repository"
+msgstr "Redigera arkiv"
+
+msgid "Edited REST server user."
 msgstr ""
 
 msgid "Edited environment variable."
-msgstr ""
+msgstr "Miljövariabeln har redigerats."
 
 msgid "Edited repository."
+msgstr "Arkivet har redigerats."
+
+msgid ""
+"Email the check output to the root user. Requires notifications to be "
+"configured."
+msgstr ""
+
+msgid ""
+"Email the job output to the root user (and any address aliased to it) after "
+"each scheduled run. Requires a working email/notification setup under "
+"System."
+msgstr ""
+
+msgid ""
+"Email the restore test output to the root user (and any address aliased to "
+"it) after each scheduled run. Requires a working email/notification setup "
+"under System."
 msgstr ""
 
 msgid ""
 "Enable or disable this backup job. Disabled jobs are skipped by the "
 "scheduler."
 msgstr ""
+"Aktivera eller inaktivera säkerhetskopieringsjobbet. Inaktiverade jobb "
+"hoppas över av schemaläggaren."
+
+msgid ""
+"Enable or disable this restore test. Disabled tests are skipped by the "
+"scheduler."
+msgstr ""
 
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiverad"
 
 msgid ""
 "Ensure that the passphrase is strong and stored securely. It cannot be "
 "recovered if lost."
 msgstr ""
+"Se till att lösenfrasen är stark och förvaras säkert. Den kan inte "
+"återställas om den går förlorad."
 
 msgid "Environment Variables"
-msgstr ""
+msgstr "Miljövariabler"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "Var N:e dag i månaden"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "Var N:e timme"
 
 msgid "Every N minute"
+msgstr "Var N:e minut"
+
+msgid "Exclude cache directories"
 msgstr ""
 
 msgid "Exclude patterns"
-msgstr ""
+msgstr "Undantagsmönster"
 
 msgid "February"
-msgstr ""
+msgstr "Februari"
 
 msgid ""
 "Files will be restored into this shared folder. Existing files may be "
 "overwritten."
 msgstr ""
+"Filerna återställs till den här delade mappen. Befintliga filer kan skrivas "
+"över."
 
-msgid "Friday"
+msgid "Folder holding the served repositories."
 msgstr ""
 
+msgid "Forget"
+msgstr ""
+
+msgid "Forget (delete) selected snapshots"
+msgstr ""
+
+msgid ""
+"Forget all snapshots outside this repository's retention policy? This cannot"
+" be undone."
+msgstr ""
+
+msgid "Forget and prune"
+msgstr ""
+
+msgid "Forget old snapshots from every host using this repository."
+msgstr ""
+
+msgid "Forgetting snapshots ..."
+msgstr ""
+
+msgid "Forgetting snapshots and pruning ..."
+msgstr ""
+
+msgid ""
+"Free the space of forgotten snapshots right away. Can take a long time on "
+"large repositories."
+msgstr ""
+
+msgid "Friday"
+msgstr "Fredag"
+
 msgid "Help"
+msgstr "Hjälp"
+
+msgid "Hooks"
 msgstr ""
 
 msgid "Hostname"
-msgstr ""
+msgstr "Värdnamn"
 
 msgid "Hour"
-msgstr ""
+msgstr "Timme"
 
 msgid "Hourly"
-msgstr ""
+msgstr "Varje timme"
 
 msgid "ID"
+msgstr "ID"
+
+msgid "Inspect snapshot"
+msgstr ""
+
+msgid "Inspecting snapshot ..."
+msgstr ""
+
+msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid "Invalid tag."
 msgstr ""
 
 msgid "January"
-msgstr ""
+msgstr "Januari"
 
 msgid "Job"
-msgstr ""
+msgstr "Jobb"
 
 msgid "Job name"
-msgstr ""
+msgstr "Jobbnamn"
 
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 msgid "Keep daily"
-msgstr ""
+msgstr "Behåll dagliga"
 
 msgid "Keep last N"
-msgstr ""
+msgstr "Behåll de N senaste"
 
 msgid "Keep monthly"
-msgstr ""
+msgstr "Behåll månatliga"
 
 msgid "Keep one snapshot per day for this many days (0 = disabled)."
 msgstr ""
+"Behåll en ögonblicksbild per dag i så här många dagar (0 = inaktiverat)."
 
 msgid "Keep one snapshot per month for this many months (0 = disabled)."
 msgstr ""
+"Behåll en ögonblicksbild per månad i så här många månader (0 = inaktiverat)."
 
 msgid "Keep one snapshot per week for this many weeks (0 = disabled)."
 msgstr ""
+"Behåll en ögonblicksbild per vecka i så här många veckor (0 = inaktiverat)."
 
 msgid "Keep one snapshot per year for this many years (0 = disabled)."
-msgstr ""
+msgstr "Behåll en ögonblicksbild per år i så här många år (0 = inaktiverat)."
 
 msgid "Keep this many of the most recent snapshots (0 = disabled)."
 msgstr ""
+"Behåll så här många av de senaste ögonblicksbilderna (0 = inaktiverat)."
 
 msgid "Keep weekly"
-msgstr ""
+msgstr "Behåll veckovisa"
 
 msgid "Keep yearly"
-msgstr ""
+msgstr "Behåll årliga"
 
 msgid "Last snapshot"
+msgstr "Senaste ögonblicksbild"
+
+msgid ""
+"Letters, digits, dot, dash and underscore. With private repositories enabled"
+" this is also the user's repository sub-path."
+msgstr ""
+
+msgid "List files in snapshot"
+msgstr ""
+
+msgid "Listing snapshot files ..."
 msgstr ""
 
 msgid "Local (shared folder)"
-msgstr ""
+msgstr "Lokal (delad mapp)"
 
 msgid "Location / URI"
-msgstr ""
+msgstr "Plats/URI"
 
 msgid "March"
-msgstr ""
+msgstr "Mars"
 
 msgid "May"
-msgstr ""
+msgstr "Maj"
 
 msgid "Message"
-msgstr ""
+msgstr "Meddelande"
 
 msgid "Minute"
+msgstr "Minut"
+
+msgid "Mode"
 msgstr ""
 
 msgid "Monday"
-msgstr ""
+msgstr "Måndag"
 
 msgid "Month"
-msgstr ""
+msgstr "Månad"
 
 msgid "Monthly"
+msgstr "Varje månad"
+
+msgid "Monthly (1st, 02:00)"
+msgstr ""
+
+msgid "Monthly (1st, 03:00)"
+msgstr ""
+
+msgid "Months with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "Name"
+msgstr "Namn"
+
+msgid "Never"
+msgstr ""
+
+msgid "Notifications"
 msgstr ""
 
 msgid "November"
-msgstr ""
+msgstr "November"
 
 msgid "OMV-Extras Wiki"
-msgstr ""
+msgstr "OMV-Extras-wiki"
 
 msgid "October"
+msgstr "Oktober"
+
+msgid ""
+"One pattern per line, applied to every backup job in addition to its own "
+"excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are "
+"comments."
+msgstr ""
+
+msgid ""
+"Only a hash of the password is stored. When editing, leave blank to keep the"
+" current password."
+msgstr ""
+
+msgid "Only host"
+msgstr ""
+
+msgid "Only on error"
 msgstr ""
 
 msgid ""
 "Only restore files matching this path prefix within the snapshot (e.g. "
 "/home/user/documents)."
 msgstr ""
+"Återställ endast filer i ögonblicksbilden vars sökväg börjar med det här "
+"prefixet, till exempel /home/user/documents."
+
+msgid ""
+"Only restore-test files matching this path prefix within the snapshot (e.g. "
+"/home/user/documents). Leave blank to test the whole snapshot."
+msgstr ""
+
+msgid "Only send an email if the scheduled job exits with an error."
+msgstr ""
+
+msgid ""
+"Only send an email if the scheduled restore test exits with an error (i.e. "
+"the backup could not be restored/verified)."
+msgstr ""
+
+msgid "Only tag"
+msgstr ""
 
 msgid "Optional human-readable name for this backup job."
+msgstr "Valfritt läsbart namn på säkerhetskopieringsjobbet."
+
+msgid "Optional human-readable name for this restore test."
+msgstr ""
+
+msgid ""
+"Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 "
+"or 500M. Leave blank to only check the repository structure. Reading data "
+"from cloud storage may incur egress costs."
+msgstr ""
+
+msgid "Optional. Only apply to snapshots from this hostname."
+msgstr ""
+
+msgid "Optional. Only apply to snapshots with this tag."
 msgstr ""
 
 msgid "Options"
-msgstr ""
+msgstr "Inställningar"
 
 msgid "Passphrase"
+msgstr "Lösenfras"
+
+msgid "Password"
 msgstr ""
 
 msgid "Path filter (optional)"
-msgstr ""
+msgstr "Sökvägsfilter (valfritt)"
 
 msgid "Paths"
+msgstr "Sökvägar"
+
+msgid "Periodically run 'restic check' against this repository."
+msgstr ""
+
+msgid "Port"
+msgstr ""
+
+msgid "Post-script"
+msgstr ""
+
+msgid "Pre-script"
+msgstr ""
+
+msgid "Preview (dry run)"
+msgstr ""
+
+msgid ""
+"Preview what would be restored without writing any files. Useful for "
+"verifying a snapshot's contents are intact and browsable."
+msgstr ""
+
+msgid "Private repositories"
+msgstr ""
+
+msgid "Prune"
 msgstr ""
 
 msgid "Prune unused data from repository"
-msgstr ""
+msgstr "Rensa oanvända data ur arkivet"
 
 msgid "Pruning repository ..."
+msgstr "Rensar arkivet…"
+
+msgid "REST Server"
+msgstr ""
+
+msgid "REST Users"
 msgstr ""
 
 msgid "REST server"
+msgstr "REST-server"
+
+msgid "Read data subset"
+msgstr ""
+
+msgid "Recommended when login is required."
 msgstr ""
 
 msgid "Refresh snapshot list"
-msgstr ""
+msgstr "Uppdatera listan över ögonblicksbilder"
 
 msgid "Remote path / URI"
-msgstr ""
+msgstr "Fjärrsökväg/URI"
 
 msgid "Remove stale locks (unlock)"
+msgstr "Ta bort inaktuella lås (lås upp)"
+
+msgid ""
+"Remove the selected snapshots and prune the data no longer referenced by any"
+" snapshot? This cannot be undone and may take a long time."
+msgstr ""
+
+msgid ""
+"Remove the selected snapshots from the repository? The data they reference "
+"is kept until the repository is pruned."
+msgstr ""
+
+msgid ""
+"Remove this repository and permanently delete all of its backup data from "
+"the shared folder? This cannot be undone."
 msgstr ""
 
 msgid "Repositories"
-msgstr ""
+msgstr "Arkiv"
 
 msgid "Repository"
-msgstr ""
+msgstr "Arkiv"
 
 msgid "Repository Snapshots"
-msgstr ""
+msgstr "Arkivets ögonblicksbilder"
 
 msgid ""
 "Repository is in use. Please delete the backup jobs associated with this "
 "repository first."
 msgstr ""
+"Arkivet används. Ta först bort de säkerhetskopieringsjobb som är kopplade "
+"till arkivet."
 
-msgid "Repository name"
+msgid ""
+"Repository is in use. Please delete the restore tests associated with this "
+"repository first."
 msgstr ""
 
+msgid "Repository name"
+msgstr "Arkivnamn"
+
 msgid "Repository statistics ..."
+msgstr "Hämtar arkivstatistik…"
+
+msgid "Require login"
 msgstr ""
 
 msgid "Restic"
-msgstr ""
+msgstr "Restic"
 
 msgid "Restic documentation"
-msgstr ""
+msgstr "Restic-dokumentation"
 
 msgid "Restore Snapshot"
+msgstr "Återställ ögonblicksbild"
+
+msgid "Restore Tests"
 msgstr ""
 
 msgid "Restore target folder"
+msgstr "Målmapp för återställning"
+
+msgid "Restore test"
+msgstr ""
+
+msgid "Restore test saved."
 msgstr ""
 
 msgid "Restore this snapshot to a shared folder"
-msgstr ""
+msgstr "Återställ den här ögonblicksbilden till en delad mapp"
 
 msgid "Restoring snapshot, this may take a while…"
-msgstr ""
+msgstr "Återställer ögonblicksbilden. Det kan ta en stund…"
 
 msgid "Retention policy"
+msgstr "Lagringspolicy"
+
+msgid "Retention policy preview ..."
 msgstr ""
 
 msgid "Run backup now"
+msgstr "Kör säkerhetskopiering nu"
+
+msgid "Run restore test now"
 msgstr ""
 
 msgid "Running backup job ..."
+msgstr "Kör säkerhetskopieringsjobb…"
+
+msgid "Running restore test ..."
 msgstr ""
 
 msgid "S3 compatible"
-msgstr ""
+msgstr "S3-kompatibel"
 
 msgid "SFTP"
-msgstr ""
+msgstr "SFTP"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Lördag"
 
 msgid "Schedule"
+msgstr "Schema"
+
+msgid "Scheduled integrity check"
+msgstr ""
+
+msgid "Scheduled retention"
+msgstr ""
+
+msgid "Secure connection"
 msgstr ""
 
 msgid "Select a repository"
-msgstr ""
+msgstr "Välj ett arkiv"
 
 msgid "Select a repository."
-msgstr ""
+msgstr "Välj ett arkiv."
 
 msgid "Select one or more shared folders to back up."
-msgstr ""
+msgstr "Välj en eller flera delade mappar som ska säkerhetskopieras."
 
 msgid ""
 "Selecting 'All Repositories' will ensure that the environment variable will "
 "be applied to all repositories."
+msgstr "Om du väljer ”Alla arkiv” tillämpas miljövariabeln på samtliga arkiv."
+
+msgid "Send command output via email"
+msgstr ""
+
+msgid "Send email"
+msgstr ""
+
+msgid "Send email on error only"
 msgstr ""
 
 msgid "September"
-msgstr ""
+msgstr "September"
 
 msgid "Settings"
-msgstr ""
+msgstr "Inställningar"
 
 msgid "Shared Folder"
+msgstr "Delad mapp"
+
+msgid "Shared folder"
+msgstr ""
+
+msgid ""
+"Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches)."
 msgstr ""
 
 msgid "Skip initialisation"
-msgstr ""
+msgstr "Hoppa över initiering"
 
 msgid "Snapshot ID"
-msgstr ""
+msgstr "Ögonblicksbilds-ID"
 
 msgid "Source & Destination"
-msgstr ""
+msgstr "Källa och mål"
 
 msgid "Source folders"
-msgstr ""
+msgstr "Källmappar"
 
 msgid "Sunday"
+msgstr "Söndag"
+
+msgid "TLS enabled"
 msgstr ""
 
 msgid "Tags"
+msgstr "Etiketter"
+
+msgid "Target folder"
 msgstr ""
 
 msgid "Test connection"
+msgstr "Testa anslutningen"
+
+msgid "Test mode"
 msgstr ""
 
 msgid "Testing repository connection ..."
+msgstr "Testar anslutningen till arkivet…"
+
+msgid "The latest snapshot in this repository will be restore-tested."
 msgstr ""
 
 msgid "The shared folder used as the restic repository location."
-msgstr ""
+msgstr "Den delade mapp som används som plats för Restic-arkivet."
 
 msgid "This must be a valid Restic environment variable."
-msgstr ""
+msgstr "Det måste vara en giltig miljövariabel för Restic."
 
 msgid "Thursday"
-msgstr ""
+msgstr "Torsdag"
 
 msgid ""
 "Tick this to import an existing restic repository. The passphrase must match"
 " the one already used by that repository."
 msgstr ""
+"Markera alternativet för att importera ett befintligt Restic-arkiv. "
+"Lösenfrasen måste vara samma som redan används av arkivet."
 
 msgid "Time of execution"
-msgstr ""
+msgstr "Tidpunkt för körning"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Tisdag"
 
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 msgid "Unlocking repository ..."
+msgstr "Låser upp arkivet…"
+
+msgid "Use a percentage (5%), a fraction (1/7) or a size (500M)."
+msgstr ""
+
+msgid "Use letters, digits and underscores only, not starting with a digit."
+msgstr ""
+
+msgid "Use letters, digits, dot, dash and underscore only."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Users"
 msgstr ""
 
 msgid "Value"
+msgstr "Värde"
+
+msgid "Verify (full restore + checksum)"
+msgstr ""
+
+msgid ""
+"Verify restores into a per-test subdirectory inside this shared folder. "
+"Required for verify mode."
+msgstr ""
+
+msgid "Verify target folder"
 msgstr ""
 
 msgid "View repository statistics"
-msgstr ""
+msgstr "Visa arkivstatistik"
 
 msgid "View snapshots stored in this repository"
-msgstr ""
+msgstr "Visa ögonblicksbilder som lagras i arkivet"
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Onsdag"
 
 msgid "Weekly"
+msgstr "Varje vecka"
+
+msgid "Weekly (Sunday 02:00)"
+msgstr ""
+
+msgid "Weekly (Sunday 03:00)"
+msgstr ""
+
+msgid "Weeks with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "Yearly"
+msgstr "Varje år"
+
+msgid "Years with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "n/a"
-msgstr ""
+msgstr "Ej tillgängligt"
 
 msgid "rclone remote"
-msgstr ""
+msgstr "Rclone-fjärranslutning"

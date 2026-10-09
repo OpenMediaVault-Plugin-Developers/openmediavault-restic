@@ -3,13 +3,17 @@
 # This file is distributed under the same license as the openmediavault-restic package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
+# Translators:
+# songming <by@songming.me>, 2026
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 01:34+0000\n"
+"POT-Creation-Date: 2026-10-09 20:50+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
+"Last-Translator: songming <by@songming.me>, 2026\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,446 +21,856 @@ msgstr ""
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "'Every N %s' needs exactly one value greater than 0."
+msgstr ""
+
+msgid "0 = disabled."
+msgstr ""
+
 msgid "A repository must be specified."
+msgstr "必须指定一个存储库。"
+
+msgid "Access"
 msgstr ""
 
 msgid "Account ID / Access key"
-msgstr ""
+msgstr "账号 ID / 访问密钥"
 
 msgid "Account key / Secret key"
-msgstr ""
+msgstr "账号密钥 / 私密密钥"
 
 msgid ""
 "After each backup the retention policy is applied. Snapshots outside these "
 "limits are forgotten and the repository is pruned. Set a field to 0 to "
 "disable that limit."
-msgstr ""
+msgstr "每次备份都会遵循保留政策。超出这些政策限制的快照会被删除，存储库会同步清理。将字段设置为 0 可以禁用该限制。"
 
 msgid "All selected folders will be included in the same snapshot."
+msgstr "所有选中的文件夹都会包含在同一个快照中。"
+
+msgid "Always"
+msgstr ""
+
+msgid "Append-only"
+msgstr ""
+
+msgid "Apply now"
+msgstr ""
+
+msgid "Applying retention policy ..."
 msgstr ""
 
 msgid "April"
-msgstr ""
+msgstr "四月"
 
 msgid "At reboot"
-msgstr ""
+msgstr "在重启时"
 
 msgid "August"
-msgstr ""
+msgstr "八月"
 
 msgid "Backblaze B2 (native API)"
-msgstr ""
+msgstr "Backblaze B2 （原生 API）"
 
 msgid "Backup Jobs"
-msgstr ""
+msgstr "备份任务"
 
 msgid "Backup job saved."
-msgstr ""
+msgstr "备份任务已保存。"
 
 msgid "Cache directory"
-msgstr ""
+msgstr "缓存目录"
 
 msgid "Certain date"
+msgstr "某个日期"
+
+msgid "Certificate"
 msgstr ""
 
 msgid "Check repository integrity"
-msgstr ""
+msgstr "检查存储库完整性"
 
 msgid "Checking repository integrity ..."
+msgstr "检查存储库完整性中 ..."
+
+msgid "Clean up after verify"
+msgstr ""
+
+msgid "Cleanup"
+msgstr ""
+
+msgid "Clients can add snapshots but cannot delete existing data."
+msgstr ""
+
+msgid "Clients must log in as one of the users on the Users page."
 msgstr ""
 
 msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
-msgstr ""
+msgstr "要排除的列表可用逗号分隔（例如 *.tmp,/proc,/sys）。"
 
 msgid ""
 "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
+msgstr "要附加到快照的列表可用逗号分隔（例如 daily、offsite）。"
+
+msgid ""
+"Command run after the backup, even if it failed. The exit code is in "
+"RESTIC_JOB_EXIT."
+msgstr ""
+
+msgid ""
+"Command run after the restore test, even if it failed. The exit code is in "
+"RESTIC_JOB_EXIT."
+msgstr ""
+
+msgid "Command run before the backup. If it fails, the backup is skipped."
+msgstr ""
+
+msgid ""
+"Command run before the restore test. If it fails, the restore test is "
+"skipped."
 msgstr ""
 
 msgid "Create"
-msgstr ""
+msgstr "创建"
 
 msgid "Create Backup Job"
+msgstr "创建备份任务"
+
+msgid "Create Restore Test"
 msgstr ""
 
 msgid "Create repository"
+msgstr "创建存储库"
+
+msgid "Created REST server user."
 msgstr ""
 
 msgid "Created environment variable."
-msgstr ""
+msgstr "已创建环境变量"
 
 msgid "Created repository."
-msgstr ""
+msgstr "已创建存储库。"
 
 msgid "Daily"
+msgstr "每日"
+
+msgid "Daily (02:00)"
+msgstr ""
+
+msgid "Daily (03:00)"
 msgstr ""
 
 msgid "Date / Time"
-msgstr ""
+msgstr "日期 / 时间"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "日期/时间"
 
 msgid "Day of month"
-msgstr ""
+msgstr "月内第几天"
 
 msgid "Day of week"
+msgstr "周内第几天"
+
+msgid "Days with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "December"
+msgstr "十二月"
+
+msgid "Default excludes"
+msgstr ""
+
+msgid "Delete repository and its data"
+msgstr ""
+
+msgid ""
+"Delete the restored data once the verify completes. Only the per-test "
+"subdirectory created in the target folder is removed."
 msgstr ""
 
 msgid ""
 "Directory where Restic stores its local cache. The cache speeds up "
 "operations, especially for remote repositories. Leave blank to disable "
 "caching (not recommended)."
+msgstr "Restic 存储本地缓存的目录。缓存可以加快操作速度，尤其是针对远程存储库，留空即可禁用（不建议禁用缓存）。"
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Dry run"
+msgstr ""
+
+msgid "Dry run (preview only)"
+msgstr ""
+
+msgid ""
+"Dry run previews what would be restored (fast, reads only metadata, writes "
+"nothing). Verify performs a full restore and checks each restored file's "
+"contents against the snapshot (reads all data, writes to disk)."
+msgstr ""
+
+msgid ""
+"Each user only sees repositories under a path named after their username."
 msgstr ""
 
 msgid "Edit"
-msgstr ""
+msgstr "编辑"
 
 msgid "Edit Backup Job"
+msgstr "编辑备份任务"
+
+msgid "Edit Restore Test"
 msgstr ""
 
 msgid "Edit repository"
+msgstr "编辑存储库"
+
+msgid "Edited REST server user."
 msgstr ""
 
 msgid "Edited environment variable."
-msgstr ""
+msgstr "已编辑环境变量。"
 
 msgid "Edited repository."
+msgstr "已编辑存储库。"
+
+msgid ""
+"Email the check output to the root user. Requires notifications to be "
+"configured."
+msgstr ""
+
+msgid ""
+"Email the job output to the root user (and any address aliased to it) after "
+"each scheduled run. Requires a working email/notification setup under "
+"System."
+msgstr ""
+
+msgid ""
+"Email the restore test output to the root user (and any address aliased to "
+"it) after each scheduled run. Requires a working email/notification setup "
+"under System."
 msgstr ""
 
 msgid ""
 "Enable or disable this backup job. Disabled jobs are skipped by the "
 "scheduler."
+msgstr "启用或禁用此备份任务。禁用的任务会被调度程序跳过。"
+
+msgid ""
+"Enable or disable this restore test. Disabled tests are skipped by the "
+"scheduler."
 msgstr ""
 
 msgid "Enabled"
-msgstr ""
+msgstr "已启用"
 
 msgid ""
 "Ensure that the passphrase is strong and stored securely. It cannot be "
 "recovered if lost."
-msgstr ""
+msgstr "确保密码短语足够强并安全存储。如果丢失了就无法恢复。"
 
 msgid "Environment Variables"
-msgstr ""
+msgstr "环境变量"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "每个月的第N天"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "每N小时"
 
 msgid "Every N minute"
+msgstr "每N分钟"
+
+msgid "Exclude cache directories"
 msgstr ""
 
 msgid "Exclude patterns"
-msgstr ""
+msgstr "排除类型"
 
 msgid "February"
-msgstr ""
+msgstr "二月"
 
 msgid ""
 "Files will be restored into this shared folder. Existing files may be "
 "overwritten."
+msgstr "文件将会恢复到这个共享文件夹。已有的文件可能会被覆盖。"
+
+msgid "Folder holding the served repositories."
+msgstr ""
+
+msgid "Forget"
+msgstr ""
+
+msgid "Forget (delete) selected snapshots"
+msgstr ""
+
+msgid ""
+"Forget all snapshots outside this repository's retention policy? This cannot"
+" be undone."
+msgstr ""
+
+msgid "Forget and prune"
+msgstr ""
+
+msgid "Forget old snapshots from every host using this repository."
+msgstr ""
+
+msgid "Forgetting snapshots ..."
+msgstr ""
+
+msgid "Forgetting snapshots and pruning ..."
+msgstr ""
+
+msgid ""
+"Free the space of forgotten snapshots right away. Can take a long time on "
+"large repositories."
 msgstr ""
 
 msgid "Friday"
-msgstr ""
+msgstr "周五"
 
 msgid "Help"
+msgstr "帮助"
+
+msgid "Hooks"
 msgstr ""
 
 msgid "Hostname"
-msgstr ""
+msgstr "主机名"
 
 msgid "Hour"
-msgstr ""
+msgstr "小时"
 
 msgid "Hourly"
-msgstr ""
+msgstr "每小时"
 
 msgid "ID"
+msgstr "ID"
+
+msgid "Inspect snapshot"
+msgstr ""
+
+msgid "Inspecting snapshot ..."
+msgstr ""
+
+msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid "Invalid tag."
 msgstr ""
 
 msgid "January"
-msgstr ""
+msgstr "一月"
 
 msgid "Job"
-msgstr ""
+msgstr "任务"
 
 msgid "Job name"
-msgstr ""
+msgstr "任务名称"
 
 msgid "July"
-msgstr ""
+msgstr "七月"
 
 msgid "June"
-msgstr ""
+msgstr "六月"
 
 msgid "Keep daily"
-msgstr ""
+msgstr "每日保留"
 
 msgid "Keep last N"
-msgstr ""
+msgstr "保留最后N"
 
 msgid "Keep monthly"
-msgstr ""
+msgstr "保留每月"
 
 msgid "Keep one snapshot per day for this many days (0 = disabled)."
-msgstr ""
+msgstr "每天保留一份快照，要保留多少天（0 = 禁用）。"
 
 msgid "Keep one snapshot per month for this many months (0 = disabled)."
-msgstr ""
+msgstr "每月保留一份快照，要保留多少月（0 = 禁用）。"
 
 msgid "Keep one snapshot per week for this many weeks (0 = disabled)."
-msgstr ""
+msgstr "每周保留一份快照，要保留多少周（0 = 禁用）。"
 
 msgid "Keep one snapshot per year for this many years (0 = disabled)."
-msgstr ""
+msgstr "每年保留一份快照，要保留多少年（0 = 禁用）。"
 
 msgid "Keep this many of the most recent snapshots (0 = disabled)."
-msgstr ""
+msgstr "保留最近的快照数量（0 = 禁用）。"
 
 msgid "Keep weekly"
-msgstr ""
+msgstr "每周保存"
 
 msgid "Keep yearly"
-msgstr ""
+msgstr "每年保存"
 
 msgid "Last snapshot"
+msgstr "最后快照"
+
+msgid ""
+"Letters, digits, dot, dash and underscore. With private repositories enabled"
+" this is also the user's repository sub-path."
+msgstr ""
+
+msgid "List files in snapshot"
+msgstr ""
+
+msgid "Listing snapshot files ..."
 msgstr ""
 
 msgid "Local (shared folder)"
-msgstr ""
+msgstr "本地（共享文件夹）"
 
 msgid "Location / URI"
-msgstr ""
+msgstr "位置 / URI"
 
 msgid "March"
-msgstr ""
+msgstr "三月"
 
 msgid "May"
-msgstr ""
+msgstr "五月"
 
 msgid "Message"
-msgstr ""
+msgstr "消息"
 
 msgid "Minute"
+msgstr "分钟"
+
+msgid "Mode"
 msgstr ""
 
 msgid "Monday"
-msgstr ""
+msgstr "周一"
 
 msgid "Month"
-msgstr ""
+msgstr "月"
 
 msgid "Monthly"
+msgstr "每月"
+
+msgid "Monthly (1st, 02:00)"
+msgstr ""
+
+msgid "Monthly (1st, 03:00)"
+msgstr ""
+
+msgid "Months with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "Name"
+msgstr "名称"
+
+msgid "Never"
+msgstr ""
+
+msgid "Notifications"
 msgstr ""
 
 msgid "November"
-msgstr ""
+msgstr "十一月"
 
 msgid "OMV-Extras Wiki"
-msgstr ""
+msgstr "OMV-Extras 维基"
 
 msgid "October"
+msgstr "十月"
+
+msgid ""
+"One pattern per line, applied to every backup job in addition to its own "
+"excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are "
+"comments."
+msgstr ""
+
+msgid ""
+"Only a hash of the password is stored. When editing, leave blank to keep the"
+" current password."
+msgstr ""
+
+msgid "Only host"
+msgstr ""
+
+msgid "Only on error"
 msgstr ""
 
 msgid ""
 "Only restore files matching this path prefix within the snapshot (e.g. "
 "/home/user/documents)."
+msgstr "只恢复快照中与此路径前缀匹配的文件（例如 /home/user/documents）。"
+
+msgid ""
+"Only restore-test files matching this path prefix within the snapshot (e.g. "
+"/home/user/documents). Leave blank to test the whole snapshot."
+msgstr ""
+
+msgid "Only send an email if the scheduled job exits with an error."
+msgstr ""
+
+msgid ""
+"Only send an email if the scheduled restore test exits with an error (i.e. "
+"the backup could not be restored/verified)."
+msgstr ""
+
+msgid "Only tag"
 msgstr ""
 
 msgid "Optional human-readable name for this backup job."
+msgstr "此备份任务的可选可读名称。"
+
+msgid "Optional human-readable name for this restore test."
+msgstr ""
+
+msgid ""
+"Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 "
+"or 500M. Leave blank to only check the repository structure. Reading data "
+"from cloud storage may incur egress costs."
+msgstr ""
+
+msgid "Optional. Only apply to snapshots from this hostname."
+msgstr ""
+
+msgid "Optional. Only apply to snapshots with this tag."
 msgstr ""
 
 msgid "Options"
-msgstr ""
+msgstr "选项"
 
 msgid "Passphrase"
+msgstr "密码短语"
+
+msgid "Password"
 msgstr ""
 
 msgid "Path filter (optional)"
-msgstr ""
+msgstr "路径筛选（可选）"
 
 msgid "Paths"
+msgstr "路径"
+
+msgid "Periodically run 'restic check' against this repository."
+msgstr ""
+
+msgid "Port"
+msgstr ""
+
+msgid "Post-script"
+msgstr ""
+
+msgid "Pre-script"
+msgstr ""
+
+msgid "Preview (dry run)"
+msgstr ""
+
+msgid ""
+"Preview what would be restored without writing any files. Useful for "
+"verifying a snapshot's contents are intact and browsable."
+msgstr ""
+
+msgid "Private repositories"
+msgstr ""
+
+msgid "Prune"
 msgstr ""
 
 msgid "Prune unused data from repository"
-msgstr ""
+msgstr "清理存储库中未使用的数据"
 
 msgid "Pruning repository ..."
+msgstr "清理存储库中 ..."
+
+msgid "REST Server"
+msgstr ""
+
+msgid "REST Users"
 msgstr ""
 
 msgid "REST server"
+msgstr "REST 服务器"
+
+msgid "Read data subset"
+msgstr ""
+
+msgid "Recommended when login is required."
 msgstr ""
 
 msgid "Refresh snapshot list"
-msgstr ""
+msgstr "刷新快照列表"
 
 msgid "Remote path / URI"
-msgstr ""
+msgstr "远程路径 / URI"
 
 msgid "Remove stale locks (unlock)"
+msgstr "移除过期锁（解锁）"
+
+msgid ""
+"Remove the selected snapshots and prune the data no longer referenced by any"
+" snapshot? This cannot be undone and may take a long time."
+msgstr ""
+
+msgid ""
+"Remove the selected snapshots from the repository? The data they reference "
+"is kept until the repository is pruned."
+msgstr ""
+
+msgid ""
+"Remove this repository and permanently delete all of its backup data from "
+"the shared folder? This cannot be undone."
 msgstr ""
 
 msgid "Repositories"
-msgstr ""
+msgstr "存储库"
 
 msgid "Repository"
-msgstr ""
+msgstr "存储库"
 
 msgid "Repository Snapshots"
-msgstr ""
+msgstr "存储库快照"
 
 msgid ""
 "Repository is in use. Please delete the backup jobs associated with this "
 "repository first."
+msgstr "存储库正在使用中。请先删除与该存储库相关的备份任务。"
+
+msgid ""
+"Repository is in use. Please delete the restore tests associated with this "
+"repository first."
 msgstr ""
 
 msgid "Repository name"
-msgstr ""
+msgstr "存储库名称"
 
 msgid "Repository statistics ..."
+msgstr "存储库统计 ..."
+
+msgid "Require login"
 msgstr ""
 
 msgid "Restic"
-msgstr ""
+msgstr "Restic"
 
 msgid "Restic documentation"
-msgstr ""
+msgstr "Restic 文档"
 
 msgid "Restore Snapshot"
+msgstr "恢复快照"
+
+msgid "Restore Tests"
 msgstr ""
 
 msgid "Restore target folder"
+msgstr "恢复目标文件夹"
+
+msgid "Restore test"
+msgstr ""
+
+msgid "Restore test saved."
 msgstr ""
 
 msgid "Restore this snapshot to a shared folder"
-msgstr ""
+msgstr "恢复这个快照到一个共享文件夹"
 
 msgid "Restoring snapshot, this may take a while…"
-msgstr ""
+msgstr "恢复快照中，这可能要一会 ..."
 
 msgid "Retention policy"
+msgstr "保留政策"
+
+msgid "Retention policy preview ..."
 msgstr ""
 
 msgid "Run backup now"
+msgstr "立即运行备份"
+
+msgid "Run restore test now"
 msgstr ""
 
 msgid "Running backup job ..."
+msgstr "运行备份任务中 ..."
+
+msgid "Running restore test ..."
 msgstr ""
 
 msgid "S3 compatible"
-msgstr ""
+msgstr "S3 兼容 "
 
 msgid "SFTP"
-msgstr ""
+msgstr "SFTP"
 
 msgid "Saturday"
-msgstr ""
+msgstr "周六"
 
 msgid "Schedule"
+msgstr "日程"
+
+msgid "Scheduled integrity check"
+msgstr ""
+
+msgid "Scheduled retention"
+msgstr ""
+
+msgid "Secure connection"
 msgstr ""
 
 msgid "Select a repository"
-msgstr ""
+msgstr "选择一个存储库"
 
 msgid "Select a repository."
-msgstr ""
+msgstr "选择一个存储库"
 
 msgid "Select one or more shared folders to back up."
-msgstr ""
+msgstr "选择一个或多个要备份的共享文件夹。"
 
 msgid ""
 "Selecting 'All Repositories' will ensure that the environment variable will "
 "be applied to all repositories."
+msgstr "选择“所有存储库”将确保该环境变量应用到所有存储库。"
+
+msgid "Send command output via email"
+msgstr ""
+
+msgid "Send email"
+msgstr ""
+
+msgid "Send email on error only"
 msgstr ""
 
 msgid "September"
-msgstr ""
+msgstr "九月"
 
 msgid "Settings"
-msgstr ""
+msgstr "设置"
 
 msgid "Shared Folder"
+msgstr "共享文件夹"
+
+msgid "Shared folder"
+msgstr ""
+
+msgid ""
+"Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches)."
 msgstr ""
 
 msgid "Skip initialisation"
-msgstr ""
+msgstr "跳过初始化"
 
 msgid "Snapshot ID"
-msgstr ""
+msgstr "快照 ID"
 
 msgid "Source & Destination"
-msgstr ""
+msgstr "来源 & 目标"
 
 msgid "Source folders"
-msgstr ""
+msgstr "源文件夹"
 
 msgid "Sunday"
+msgstr "周日"
+
+msgid "TLS enabled"
 msgstr ""
 
 msgid "Tags"
+msgstr "标签"
+
+msgid "Target folder"
 msgstr ""
 
 msgid "Test connection"
+msgstr "测试连接"
+
+msgid "Test mode"
 msgstr ""
 
 msgid "Testing repository connection ..."
+msgstr "测试存储库连接中 ..."
+
+msgid "The latest snapshot in this repository will be restore-tested."
 msgstr ""
 
 msgid "The shared folder used as the restic repository location."
-msgstr ""
+msgstr "用作 restic 存储库本地位置的共享文件夹。"
 
 msgid "This must be a valid Restic environment variable."
-msgstr ""
+msgstr "这必须是一个有效的 Restic 环境变量。"
 
 msgid "Thursday"
-msgstr ""
+msgstr "周四"
 
 msgid ""
 "Tick this to import an existing restic repository. The passphrase must match"
 " the one already used by that repository."
-msgstr ""
+msgstr "勾选此项以导入一个现有的 restic 存储库。密码必须与该存储库已使用的密码相匹配。"
 
 msgid "Time of execution"
-msgstr ""
+msgstr "执行时间"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "周二"
 
 msgid "Type"
-msgstr ""
+msgstr "类型"
 
 msgid "Unlocking repository ..."
+msgstr "解锁存储库中 ..."
+
+msgid "Use a percentage (5%), a fraction (1/7) or a size (500M)."
+msgstr ""
+
+msgid "Use letters, digits and underscores only, not starting with a digit."
+msgstr ""
+
+msgid "Use letters, digits, dot, dash and underscore only."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Users"
 msgstr ""
 
 msgid "Value"
+msgstr "值"
+
+msgid "Verify (full restore + checksum)"
+msgstr ""
+
+msgid ""
+"Verify restores into a per-test subdirectory inside this shared folder. "
+"Required for verify mode."
+msgstr ""
+
+msgid "Verify target folder"
 msgstr ""
 
 msgid "View repository statistics"
-msgstr ""
+msgstr "显示存储库统计"
 
 msgid "View snapshots stored in this repository"
-msgstr ""
+msgstr "显示存储在此存储库的快照"
 
 msgid "Wednesday"
-msgstr ""
+msgstr "周三"
 
 msgid "Weekly"
+msgstr "每周"
+
+msgid "Weekly (Sunday 02:00)"
+msgstr ""
+
+msgid "Weekly (Sunday 03:00)"
+msgstr ""
+
+msgid "Weeks with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "Yearly"
+msgstr "每年"
+
+msgid "Years with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "n/a"
-msgstr ""
+msgstr "n/a"
 
 msgid "rclone remote"
-msgstr ""
+msgstr "远程 rclone"
