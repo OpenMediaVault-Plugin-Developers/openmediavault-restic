@@ -110,7 +110,7 @@ data:
         hint: _("Optional. One restic extended option per line, passed as -o, e.g. s3.region=us-east-1. Run 'restic options' to list them.")
         validators:
           pattern:
-            pattern: '^([ \t]*([a-z0-9]+\.[a-z0-9-]+=[^\n]*)?(\r?\n|$))*$'
+            pattern: '^([ \t]*([a-z0-9]+\.[a-z0-9-]+=[^\x00-\x1f\x7f]*)?[ \t]*(\r?\n|$))*$'
             errorData: _("Use one backend.option=value per line.")
       - type: divider
         title: _("Scheduled integrity check")
