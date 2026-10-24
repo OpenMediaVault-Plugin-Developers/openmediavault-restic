@@ -130,6 +130,12 @@ foreach (['5%', '2.5%', '1/7', '500M', ''] as $v) {
 }
 expectInvalid('rpc.restic.setrepo', ['checkreaddata' => "5%\n"] + $repo,
     'a read data subset with a trailing newline');
+expectValid('rpc.restic.setrepo', ['connections' => 10] + $repo, '10 connections');
+expectInvalid('rpc.restic.setrepo', ['connections' => -1] + $repo, 'negative connections');
+expectValid('rpc.restic.setrepo', ['options' => "s3.region=us-east-1\r\nrclone.args=serve restic --stdio\n"] + $repo,
+    'multi-line extended options');
+expectInvalid('rpc.restic.setrepo', ['options' => "s3.region=x\x1b[2J"] + $repo,
+    'extended options with a control character');
 
 echo "\n=== Schemas: deleteRepo ===\n";
 expectValid('rpc.restic.deleterepo', ['uuid' => NEW_UUID], 'a UUID only (keeps data)');
@@ -208,6 +214,37 @@ try {
 } catch (\OMV\Exception $e) {
     check('ignores "every N" when the execution is not a certain date', false, $e->getMessage());
 }
+
+echo "\n=== Repository extended options (must match default.sls) ===\n";
+class FakeRepo
+{
+    private $data;
+    public function __construct(array $data) { $this->data = $data; }
+    public function get($key) { return $this->data[$key] ?? null; }
+}
+$opts = callPrivate($service, 'parseRepoOptions', ["  s3.region=us-east-1 \r\n\n\trclone.args=serve restic --stdio\r"]);
+check('parses lines, trims them and skips blank lines',
+    $opts === ['s3.region=us-east-1', 'rclone.args=serve restic --stdio'], json_encode($opts));
+check('parses an empty value', callPrivate($service, 'parseRepoOptions', ['']) === []);
+foreach (['region=x', '--repo=/tmp/x', 'S3.region=x', 's3.region', "s3.region=a\x0bb", '-o s3.region=x'] as $bad) {
+    try {
+        callPrivate($service, 'parseRepoOptions', [$bad]);
+        check('rejects option ' . json_encode($bad), false, 'no exception');
+    } catch (\OMV\Exception $e) {
+        check('rejects option ' . json_encode($bad), true);
+    }
+}
+$args = callPrivate($service, 'buildRepoOptions', [new FakeRepo(
+    ['type' => 's3', 'connections' => '10', 'options' => "s3.region=it's \$(id)"])]);
+check('connections map to the backend type and values are shell-quoted',
+    $args === ["-o 's3.connections=10'", "-o 's3.region=it'\\''s \$(id)'"], json_encode($args));
+check('no options when connections is 0 and options are empty',
+    callPrivate($service, 'buildRepoOptions', [new FakeRepo(
+        ['type' => 'b2', 'connections' => 0, 'options' => ''])]) === []);
+$cmd = callPrivate($service, 'addRepoOptions', [new FakeRepo(
+    ['type' => 'b2', 'connections' => 8, 'options' => '']), ['/usr/bin/restic', 'check', '--retry-lock', '5m']]);
+check('options go after the subcommand',
+    $cmd === ['/usr/bin/restic', 'check', "-o 'b2.connections=8'", '--retry-lock', '5m'], json_encode($cmd));
 
 echo "\n=== RPC methods ===\n";
 $registered = (new ReflectionProperty(\OMV\Rpc\ServiceAbstract::class, 'registeredMethods'));

@@ -236,6 +236,21 @@ class BackupJobScriptTest(ScriptTestCase):
                          'log contains duplicated lines:\n' + '\n'.join(lines))
         self.assertEqual(sum('Starting backup job' in l for l in lines), 1)
 
+    def test_backend_options_reach_backup_and_retention(self):
+        opts = ['s3.connections=10', "rclone.args=serve restic --stdio $(touch MARK) 'q'"]
+        script = render('restic-job.sh.j2', job=job(), repo=repo(),
+                        repo_path=self.sb.path('repo'),
+                        source_paths=[self.sb.path('src')], cachedir='',
+                        excludefile='', excludecaches=False,
+                        hashfile=self.sb.hashfile, backend_opts=opts)
+        self.assertSyntaxOk(script)
+        self.assertEqual(self.sb.run(self.sb.install(script)), 0)
+        self.assertFalse(os.path.exists(self.sb.path('MARK')))
+        calls = self.sb.read('restic-calls').splitlines()
+        expected = '-o ' + opts[0] + ' -o ' + opts[1]
+        self.assertTrue(calls[0].startswith('backup --verbose --retry-lock 5m ' + expected), calls[0])
+        self.assertTrue(calls[1].startswith('forget --prune --retry-lock 5m ' + expected), calls[1])
+
     def test_prescript_failure_skips_backup(self):
         rc = self.sb.run(self.sb.install(self.render_job(prescript='exit 4')))
         self.assertEqual(rc, 4)
@@ -280,6 +295,20 @@ class RepoMaintenanceScriptTest(ScriptTestCase):
                                     repo_path=self.sb.path('repo'), cachedir='')
                     self.assertSyntaxOk(script)
                     self.assertNoInjection(self.sb.install(script), name, **env)
+
+    def test_backend_options_are_passed(self):
+        for tpl, cmd in (('restic-check.sh.j2', 'check'), ('restic-forget.sh.j2', 'forget'),
+                         ('restic-restoretest.sh.j2', 'restore')):
+            with self.subTest(template=tpl):
+                self.sb.cleanup()
+                self.sb = Sandbox()
+                script = render(tpl, repo=repo(), job=job(), repo_path=self.sb.path('repo'),
+                                target_path=self.sb.path('target'), cachedir='',
+                                backend_opts=['b2.connections=10'])
+                self.assertEqual(self.sb.run(self.sb.install(script)), 0)
+                self.assertIn('--retry-lock 5m -o b2.connections=10',
+                              self.sb.read('restic-calls'))
+                self.assertTrue(self.sb.read('restic-calls').startswith(cmd))
 
     def test_failed_check_fails_the_script(self):
         script = render('restic-check.sh.j2', repo=repo(),
@@ -403,8 +432,8 @@ class EnvVarFileInvalidEntriesTest(unittest.TestCase):
 class DefaultStateTest(unittest.TestCase):
     """Render default.sls with stubbed Salt functions and inspect the result."""
 
-    def render_state(self, snapshots=(), restoretests=()):
-        r = repo()
+    def render_state(self, snapshots=(), restoretests=(), repo_kw=None):
+        r = repo(**(repo_kw or {}))
         config = {
             'settings': {'cachedir': '', 'exclude': '', 'excludecaches': False},
             'repos': {'repo': [r]},
@@ -446,6 +475,21 @@ class DefaultStateTest(unittest.TestCase):
                 state = self.render_state(snapshots=[job(execution='exactly', **kw)],
                                           restoretests=[job(execution='exactly', **kw)])
                 self.assertEqual(self.cron_exprs(state)[:2], [expected, expected])
+
+    def test_backend_options_from_repo(self):
+        cases = [
+            (dict(), []),
+            (dict(connections=10, type='s3'), ['s3.connections=10']),
+            (dict(connections='0', options=None), []),
+            (dict(connections=4, type='b2', options=' s3.region=x \r\n\n\trclone.args=a b\r'),
+             ['b2.connections=4', 's3.region=x', 'rclone.args=a b']),
+        ]
+        for kw, expected in cases:
+            with self.subTest(kw=kw):
+                state = self.render_state(repo_kw=kw, snapshots=[job()])
+                ctx = [a for a in state['configure_restic_job_script_' + job()['uuid']]['file.managed']
+                       if 'context' in a][0]['context']
+                self.assertEqual(ctx['backend_opts'], expected)
 
     def test_job_script_gets_hash_file(self):
         state = self.render_state(snapshots=[job()])
