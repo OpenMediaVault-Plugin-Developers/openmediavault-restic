@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 20:50+0000\n"
+"POT-Creation-Date: 2026-10-24 14:13+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Language-Team: French (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fr\n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+msgid ""
+"'%s' is set twice. Use either the Connections field or the extended options."
+msgstr ""
 
 msgid "'Every N %s' needs exactly one value greater than 0."
 msgstr ""
@@ -66,6 +70,9 @@ msgid "August"
 msgstr ""
 
 msgid "Backblaze B2 (native API)"
+msgstr ""
+
+msgid "Backend options"
 msgstr ""
 
 msgid "Backup Jobs"
@@ -124,6 +131,9 @@ msgstr ""
 msgid ""
 "Command run before the restore test. If it fails, the restore test is "
 "skipped."
+msgstr ""
+
+msgid "Connections"
 msgstr ""
 
 msgid "Create"
@@ -284,6 +294,9 @@ msgstr ""
 msgid "Exclude patterns"
 msgstr ""
 
+msgid "Extended options"
+msgstr ""
+
 msgid "February"
 msgstr ""
 
@@ -351,6 +364,11 @@ msgid "Inspecting snapshot ..."
 msgstr ""
 
 msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid ""
+"Invalid restic option '%s'. Use one backend.option=value per line, e.g. "
+"s3.region=us-east-1."
 msgstr ""
 
 msgid "Invalid tag."
@@ -422,6 +440,9 @@ msgid "Location / URI"
 msgstr ""
 
 msgid "March"
+msgstr ""
+
+msgid "Maximum number of concurrent backend connections. 0 = restic default."
 msgstr ""
 
 msgid "May"
@@ -520,6 +541,11 @@ msgid ""
 "Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 "
 "or 500M. Leave blank to only check the repository structure. Reading data "
 "from cloud storage may incur egress costs."
+msgstr ""
+
+msgid ""
+"Optional. One restic extended option per line, passed as -o, e.g. "
+"s3.region=us-east-1. Run 'restic options' to list them."
 msgstr ""
 
 msgid "Optional. Only apply to snapshots from this hostname."
@@ -816,6 +842,9 @@ msgid "Use letters, digits and underscores only, not starting with a digit."
 msgstr ""
 
 msgid "Use letters, digits, dot, dash and underscore only."
+msgstr ""
+
+msgid "Use one backend.option=value per line."
 msgstr ""
 
 msgid "Username"

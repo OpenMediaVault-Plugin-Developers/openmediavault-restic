@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 20:50+0000\n"
+"POT-Creation-Date: 2026-10-24 14:13+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2026\n"
 "Language-Team: Dutch (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/nl/)\n"
@@ -21,17 +21,21 @@ msgstr ""
 "Language: nl\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "'Every N %s' needs exactly one value greater than 0."
+msgid ""
+"'%s' is set twice. Use either the Connections field or the extended options."
 msgstr ""
 
+msgid "'Every N %s' needs exactly one value greater than 0."
+msgstr "'Elke N %s' heeft precies één waarde groter dan 0 nodig."
+
 msgid "0 = disabled."
-msgstr ""
+msgstr "0 = uitgeschakeld."
 
 msgid "A repository must be specified."
 msgstr "Er moet een opslagplaats worden opgegeven."
 
 msgid "Access"
-msgstr ""
+msgstr "Toegang"
 
 msgid "Account ID / Access key"
 msgstr "Account-ID / Toegangssleutel"
@@ -44,24 +48,24 @@ msgid ""
 "limits are forgotten and the repository is pruned. Set a field to 0 to "
 "disable that limit."
 msgstr ""
-"Na elke back-up wordt het bewaarbeleid toegepast. Momentopnames buiten deze "
-"limieten worden vergeten en de opslagplaats wordt gesnoeid. Stel een veld in"
-" op 0 om die limiet uit te schakelen."
+"Na elke back-up wordt het retentiebeleid toegepast. Momentopnames buiten "
+"deze limieten worden vergeten en de opslagplaats wordt gesnoeid. Stel een "
+"veld in op 0 om die limiet uit te schakelen."
 
 msgid "All selected folders will be included in the same snapshot."
 msgstr "Alle geselecteerde mappen worden in dezelfde momentopname opgenomen."
 
 msgid "Always"
-msgstr ""
+msgstr "Altijd"
 
 msgid "Append-only"
-msgstr ""
+msgstr "Alleen toevoegen"
 
 msgid "Apply now"
-msgstr ""
+msgstr "Nu toepassen"
 
 msgid "Applying retention policy ..."
-msgstr ""
+msgstr "Retentiebeleid toepassen…"
 
 msgid "April"
 msgstr "April"
@@ -74,6 +78,9 @@ msgstr "Augustus"
 
 msgid "Backblaze B2 (native API)"
 msgstr "Backblaze B2 (eigen API)"
+
+msgid "Backend options"
+msgstr ""
 
 msgid "Backup Jobs"
 msgstr "Back-uptaken"
@@ -88,7 +95,7 @@ msgid "Certain date"
 msgstr "Bepaalde datum"
 
 msgid "Certificate"
-msgstr ""
+msgstr "Certificaat"
 
 msgid "Check repository integrity"
 msgstr "Integriteit van opslagplaats controleren"
@@ -97,16 +104,19 @@ msgid "Checking repository integrity ..."
 msgstr "Integriteit van opslagplaats controleren…"
 
 msgid "Clean up after verify"
-msgstr ""
+msgstr "Opruimen na verificatie"
 
 msgid "Cleanup"
-msgstr ""
+msgstr "Opruimen"
 
 msgid "Clients can add snapshots but cannot delete existing data."
 msgstr ""
+"Clients kunnen momentopnames toevoegen, maar bestaande gegevens niet "
+"verwijderen."
 
 msgid "Clients must log in as one of the users on the Users page."
 msgstr ""
+"Clients moeten inloggen als een van de gebruikers op de pagina Gebruikers."
 
 msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
 msgstr ""
@@ -123,18 +133,29 @@ msgid ""
 "Command run after the backup, even if it failed. The exit code is in "
 "RESTIC_JOB_EXIT."
 msgstr ""
+"Opdracht die wordt uitgevoerd na de back-up, zelfs als deze mislukt is. De "
+"exitcode staat in RESTIC_JOB_EXIT."
 
 msgid ""
 "Command run after the restore test, even if it failed. The exit code is in "
 "RESTIC_JOB_EXIT."
 msgstr ""
+"Opdracht die wordt uitgevoerd na de hersteltest, zelfs als deze is mislukt. "
+"De exitcode bevindt zich in RESTIC_JOB_EXIT."
 
 msgid "Command run before the backup. If it fails, the backup is skipped."
 msgstr ""
+"Commando dat wordt uitgevoerd vóór de back-up. Als dit mislukt, wordt de "
+"back-up overgeslagen."
 
 msgid ""
 "Command run before the restore test. If it fails, the restore test is "
 "skipped."
+msgstr ""
+"Opdracht die wordt uitgevoerd vóór de hersteltest. Als dit mislukt, wordt de"
+" hersteltest overgeslagen."
+
+msgid "Connections"
 msgstr ""
 
 msgid "Create"
@@ -144,13 +165,13 @@ msgid "Create Backup Job"
 msgstr "Back-uptaak aanmaken"
 
 msgid "Create Restore Test"
-msgstr ""
+msgstr "Hersteltest aanmaken"
 
 msgid "Create repository"
 msgstr "Opslagplaats aanmaken"
 
 msgid "Created REST server user."
-msgstr ""
+msgstr "REST-servergebruiker aangemaakt."
 
 msgid "Created environment variable."
 msgstr "Omgevingsvariabele aangemaakt."
@@ -162,10 +183,10 @@ msgid "Daily"
 msgstr "Dagelijks"
 
 msgid "Daily (02:00)"
-msgstr ""
+msgstr "Dagelijks (02:00)"
 
 msgid "Daily (03:00)"
-msgstr ""
+msgstr "Dagelijks (03:00)"
 
 msgid "Date / Time"
 msgstr "Datum / Tijd"
@@ -180,21 +201,23 @@ msgid "Day of week"
 msgstr "Dag van de week"
 
 msgid "Days with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Dagen met elk één momentopname. 0 = uitgeschakeld."
 
 msgid "December"
 msgstr "December"
 
 msgid "Default excludes"
-msgstr ""
+msgstr "Standaarduitsluitingen"
 
 msgid "Delete repository and its data"
-msgstr ""
+msgstr "Opslagplaats en de bijbehorende gegevens verwijderen"
 
 msgid ""
 "Delete the restored data once the verify completes. Only the per-test "
 "subdirectory created in the target folder is removed."
 msgstr ""
+"Verwijder de herstelde gegevens zodra de verificatie is voltooid. Alleen de "
+"per-test submap die in de doelmap is aangemaakt, wordt verwijderd."
 
 msgid ""
 "Directory where Restic stores its local cache. The cache speeds up "
@@ -206,23 +229,29 @@ msgstr ""
 "opslag uit te schakelen (niet aanbevolen)."
 
 msgid "Disabled"
-msgstr ""
+msgstr "Uitgeschakeld"
 
 msgid "Dry run"
-msgstr ""
+msgstr "Proefrun"
 
 msgid "Dry run (preview only)"
-msgstr ""
+msgstr "Proefrun (alleen voorbeeld)"
 
 msgid ""
 "Dry run previews what would be restored (fast, reads only metadata, writes "
 "nothing). Verify performs a full restore and checks each restored file's "
 "contents against the snapshot (reads all data, writes to disk)."
 msgstr ""
+"Een proefun geeft een voorbeeld van wat hersteld zou worden (snel, leest "
+"alleen metadata, schrijft niets). Verifiëren voert een volledig herstel uit "
+"en controleert de inhoud van elk hersteld bestand tegen de momentopname "
+"(leest alle gegevens, schrijft naar de schijf)."
 
 msgid ""
 "Each user only sees repositories under a path named after their username."
 msgstr ""
+"Elke gebruiker ziet alleen opslagplaats onder een pad dat is vernoemd naar "
+"zijn gebruikersnaam."
 
 msgid "Edit"
 msgstr "Bewerken"
@@ -231,13 +260,13 @@ msgid "Edit Backup Job"
 msgstr "Back-uptaak bewerken"
 
 msgid "Edit Restore Test"
-msgstr ""
+msgstr "Hersteltest bewerken"
 
 msgid "Edit repository"
 msgstr "Opslagplaats bewerken"
 
 msgid "Edited REST server user."
-msgstr ""
+msgstr "REST-servergebruiker bewerkt."
 
 msgid "Edited environment variable."
 msgstr "Omgevingsvariabele bewerkt."
@@ -249,18 +278,26 @@ msgid ""
 "Email the check output to the root user. Requires notifications to be "
 "configured."
 msgstr ""
+"Stuur de controle-uitvoer per e-mail naar de rootgebruiker. Vereist dat "
+"meldingen zijn geconfigureerd."
 
 msgid ""
 "Email the job output to the root user (and any address aliased to it) after "
 "each scheduled run. Requires a working email/notification setup under "
 "System."
 msgstr ""
+"Stuur de uitvoer van de taak per e-mail naar de rootgebruiker (en elk aan "
+"deze gebruiker gekoppeld aliasadres) na elke geplande uitvoering. Vereist "
+"een werkende e-mail-/meldingsconfiguratie onder Systeem."
 
 msgid ""
 "Email the restore test output to the root user (and any address aliased to "
 "it) after each scheduled run. Requires a working email/notification setup "
 "under System."
 msgstr ""
+"E-mail de hersteltestuitvoer naar de root-gebruiker (en elk adres dat eraan "
+"is gekoppeld) na elke geplande uitvoering. Vereist een werkende "
+"e-mail-/meldingsconfiguratie onder Systeem."
 
 msgid ""
 "Enable or disable this backup job. Disabled jobs are skipped by the "
@@ -273,6 +310,8 @@ msgid ""
 "Enable or disable this restore test. Disabled tests are skipped by the "
 "scheduler."
 msgstr ""
+"Schakel deze hersteltest in of uit. Uitgeschakelde tests worden door de "
+"planner overgeslagen."
 
 msgid "Enabled"
 msgstr "Ingeschakeld"
@@ -297,10 +336,13 @@ msgid "Every N minute"
 msgstr "Elke N minuten"
 
 msgid "Exclude cache directories"
-msgstr ""
+msgstr "Cachemappen uitsluiten"
 
 msgid "Exclude patterns"
 msgstr "Uitsluitingspatronen"
+
+msgid "Extended options"
+msgstr ""
 
 msgid "February"
 msgstr "Februari"
@@ -313,35 +355,41 @@ msgstr ""
 "worden overschreven."
 
 msgid "Folder holding the served repositories."
-msgstr ""
+msgstr "Map met de bediende opslagplaatsen."
 
 msgid "Forget"
-msgstr ""
+msgstr "Vergeten"
 
 msgid "Forget (delete) selected snapshots"
-msgstr ""
+msgstr "Vergeet (verwijder) geselecteerde momentopnames"
 
 msgid ""
 "Forget all snapshots outside this repository's retention policy? This cannot"
 " be undone."
 msgstr ""
+"Alle momentopnames buiten het retentiebeleid van deze opslagplaats "
+"verwijderen? Dit kan niet ongedaan worden gemaakt."
 
 msgid "Forget and prune"
-msgstr ""
+msgstr "Vergeten en snoeien"
 
 msgid "Forget old snapshots from every host using this repository."
 msgstr ""
+"Vergeet oude momentopnames van elke host die van deze opslagplaats "
+"gebruikmaakt."
 
 msgid "Forgetting snapshots ..."
-msgstr ""
+msgstr "Momentopnames vergeten…"
 
 msgid "Forgetting snapshots and pruning ..."
-msgstr ""
+msgstr "Momentopnames vergeten en snoeien…"
 
 msgid ""
 "Free the space of forgotten snapshots right away. Can take a long time on "
 "large repositories."
 msgstr ""
+"De ruimte van vergeten momentopnames direct vrijmaken. Dit kan veel tijd in "
+"beslag nemen bij grote opslagplaatsen."
 
 msgid "Friday"
 msgstr "Vrijdag"
@@ -350,7 +398,7 @@ msgid "Help"
 msgstr "Hulp"
 
 msgid "Hooks"
-msgstr ""
+msgstr "Hooks"
 
 msgid "Hostname"
 msgstr "Hostnaam"
@@ -365,16 +413,22 @@ msgid "ID"
 msgstr "ID"
 
 msgid "Inspect snapshot"
-msgstr ""
+msgstr "Momentopname inspecteren"
 
 msgid "Inspecting snapshot ..."
-msgstr ""
+msgstr "Momentopname inspecteren…"
 
 msgid "Installs restic-rest-server when the changes are applied."
 msgstr ""
+"Installeert restic-rest-server wanneer de wijzigingen worden doorgevoerd."
+
+msgid ""
+"Invalid restic option '%s'. Use one backend.option=value per line, e.g. "
+"s3.region=us-east-1."
+msgstr ""
 
 msgid "Invalid tag."
-msgstr ""
+msgstr "Ongeldig label."
 
 msgid "January"
 msgstr "Januari"
@@ -434,12 +488,15 @@ msgid ""
 "Letters, digits, dot, dash and underscore. With private repositories enabled"
 " this is also the user's repository sub-path."
 msgstr ""
+"Letters, cijfers, punt, koppelteken en underscore. Met ingeschakelde "
+"privéopslagplaatsen is dit ook het subpad van de opslagplaats van de "
+"gebruiker."
 
 msgid "List files in snapshot"
-msgstr ""
+msgstr "Bestanden in momentopname weergeven"
 
 msgid "Listing snapshot files ..."
-msgstr ""
+msgstr "Bestanden in momentopname weergeven…"
 
 msgid "Local (shared folder)"
 msgstr "Lokaal (gedeelde map)"
@@ -449,6 +506,9 @@ msgstr "Locatie / URI"
 
 msgid "March"
 msgstr "Maart"
+
+msgid "Maximum number of concurrent backend connections. 0 = restic default."
+msgstr ""
 
 msgid "May"
 msgstr "Mei"
@@ -460,7 +520,7 @@ msgid "Minute"
 msgstr "Minuut"
 
 msgid "Mode"
-msgstr ""
+msgstr "Modus"
 
 msgid "Monday"
 msgstr "Maandag"
@@ -472,22 +532,22 @@ msgid "Monthly"
 msgstr "Maandelijks"
 
 msgid "Monthly (1st, 02:00)"
-msgstr ""
+msgstr "Maandelijks (1e, 02:00)"
 
 msgid "Monthly (1st, 03:00)"
-msgstr ""
+msgstr "Maandelijks (1e, 03:00)"
 
 msgid "Months with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Maanden met elk één momentopname. 0 = uitgeschakeld."
 
 msgid "Name"
 msgstr "Naam"
 
 msgid "Never"
-msgstr ""
+msgstr "Nooit"
 
 msgid "Notifications"
-msgstr ""
+msgstr "Meldingen"
 
 msgid "November"
 msgstr "November"
@@ -503,17 +563,22 @@ msgid ""
 "excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are "
 "comments."
 msgstr ""
+"Één patroon per regel, toegepast op elke back-uptaak naast de eigen "
+"uitsluitingen (bijv. *.tmp, .Trash-*, .recycle). Regels die beginnen met # "
+"zijn opmerkingen."
 
 msgid ""
 "Only a hash of the password is stored. When editing, leave blank to keep the"
 " current password."
 msgstr ""
+"Er wordt alleen een hash van het wachtwoord opgeslagen. Laat het veld bij "
+"het bewerken leeg om het huidige wachtwoord te behouden."
 
 msgid "Only host"
-msgstr ""
+msgstr "Alleen host"
 
 msgid "Only on error"
-msgstr ""
+msgstr "Alleen bij fout"
 
 msgid ""
 "Only restore files matching this path prefix within the snapshot (e.g. "
@@ -526,35 +591,49 @@ msgid ""
 "Only restore-test files matching this path prefix within the snapshot (e.g. "
 "/home/user/documents). Leave blank to test the whole snapshot."
 msgstr ""
+"Herstel alleen testbestanden die overeenkomen met dit padvoorvoegsel binnen "
+"de snapshot (bijv. /home/user/documents). Laat leeg om de gehele "
+"momentopname te testen."
 
 msgid "Only send an email if the scheduled job exits with an error."
-msgstr ""
+msgstr "Stuur alleen een e-mail als de geplande taak met een fout eindigt."
 
 msgid ""
 "Only send an email if the scheduled restore test exits with an error (i.e. "
 "the backup could not be restored/verified)."
 msgstr ""
+"Stuur alleen een e-mail als de geplande hersteltest met een fout eindigt "
+"(d.w.z. als de back-up niet kon worden hersteld/geverifieerd)."
 
 msgid "Only tag"
-msgstr ""
+msgstr "Alleen labelen"
 
 msgid "Optional human-readable name for this backup job."
 msgstr "Optionele leesbare naam voor deze back-uptaak."
 
 msgid "Optional human-readable name for this restore test."
-msgstr ""
+msgstr "Optionele voor mensen leesbare naam voor deze hersteltest."
 
 msgid ""
 "Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 "
 "or 500M. Leave blank to only check the repository structure. Reading data "
 "from cloud storage may incur egress costs."
 msgstr ""
+"Optioneel. Download en verifieer ook een deel van de opgeslagen gegevens, "
+"bijvoorbeeld 5% of 1/7 of 500M. Laat leeg om alleen de structuur van de "
+"opslagplaats te controleren. Het lezen van gegevens uit cloudopslag kan "
+"extra kosten met zich meebrengen."
+
+msgid ""
+"Optional. One restic extended option per line, passed as -o, e.g. "
+"s3.region=us-east-1. Run 'restic options' to list them."
+msgstr ""
 
 msgid "Optional. Only apply to snapshots from this hostname."
-msgstr ""
+msgstr "Optioneel. Alleen toepassen op momentopnames van deze host."
 
 msgid "Optional. Only apply to snapshots with this tag."
-msgstr ""
+msgstr "Optioneel. Alleen toepassen op momentopnames met dit label."
 
 msgid "Options"
 msgstr "Opties"
@@ -563,7 +642,7 @@ msgid "Passphrase"
 msgstr "Wachtwoordzin"
 
 msgid "Password"
-msgstr ""
+msgstr "Wachtwoord"
 
 msgid "Path filter (optional)"
 msgstr "Padfilter (optioneel)"
@@ -572,30 +651,32 @@ msgid "Paths"
 msgstr "Paden"
 
 msgid "Periodically run 'restic check' against this repository."
-msgstr ""
+msgstr "Voer periodiek 'restic check' uit tegen deze opslagplaats."
 
 msgid "Port"
-msgstr ""
+msgstr "Poort"
 
 msgid "Post-script"
-msgstr ""
+msgstr "Post-script"
 
 msgid "Pre-script"
-msgstr ""
+msgstr "Pre-script"
 
 msgid "Preview (dry run)"
-msgstr ""
+msgstr "Voorbeels (proefrun)"
 
 msgid ""
 "Preview what would be restored without writing any files. Useful for "
 "verifying a snapshot's contents are intact and browsable."
 msgstr ""
+"Bekijk wat zou worden hersteld zonder bestanden te schrijven. Nuttig om te "
+"verifiëren dat de inhoud van een momentopname intact en doorzoekbaar is."
 
 msgid "Private repositories"
-msgstr ""
+msgstr "Privé-opslagplaatsen"
 
 msgid "Prune"
-msgstr ""
+msgstr "Snoeien"
 
 msgid "Prune unused data from repository"
 msgstr "Verwijder ongebruikte gegevens uit de opslagplaats"
@@ -604,19 +685,19 @@ msgid "Pruning repository ..."
 msgstr "Opslagplaats snoeien…"
 
 msgid "REST Server"
-msgstr ""
+msgstr "REST-server"
 
 msgid "REST Users"
-msgstr ""
+msgstr "REST-gebruikers"
 
 msgid "REST server"
 msgstr "REST-server"
 
 msgid "Read data subset"
-msgstr ""
+msgstr "Gegevens-subset lezen"
 
 msgid "Recommended when login is required."
-msgstr ""
+msgstr "Aanbevolen wanneer inloggen vereist is."
 
 msgid "Refresh snapshot list"
 msgstr "Lijst met momentopnames verversen"
@@ -631,16 +712,24 @@ msgid ""
 "Remove the selected snapshots and prune the data no longer referenced by any"
 " snapshot? This cannot be undone and may take a long time."
 msgstr ""
+"Wilt u de geselecteerde momentopnames verwijderen en de gegevens opschonen "
+"die door geen enkele momentopname meer worden verwezen? Dit kan niet "
+"ongedaan worden gemaakt en kan enige tijd duren."
 
 msgid ""
 "Remove the selected snapshots from the repository? The data they reference "
 "is kept until the repository is pruned."
 msgstr ""
+"De geselecteerde momentopnames uit de opslagplaats verwijderen? De gegevens "
+"waarnaar ze verwijzen, worden bewaard totdat de opslagplaats wordt "
+"opgeschoond."
 
 msgid ""
 "Remove this repository and permanently delete all of its backup data from "
 "the shared folder? This cannot be undone."
 msgstr ""
+"Wilt u deze opslagplaats verwijderen en alle back-upgegevens ervan permanent"
+" uit de gedeelde map verwijderen? Dit kan niet ongedaan worden gemaakt."
 
 msgid "Repositories"
 msgstr "Opslagplaatsen"
@@ -662,6 +751,8 @@ msgid ""
 "Repository is in use. Please delete the restore tests associated with this "
 "repository first."
 msgstr ""
+"Het opslagplaats is in gebruik. Verwijder eerst de hersteltests die aan deze"
+" opslagplaats zijn gekoppeld."
 
 msgid "Repository name"
 msgstr "Naam van opslagplaats"
@@ -670,7 +761,7 @@ msgid "Repository statistics ..."
 msgstr "Statistieken van opslagplaats…"
 
 msgid "Require login"
-msgstr ""
+msgstr "Inloggen vereist"
 
 msgid "Restic"
 msgstr "Restic"
@@ -682,16 +773,16 @@ msgid "Restore Snapshot"
 msgstr "Momentopname terugzetten"
 
 msgid "Restore Tests"
-msgstr ""
+msgstr "Hersteltesten"
 
 msgid "Restore target folder"
 msgstr "Doelmap terugzetten"
 
 msgid "Restore test"
-msgstr ""
+msgstr "Hersteltest"
 
 msgid "Restore test saved."
-msgstr ""
+msgstr "Hersteltest opgeslagen."
 
 msgid "Restore this snapshot to a shared folder"
 msgstr "Deze momentopname terugzetten naar een gedeelde map"
@@ -700,22 +791,22 @@ msgid "Restoring snapshot, this may take a while…"
 msgstr "Momentopname terugzetten, dit kan even duren…"
 
 msgid "Retention policy"
-msgstr "Bewaarbeleid"
+msgstr "Retentiebeleid "
 
 msgid "Retention policy preview ..."
-msgstr ""
+msgstr "Retentiebeleid-voorbeeld…"
 
 msgid "Run backup now"
 msgstr "Back-up nu uitvoeren"
 
 msgid "Run restore test now"
-msgstr ""
+msgstr "Hersteltest nu uitvoeren"
 
 msgid "Running backup job ..."
 msgstr "Back-uptaak uitvoeren…"
 
 msgid "Running restore test ..."
-msgstr ""
+msgstr "Hersteltest nu uitvoeren…"
 
 msgid "S3 compatible"
 msgstr "S3-compatibel"
@@ -730,13 +821,13 @@ msgid "Schedule"
 msgstr "Planning"
 
 msgid "Scheduled integrity check"
-msgstr ""
+msgstr "Geplande integriteitscontrole"
 
 msgid "Scheduled retention"
-msgstr ""
+msgstr "Geplande retentie"
 
 msgid "Secure connection"
-msgstr ""
+msgstr "Beveiligde verbinding"
 
 msgid "Select a repository"
 msgstr "Selecteer een opslagplaats"
@@ -755,13 +846,13 @@ msgstr ""
 "omgevingsvariabele daarop wordt toegepast."
 
 msgid "Send command output via email"
-msgstr ""
+msgstr "De uitvoer van de opdracht via e-mail sturen"
 
 msgid "Send email"
-msgstr ""
+msgstr "E-mail sturen"
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "Stuur alleen een e-mail bij een fout"
 
 msgid "September"
 msgstr "September"
@@ -773,11 +864,13 @@ msgid "Shared Folder"
 msgstr "Gedeelde map"
 
 msgid "Shared folder"
-msgstr ""
+msgstr "Gedeelde map"
 
 msgid ""
 "Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches)."
 msgstr ""
+"Mappen die een CACHEDIR.TAG-bestand bevatten overslaan (restic --exclude-"
+"caches)."
 
 msgid "Skip initialisation"
 msgstr "Initalisatie overslaan"
@@ -795,25 +888,26 @@ msgid "Sunday"
 msgstr "Zondag"
 
 msgid "TLS enabled"
-msgstr ""
+msgstr "TLS ingeschakeld"
 
 msgid "Tags"
 msgstr "Labels"
 
 msgid "Target folder"
-msgstr ""
+msgstr "Doelmap"
 
 msgid "Test connection"
 msgstr "Verbinding testen"
 
 msgid "Test mode"
-msgstr ""
+msgstr "Testmodus"
 
 msgid "Testing repository connection ..."
 msgstr "Verbinding testen met opslagplaats…"
 
 msgid "The latest snapshot in this repository will be restore-tested."
 msgstr ""
+"De nieuwste momentopname in deze opslagplaats zal worden hersteld en getest."
 
 msgid "The shared folder used as the restic repository location."
 msgstr ""
@@ -847,33 +941,40 @@ msgid "Unlocking repository ..."
 msgstr "Opslagplaats ontgrendelen…"
 
 msgid "Use a percentage (5%), a fraction (1/7) or a size (500M)."
-msgstr ""
+msgstr "Gebruik een percentage (5%), een breuk (1/7) of een grootte (500M)."
 
 msgid "Use letters, digits and underscores only, not starting with a digit."
 msgstr ""
+"Gebruik alleen letters, cijfers en underscores, en begin niet met een "
+"cijfer."
 
 msgid "Use letters, digits, dot, dash and underscore only."
+msgstr "Gebruik alleen letters, cijfers, punt, koppelteken en underscore."
+
+msgid "Use one backend.option=value per line."
 msgstr ""
 
 msgid "Username"
-msgstr ""
+msgstr "Gebruikersnaam"
 
 msgid "Users"
-msgstr ""
+msgstr "Gebruikers"
 
 msgid "Value"
 msgstr "Waarde"
 
 msgid "Verify (full restore + checksum)"
-msgstr ""
+msgstr "Verificatie (volledige herstel + controlesom)"
 
 msgid ""
 "Verify restores into a per-test subdirectory inside this shared folder. "
 "Required for verify mode."
 msgstr ""
+"Verificatie herstelt in een submap per test binnen deze gedeelde map. "
+"Vereist voor verificatiemodus."
 
 msgid "Verify target folder"
-msgstr ""
+msgstr "Verificatie van doelmap"
 
 msgid "View repository statistics"
 msgstr "Statistieken van opslagplaats weergeven"
@@ -888,19 +989,19 @@ msgid "Weekly"
 msgstr "Wekelijks"
 
 msgid "Weekly (Sunday 02:00)"
-msgstr ""
+msgstr "Wekelijks (Zondag 02:00)"
 
 msgid "Weekly (Sunday 03:00)"
-msgstr ""
+msgstr "Wekelijks (Zondag 03:00)"
 
 msgid "Weeks with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Weken met elk één momentopname. 0 = uitgeschakeld."
 
 msgid "Yearly"
 msgstr "Jaarlijks"
 
 msgid "Years with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Jaren met elk één momentopname. 0 = uitgeschakeld."
 
 msgid "n/a"
 msgstr "n.v.t."

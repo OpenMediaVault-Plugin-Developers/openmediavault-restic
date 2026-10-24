@@ -3,31 +3,39 @@
 # This file is distributed under the same license as the openmediavault-restic package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
+# Translators:
+# Ettore Atalan <atalanttore@googlemail.com>, 2026
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 20:50+0000\n"
+"POT-Creation-Date: 2026-10-24 14:13+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
-"Language-Team: German (Germany) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/de_DE/)\n"
+"Last-Translator: Ettore Atalan <atalanttore@googlemail.com>, 2026\n"
+"Language-Team: German (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de_DE\n"
+"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid ""
+"'%s' is set twice. Use either the Connections field or the extended options."
+msgstr ""
 
 msgid "'Every N %s' needs exactly one value greater than 0."
 msgstr ""
 
 msgid "0 = disabled."
-msgstr ""
+msgstr "0 = deaktiviert."
 
 msgid "A repository must be specified."
 msgstr ""
 
 msgid "Access"
-msgstr ""
+msgstr "Zugriff"
 
 msgid "Account ID / Access key"
 msgstr ""
@@ -45,27 +53,30 @@ msgid "All selected folders will be included in the same snapshot."
 msgstr ""
 
 msgid "Always"
-msgstr ""
+msgstr "Immer"
 
 msgid "Append-only"
-msgstr ""
+msgstr "Nur anfügen"
 
 msgid "Apply now"
-msgstr ""
+msgstr "Jetzt anwenden"
 
 msgid "Applying retention policy ..."
 msgstr ""
 
 msgid "April"
-msgstr ""
+msgstr "April"
 
 msgid "At reboot"
-msgstr ""
+msgstr "Beim Neustart"
 
 msgid "August"
-msgstr ""
+msgstr "August"
 
 msgid "Backblaze B2 (native API)"
+msgstr ""
+
+msgid "Backend options"
 msgstr ""
 
 msgid "Backup Jobs"
@@ -78,10 +89,10 @@ msgid "Cache directory"
 msgstr ""
 
 msgid "Certain date"
-msgstr ""
+msgstr "Bestimmtes Datum"
 
 msgid "Certificate"
-msgstr ""
+msgstr "Zertifikat"
 
 msgid "Check repository integrity"
 msgstr ""
@@ -93,7 +104,7 @@ msgid "Clean up after verify"
 msgstr ""
 
 msgid "Cleanup"
-msgstr ""
+msgstr "Bereinigen"
 
 msgid "Clients can add snapshots but cannot delete existing data."
 msgstr ""
@@ -126,8 +137,11 @@ msgid ""
 "skipped."
 msgstr ""
 
-msgid "Create"
+msgid "Connections"
 msgstr ""
+
+msgid "Create"
+msgstr "Erstellen"
 
 msgid "Create Backup Job"
 msgstr ""
@@ -142,37 +156,37 @@ msgid "Created REST server user."
 msgstr ""
 
 msgid "Created environment variable."
-msgstr ""
+msgstr "Umgebungsvariable erstellt."
 
 msgid "Created repository."
 msgstr ""
 
 msgid "Daily"
-msgstr ""
+msgstr "Täglich"
 
 msgid "Daily (02:00)"
-msgstr ""
+msgstr "Täglich (02:00)"
 
 msgid "Daily (03:00)"
-msgstr ""
+msgstr "Täglich (03:00)"
 
 msgid "Date / Time"
-msgstr ""
+msgstr "Datum / Zeit"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Datum/Zeit"
 
 msgid "Day of month"
-msgstr ""
+msgstr "Tag des Monats"
 
 msgid "Day of week"
-msgstr ""
+msgstr "Tag der Woche"
 
 msgid "Days with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "December"
-msgstr ""
+msgstr "Dezember"
 
 msgid "Default excludes"
 msgstr ""
@@ -192,13 +206,13 @@ msgid ""
 msgstr ""
 
 msgid "Disabled"
-msgstr ""
+msgstr "Deaktiviert"
 
 msgid "Dry run"
-msgstr ""
+msgstr "Probelauf"
 
 msgid "Dry run (preview only)"
-msgstr ""
+msgstr "Probelauf (nur Vorschau)"
 
 msgid ""
 "Dry run previews what would be restored (fast, reads only metadata, writes "
@@ -211,7 +225,7 @@ msgid ""
 msgstr ""
 
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
 msgid "Edit Backup Job"
 msgstr ""
@@ -226,7 +240,7 @@ msgid "Edited REST server user."
 msgstr ""
 
 msgid "Edited environment variable."
-msgstr ""
+msgstr "Umgebungsvariable bearbeitet."
 
 msgid "Edited repository."
 msgstr ""
@@ -259,7 +273,7 @@ msgid ""
 msgstr ""
 
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiviert"
 
 msgid ""
 "Ensure that the passphrase is strong and stored securely. It cannot be "
@@ -267,25 +281,28 @@ msgid ""
 msgstr ""
 
 msgid "Environment Variables"
-msgstr ""
+msgstr "Umgebungsvariablen"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "Jeder N. Tag des Monats"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "Jede N. Stunde"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "Jede N. Minute"
 
 msgid "Exclude cache directories"
 msgstr ""
 
 msgid "Exclude patterns"
+msgstr "Muster ausschließen"
+
+msgid "Extended options"
 msgstr ""
 
 msgid "February"
-msgstr ""
+msgstr "Februar"
 
 msgid ""
 "Files will be restored into this shared folder. Existing files may be "
@@ -296,10 +313,10 @@ msgid "Folder holding the served repositories."
 msgstr ""
 
 msgid "Forget"
-msgstr ""
+msgstr "Vergessen"
 
 msgid "Forget (delete) selected snapshots"
-msgstr ""
+msgstr "Ausgewählte Schnappschüsse vergessen (löschen)"
 
 msgid ""
 "Forget all snapshots outside this repository's retention policy? This cannot"
@@ -313,7 +330,7 @@ msgid "Forget old snapshots from every host using this repository."
 msgstr ""
 
 msgid "Forgetting snapshots ..."
-msgstr ""
+msgstr "Schnappschüsse werden vergesen ..."
 
 msgid "Forgetting snapshots and pruning ..."
 msgstr ""
@@ -324,40 +341,45 @@ msgid ""
 msgstr ""
 
 msgid "Friday"
-msgstr ""
+msgstr "Freitag"
 
 msgid "Help"
-msgstr ""
+msgstr "Hilfe"
 
 msgid "Hooks"
 msgstr ""
 
 msgid "Hostname"
-msgstr ""
+msgstr "Hostname"
 
 msgid "Hour"
-msgstr ""
+msgstr "Stunde"
 
 msgid "Hourly"
-msgstr ""
+msgstr "Stündlich"
 
 msgid "ID"
 msgstr ""
 
 msgid "Inspect snapshot"
-msgstr ""
+msgstr "Schnappschuss untersuchen"
 
 msgid "Inspecting snapshot ..."
-msgstr ""
+msgstr "Schnappschuss wird untersucht ..."
 
 msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid ""
+"Invalid restic option '%s'. Use one backend.option=value per line, e.g. "
+"s3.region=us-east-1."
 msgstr ""
 
 msgid "Invalid tag."
 msgstr ""
 
 msgid "January"
-msgstr ""
+msgstr "Januar"
 
 msgid "Job"
 msgstr ""
@@ -366,10 +388,10 @@ msgid "Job name"
 msgstr ""
 
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 msgid "Keep daily"
 msgstr ""
@@ -402,7 +424,7 @@ msgid "Keep yearly"
 msgstr ""
 
 msgid "Last snapshot"
-msgstr ""
+msgstr "Letzter Schnappschuss"
 
 msgid ""
 "Letters, digits, dot, dash and underscore. With private repositories enabled"
@@ -410,67 +432,70 @@ msgid ""
 msgstr ""
 
 msgid "List files in snapshot"
-msgstr ""
+msgstr "Dateien im Schnappschuss auflisten"
 
 msgid "Listing snapshot files ..."
-msgstr ""
+msgstr "Schnappschussdateien werden aufgelistet ..."
 
 msgid "Local (shared folder)"
 msgstr ""
 
 msgid "Location / URI"
-msgstr ""
+msgstr "Ort / URI"
 
 msgid "March"
+msgstr "März"
+
+msgid "Maximum number of concurrent backend connections. 0 = restic default."
 msgstr ""
 
 msgid "May"
-msgstr ""
+msgstr "Mai"
 
 msgid "Message"
-msgstr ""
+msgstr "Nachricht"
 
 msgid "Minute"
-msgstr ""
+msgstr "Minute"
 
 msgid "Mode"
-msgstr ""
+msgstr "Modus"
 
 msgid "Monday"
-msgstr ""
+msgstr "Montag"
 
 msgid "Month"
-msgstr ""
+msgstr "Monat"
 
 msgid "Monthly"
-msgstr ""
+msgstr "Monatlich"
 
 msgid "Monthly (1st, 02:00)"
-msgstr ""
+msgstr "Monatlich (1., 02:00)"
 
 msgid "Monthly (1st, 03:00)"
-msgstr ""
+msgstr "Monatlich (1., 03:00)"
 
 msgid "Months with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 msgid "Never"
-msgstr ""
+msgstr "Nie"
 
 msgid "Notifications"
-msgstr ""
+msgstr "Benachrichtigungen"
 
 msgid "November"
-msgstr ""
+msgstr "November"
 
 msgid "OMV-Extras Wiki"
 msgstr ""
 
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 msgid ""
 "One pattern per line, applied to every backup job in addition to its own "
@@ -484,10 +509,10 @@ msgid ""
 msgstr ""
 
 msgid "Only host"
-msgstr ""
+msgstr "Nur Host"
 
 msgid "Only on error"
-msgstr ""
+msgstr "Nur bei Fehler"
 
 msgid ""
 "Only restore files matching this path prefix within the snapshot (e.g. "
@@ -522,6 +547,11 @@ msgid ""
 "from cloud storage may incur egress costs."
 msgstr ""
 
+msgid ""
+"Optional. One restic extended option per line, passed as -o, e.g. "
+"s3.region=us-east-1. Run 'restic options' to list them."
+msgstr ""
+
 msgid "Optional. Only apply to snapshots from this hostname."
 msgstr ""
 
@@ -529,34 +559,34 @@ msgid "Optional. Only apply to snapshots with this tag."
 msgstr ""
 
 msgid "Options"
-msgstr ""
+msgstr "Optionen"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "Passphrase"
 
 msgid "Password"
-msgstr ""
+msgstr "Passwort"
 
 msgid "Path filter (optional)"
-msgstr ""
+msgstr "Pfadfilter (optional)"
 
 msgid "Paths"
-msgstr ""
+msgstr "Pfade"
 
 msgid "Periodically run 'restic check' against this repository."
 msgstr ""
 
 msgid "Port"
-msgstr ""
+msgstr "Port"
 
 msgid "Post-script"
 msgstr ""
 
 msgid "Pre-script"
-msgstr ""
+msgstr "Vorskript"
 
 msgid "Preview (dry run)"
-msgstr ""
+msgstr "Vorschau (Probelauf)"
 
 msgid ""
 "Preview what would be restored without writing any files. Useful for "
@@ -576,13 +606,13 @@ msgid "Pruning repository ..."
 msgstr ""
 
 msgid "REST Server"
-msgstr ""
+msgstr "REST-Server"
 
 msgid "REST Users"
-msgstr ""
+msgstr "REST-Benutzer"
 
 msgid "REST server"
-msgstr ""
+msgstr "REST-Server"
 
 msgid "Read data subset"
 msgstr ""
@@ -643,25 +673,25 @@ msgid "Require login"
 msgstr ""
 
 msgid "Restic"
-msgstr ""
+msgstr "Restic"
 
 msgid "Restic documentation"
-msgstr ""
+msgstr "Restic-Dokumentation"
 
 msgid "Restore Snapshot"
-msgstr ""
+msgstr "Schnappschuss wiederherstellen"
 
 msgid "Restore Tests"
-msgstr ""
+msgstr "Wiederherstellungstests"
 
 msgid "Restore target folder"
-msgstr ""
+msgstr "Zielordner wiederherstellen"
 
 msgid "Restore test"
-msgstr ""
+msgstr "Wiederherstellungstest"
 
 msgid "Restore test saved."
-msgstr ""
+msgstr "Wiederherstellungstest gespeichert."
 
 msgid "Restore this snapshot to a shared folder"
 msgstr ""
@@ -676,25 +706,25 @@ msgid "Retention policy preview ..."
 msgstr ""
 
 msgid "Run backup now"
-msgstr ""
+msgstr "Sicherung jetzt ausführen"
 
 msgid "Run restore test now"
-msgstr ""
+msgstr "Wiederherstellungstest jetzt ausführen"
 
 msgid "Running backup job ..."
 msgstr ""
 
 msgid "Running restore test ..."
-msgstr ""
+msgstr "Wiederherstellungstest wird ausgeführt ..."
 
 msgid "S3 compatible"
-msgstr ""
+msgstr "S3-kompatibel"
 
 msgid "SFTP"
-msgstr ""
+msgstr "SFTP"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Samstag"
 
 msgid "Schedule"
 msgstr ""
@@ -706,7 +736,7 @@ msgid "Scheduled retention"
 msgstr ""
 
 msgid "Secure connection"
-msgstr ""
+msgstr "Sichere Verbindung"
 
 msgid "Select a repository"
 msgstr ""
@@ -726,53 +756,53 @@ msgid "Send command output via email"
 msgstr ""
 
 msgid "Send email"
-msgstr ""
+msgstr "E-Mail senden"
 
 msgid "Send email on error only"
 msgstr ""
 
 msgid "September"
-msgstr ""
+msgstr "September"
 
 msgid "Settings"
-msgstr ""
+msgstr "Einstellungen"
 
 msgid "Shared Folder"
-msgstr ""
+msgstr "Gemeinsamer Ordner"
 
 msgid "Shared folder"
-msgstr ""
+msgstr "Gemeinsamer Ordner"
 
 msgid ""
 "Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches)."
 msgstr ""
 
 msgid "Skip initialisation"
-msgstr ""
+msgstr "Initialisierung überspringen"
 
 msgid "Snapshot ID"
-msgstr ""
+msgstr "Schnappschusskennung"
 
 msgid "Source & Destination"
-msgstr ""
+msgstr "Quelle & Ziel"
 
 msgid "Source folders"
-msgstr ""
+msgstr "Quellordner"
 
 msgid "Sunday"
-msgstr ""
+msgstr "Sonntag"
 
 msgid "TLS enabled"
-msgstr ""
+msgstr "TLS aktiviert"
 
 msgid "Tags"
 msgstr ""
 
 msgid "Target folder"
-msgstr ""
+msgstr "Zielordner"
 
 msgid "Test connection"
-msgstr ""
+msgstr "Verbindung testen"
 
 msgid "Test mode"
 msgstr ""
@@ -790,7 +820,7 @@ msgid "This must be a valid Restic environment variable."
 msgstr ""
 
 msgid "Thursday"
-msgstr ""
+msgstr "Donnerstag"
 
 msgid ""
 "Tick this to import an existing restic repository. The passphrase must match"
@@ -798,13 +828,13 @@ msgid ""
 msgstr ""
 
 msgid "Time of execution"
-msgstr ""
+msgstr "Ausführungszeit"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Dienstag"
 
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 msgid "Unlocking repository ..."
 msgstr ""
@@ -818,14 +848,17 @@ msgstr ""
 msgid "Use letters, digits, dot, dash and underscore only."
 msgstr ""
 
-msgid "Username"
+msgid "Use one backend.option=value per line."
 msgstr ""
+
+msgid "Username"
+msgstr "Benutzername"
 
 msgid "Users"
-msgstr ""
+msgstr "Benutzer"
 
 msgid "Value"
-msgstr ""
+msgstr "Wert"
 
 msgid "Verify (full restore + checksum)"
 msgstr ""
@@ -836,7 +869,7 @@ msgid ""
 msgstr ""
 
 msgid "Verify target folder"
-msgstr ""
+msgstr "Zielordner verifizieren"
 
 msgid "View repository statistics"
 msgstr ""
@@ -845,28 +878,28 @@ msgid "View snapshots stored in this repository"
 msgstr ""
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Mittwoch"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Wöchentlich"
 
 msgid "Weekly (Sunday 02:00)"
-msgstr ""
+msgstr "Wöchentlich (Sonntag 02:00)"
 
 msgid "Weekly (Sunday 03:00)"
-msgstr ""
+msgstr "Wöchentlich (Sonntag 03:00)"
 
 msgid "Weeks with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "Yearly"
-msgstr ""
+msgstr "Jährlich"
 
 msgid "Years with one snapshot each. 0 = disabled."
 msgstr ""
 
 msgid "n/a"
-msgstr ""
+msgstr "n/v"
 
 msgid "rclone remote"
 msgstr ""
