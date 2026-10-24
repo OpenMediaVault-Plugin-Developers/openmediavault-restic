@@ -46,6 +46,7 @@ NASTY_NAMES = [
 FAKE_RESTIC = r'''#!/bin/bash
 printf '%s\n' "$*" >> "$SANDBOX/restic-calls"
 printf 'RESTIC_PASSWORD=%s\n' "$RESTIC_PASSWORD" >> "$SANDBOX/restic-env"
+env | grep -E '^(RESTIC_REPOSITORY|PRECEDENCE_[A-Z]+)=' | sort >> "$SANDBOX/restic-precedence"
 case "$1" in
     backup)
         echo "open repository"
@@ -309,6 +310,25 @@ class RepoMaintenanceScriptTest(ScriptTestCase):
                 self.assertIn('--retry-lock 5m -o b2.connections=10',
                               self.sb.read('restic-calls'))
                 self.assertTrue(self.sb.read('restic-calls').startswith(cmd))
+
+    def test_env_var_precedence(self):
+        # Shared < repository-specific < the plugin's own values. Must match
+        # buildRepoEnv() in the RPC service (see test-unit.php).
+        r = repo(type='rest', uri='http://host/repo')
+        with open(self.sb.path('etc', 'restic-envvar-shared'), 'w') as f:
+            f.write("PRECEDENCE_SHARED='shared'\nPRECEDENCE_BOTH='shared'\n"
+                    "RESTIC_PASSWORD='shared'\nRESTIC_REPOSITORY='shared'\n")
+        with open(self.sb.path('etc', 'restic-envvar-' + r['uuid']), 'w') as f:
+            f.write("PRECEDENCE_BOTH='repo'\nRESTIC_REPOSITORY='repo'\n")
+        script = render('restic-check.sh.j2', repo=r, repo_path='', cachedir='')
+        self.assertEqual(self.sb.run(self.sb.install(script)), 0)
+        self.assertEqual(self.sb.read('restic-precedence').splitlines(), [
+            'PRECEDENCE_BOTH=repo',
+            'PRECEDENCE_SHARED=shared',
+            'RESTIC_REPOSITORY=rest:http://host/repo',
+        ])
+        self.assertEqual(self.sb.read('restic-env'),
+                         'RESTIC_PASSWORD=' + r['passphrase'] + '\n')
 
     def test_failed_check_fails_the_script(self):
         script = render('restic-check.sh.j2', repo=repo(),
