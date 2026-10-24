@@ -86,9 +86,15 @@ export RESTIC_REPOSITORY={{ sq('rest:' ~ repo.uri) }}
 export RESTIC_REPOSITORY={{ sq('rclone:' ~ repo.uri) }}
 {% endif %}
 
+# Extended options (-o) passed to every restic command for this repository
+RESTIC_OPTS=()
+{% for opt in backend_opts | default([]) %}
+RESTIC_OPTS+=(-o {{ sq(opt) }})
+{% endfor %}
+
 # Build backup command as an array so paths/patterns with spaces or shell
 # metacharacters are passed to restic verbatim.
-BACKUP_ARGS=()
+BACKUP_ARGS=("${RESTIC_OPTS[@]}")
 
 {% if job.tags %}
 {% for tag in job.tags.split(',') %}
@@ -183,7 +189,7 @@ fi
 
 # Apply retention policy, scoped to this job's source paths so it cannot
 # forget snapshots created by other jobs that share the same repository.
-FORGET_ARGS=(--prune --retry-lock 5m)
+FORGET_ARGS=(--prune --retry-lock 5m "${RESTIC_OPTS[@]}")
 {% if has_keeplast    %}FORGET_ARGS+=(--keep-last {{ job.keeplast | int }}){% endif %}
 {% if has_keepdaily   %}FORGET_ARGS+=(--keep-daily {{ job.keepdaily | int }}){% endif %}
 {% if has_keepweekly  %}FORGET_ARGS+=(--keep-weekly {{ job.keepweekly | int }}){% endif %}

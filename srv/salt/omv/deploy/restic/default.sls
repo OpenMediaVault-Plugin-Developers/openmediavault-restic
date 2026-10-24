@@ -59,6 +59,27 @@ include:
 {% do repomap.update({repo.uuid: repo}) %}
 {% endfor %}
 
+{# -----------------------------------------------------------------------
+   Build a lookup map: repo uuid -> extended options (`-o` values). Must
+   match buildRepoOptions() in the RPC service, which validates them.
+   ----------------------------------------------------------------------- #}
+{% set repoopts = {} %}
+{% for repo in config.repos.repo %}
+{% set opts = [] %}
+{% set connections = (repo.connections or 0) | int %}
+{% if connections > 0 %}
+{% do opts.append(repo.type ~ '.connections=' ~ connections) %}
+{% endif %}
+{# Split on CRLF, CR and LF only, like the RPC service. #}
+{% set optlines = ((repo.options or '') | string).replace('\r\n', '\n').replace('\r', '\n').split('\n') %}
+{% for line in optlines %}
+{% if line.strip(' \t') %}
+{% do opts.append(line.strip(' \t')) %}
+{% endif %}
+{% endfor %}
+{% do repoopts.update({repo.uuid: opts}) %}
+{% endfor %}
+
 # Ensure required directories exist
 
 configure_restic_log_dir:
@@ -179,6 +200,7 @@ configure_restic_job_script_{{ job.uuid }}:
         job: {{ job | json }}
         repo: {{ repo | json }}
         repo_path: "{{ repo_path }}"
+        backend_opts: {{ repoopts[repo.uuid] | json }}
         source_paths: {{ source_paths | json }}
         hashfile: "{{ scriptsDir ~ '/hash-' ~ job.uuid }}"
         cachedir: "{{ cacheDir }}"
@@ -223,6 +245,7 @@ configure_restic_restoretest_script_{{ job.uuid }}:
         job: {{ job | json }}
         repo: {{ repo | json }}
         repo_path: "{{ repo_path }}"
+        backend_opts: {{ repoopts[repo.uuid] | json }}
         target_path: "{{ target_path }}"
         cachedir: "{{ cacheDir }}"
     - template: jinja
@@ -251,6 +274,7 @@ configure_restic_check_script_{{ repo.uuid }}:
     - context:
         repo: {{ repo | json }}
         repo_path: "{{ repo_path }}"
+        backend_opts: {{ repoopts[repo.uuid] | json }}
         cachedir: "{{ cacheDir }}"
     - template: jinja
     - user: root
@@ -277,6 +301,7 @@ configure_restic_forget_script_{{ repo.uuid }}:
     - context:
         repo: {{ repo | json }}
         repo_path: "{{ repo_path }}"
+        backend_opts: {{ repoopts[repo.uuid] | json }}
         cachedir: "{{ cacheDir }}"
     - template: jinja
     - user: root

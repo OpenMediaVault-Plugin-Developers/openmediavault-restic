@@ -94,7 +94,13 @@ export RESTIC_REPOSITORY={{ sq('rest:' ~ repo.uri) }}
 export RESTIC_REPOSITORY={{ sq('rclone:' ~ repo.uri) }}
 {% endif %}
 
-FORGET_ARGS=(--retry-lock 5m)
+# Extended options (-o) passed to every restic command for this repository
+RESTIC_OPTS=()
+{% for opt in backend_opts | default([]) %}
+RESTIC_OPTS+=(-o {{ sq(opt) }})
+{% endfor %}
+
+FORGET_ARGS=(--retry-lock 5m "${RESTIC_OPTS[@]}")
 {% for k in ['last', 'daily', 'weekly', 'monthly', 'yearly'] %}
 {% set n = repo['forgetkeep' ~ k] | int %}
 {% if n > 0 %}

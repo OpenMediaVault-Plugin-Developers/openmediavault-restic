@@ -93,6 +93,26 @@ data:
         disabled: "{{ _routeConfig.data.editing | toboolean }}"
         hint: _("Tick this to import an existing restic repository. The passphrase must match the one already used by that repository.")
       - type: divider
+        title: _("Backend options")
+      - type: numberInput
+        name: connections
+        label: _("Connections")
+        value: 0
+        hint: _("Maximum number of concurrent backend connections. 0 = restic default.")
+        validators:
+          min: 0
+          max: 1000
+      - type: textarea
+        name: options
+        label: _("Extended options")
+        value: ""
+        rows: 3
+        hint: _("Optional. One restic extended option per line, passed as -o, e.g. s3.region=us-east-1. Run 'restic options' to list them.")
+        validators:
+          pattern:
+            pattern: '^([ \t]*([a-z0-9]+\.[a-z0-9-]+=[^\n]*)?(\r?\n|$))*$'
+            errorData: _("Use one backend.option=value per line.")
+      - type: divider
         title: _("Scheduled integrity check")
       - type: select
         name: checkschedule

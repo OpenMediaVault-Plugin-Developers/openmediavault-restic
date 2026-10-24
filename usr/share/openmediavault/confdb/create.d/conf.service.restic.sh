@@ -54,8 +54,10 @@ if ! omv_config_exists "${SERVICE_XPATH}/repos"; then
     omv_config_add_node "${SERVICE_XPATH}" "repos" ""
 fi
 
-# Scheduled check and retention options on existing repositories. omv_config_add_key edits
+# Backend, scheduled check and retention options on existing repositories. omv_config_add_key edits
 # every node matching the XPath, so this only touches repos lacking the key.
+omv_config_add_key "${SERVICE_XPATH}/repos/repo[not(connections)]" "connections" "0"
+omv_config_add_key "${SERVICE_XPATH}/repos/repo[not(options)]" "options" ""
 omv_config_add_key "${SERVICE_XPATH}/repos/repo[not(checkschedule)]" "checkschedule" "disabled"
 omv_config_add_key "${SERVICE_XPATH}/repos/repo[not(checkreaddata)]" "checkreaddata" ""
 omv_config_add_key "${SERVICE_XPATH}/repos/repo[not(checkemail)]" "checkemail" "onerror"

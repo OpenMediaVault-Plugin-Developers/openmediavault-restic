@@ -77,6 +77,15 @@
           "type": "boolean",
           "required": true
         },
+        "connections": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "options": {
+          "type": "string",
+          "pattern": "^[^\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]*\\z"
+        },
         "checkschedule": {
           "type": "string",
           "enum": ["disabled", "daily", "weekly", "monthly"]

@@ -70,6 +70,15 @@
                 "type": "string",
                 "default": ""
               },
+              "connections": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0
+              },
+              "options": {
+                "type": "string",
+                "default": ""
+              },
               "checkschedule": {
                 "type": "string",
                 "enum": [

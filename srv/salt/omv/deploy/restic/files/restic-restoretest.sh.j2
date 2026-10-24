@@ -86,9 +86,15 @@ export RESTIC_REPOSITORY={{ sq('rest:' ~ repo.uri) }}
 export RESTIC_REPOSITORY={{ sq('rclone:' ~ repo.uri) }}
 {% endif %}
 
+# Extended options (-o) passed to every restic command for this repository
+RESTIC_OPTS=()
+{% for opt in backend_opts | default([]) %}
+RESTIC_OPTS+=(-o {{ sq(opt) }})
+{% endfor %}
+
 # Build the restore command as an array so paths/patterns with spaces or shell
 # metacharacters are passed to restic verbatim.
-RESTORE_ARGS=(--retry-lock 5m)
+RESTORE_ARGS=(--retry-lock 5m "${RESTIC_OPTS[@]}")
 
 {% set is_verify = job.mode == 'verify' %}
 {% if is_verify %}
