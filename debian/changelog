@@ -1,3 +1,9 @@
+openmediavault-restic (8.0.1) unstable; urgency=low
+
+  * Add per-repository Connections setting and extended (-o) options
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 24 Oct 2026 14:03:38 +0000
+
 openmediavault-restic (8.0) unstable; urgency=low
 
   * Initial release
