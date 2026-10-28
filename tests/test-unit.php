@@ -41,6 +41,7 @@ file_put_contents("$tmpDir/config.xml", '<?xml version="1.0" encoding="UTF-8"?>
     <repo><uuid>' . REPO_LOCAL . '</uuid><name>local1</name><type>local</type><sharedfolderref>' . SF_ONE . '</sharedfolderref><passphrase>p1</passphrase></repo>
     <repo><uuid>' . REPO_REST . '</uuid><name>rest1</name><type>rest</type><sharedfolderref></sharedfolderref><uri>http://host/repo</uri><passphrase>p2</passphrase></repo>
   </repos>
+  <snapshots></snapshots>
 </restic></services></config>
 ');
 \OMV\Environment::set('OMV_DATAMODELS_DIR', "$tmpDir/datamodels");
@@ -379,6 +380,48 @@ setRepoOk(['uuid' => NEW_UUID, 'name' => 'local2', 'sharedfolderref' => SF_TWO] 
 setRepoFails(['sharedfolderref' => SF_TWO] + $localEdit,
     'an edited local repo cannot move to another repo\'s shared folder');
 setRepoOk($localEdit, 'an edited local repo can keep its own shared folder');
+
+echo "\n=== Schemas: job lists and dry run ===\n";
+$jobNoSf = $job;
+unset($jobNoSf['sharedfolderrefs']);
+expectValid('rpc.restic.setsnapshot', ['fileslist' => '/a'] + $jobNoSf,
+    'a job without source folders (include list only)');
+expectValid('rpc.restic.setsnapshot', ['excludelist' => "a\r\nb", 'fileslist' => "/a\n/b"] + $job,
+    'multi-line lists');
+expectValid('rpc.restic.runsnapshot', ['uuid' => NEW_UUID, 'dryrun' => true, 'listfiles' => true],
+    'a dry run that lists files');
+expectValid('rpc.restic.runsnapshot', ['uuid' => NEW_UUID], 'a run without dry-run flags');
+
+echo "\n=== Job lists ===\n";
+check('parseJobList trims, skips blank and # lines, handles CR/LF',
+    callPrivate($service, 'parseJobList', ["# c\r\n  /a b  \r\n\n\r/c\n #x"]) === ['/a b', '/c']);
+function setSnapshotResult($params)
+{
+    global $service, $ctx;
+    $base = [
+        'uuid' => NEW_UUID, 'name' => 'job', 'hash' => '', 'tags' => '',
+        'sharedfolderrefs' => [SF_ONE], 'reporef' => REPO_LOCAL, 'exclude' => '',
+        'execution' => 'daily', 'minute' => ['0'], 'everynminute' => false,
+        'hour' => ['0'], 'everynhour' => false, 'dayofmonth' => ['*'],
+        'everyndayofmonth' => false, 'month' => ['*'], 'dayofweek' => ['*'],
+    ];
+    try {
+        return $service->setSnapshot(array_merge($base, $params), $ctx);
+    } catch (\Exception $e) {
+        return $e->getMessage();
+    }
+}
+$r = setSnapshotResult(['excludelist' => "a\r\nb\r\n", 'fileslist' => "/x\r\n"]);
+check('lists are stored with LF line endings',
+    is_array($r) && $r['excludelist'] === "a\nb" && $r['fileslist'] === '/x', json_encode($r));
+$r = setSnapshotResult(['sharedfolderrefs' => [], 'fileslist' => '# only /x']);
+check('a job needs a source folder or an include path', is_string($r), json_encode($r));
+$r = setSnapshotResult(['sharedfolderrefs' => [], 'fileslist' => "# c\n/data/deep/dir"]);
+check('an include list alone is enough', is_array($r) && $r['csvsharedfolderrefs'] === '', json_encode($r));
+$r = setSnapshotResult(['fileslist' => 'relative/path']);
+check('include paths must be absolute', is_string($r), json_encode($r));
+$r = setSnapshotResult(['excludelist' => "a\x1b[2J"]);
+check('lists reject control characters', is_string($r), json_encode($r));
 
 echo "\n=== RPC methods ===\n";
 $registered = (new ReflectionProperty(\OMV\Rpc\ServiceAbstract::class, 'registeredMethods'));

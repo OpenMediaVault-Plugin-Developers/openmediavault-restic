@@ -192,6 +192,7 @@ FAIL_JOB_UUID=""
 FAIL_RT_UUID=""
 E2E_REPO_UUID=""
 E2E_JOB_UUID=""
+E2E_FILES_JOB_UUID=""
 E2E_SF_REPO_UUID=""
 E2E_SF_SRC_UUID=""
 
@@ -327,7 +328,7 @@ cleanup() {
     done
 
     # Backup jobs must go before repos (deleteRepo checks for references)
-    for uuid in "$SNAPSHOT_UUID" "$FAIL_JOB_UUID" "$E2E_JOB_UUID"; do
+    for uuid in "$SNAPSHOT_UUID" "$FAIL_JOB_UUID" "$E2E_JOB_UUID" "$E2E_FILES_JOB_UUID"; do
         [ -z "$uuid" ] && continue
         info "Deleting test backup job $uuid"
         rpc "Restic" "deleteSnapshot" "{\"uuid\":\"$uuid\"}" &>/dev/null || true
@@ -1709,7 +1710,8 @@ fi
 if [ -n "$E2E_SF_REPO_UUID" ] && [ -n "$E2E_SF_SRC_UUID" ]; then
     REPO_PATH=$(rpc "ShareMgmt" "getPath" "{\"uuid\":\"$E2E_SF_REPO_UUID\"}" | python3 -c "import sys,json; print(json.load(sys.stdin))")
     SRC_PATH=$(rpc "ShareMgmt" "getPath" "{\"uuid\":\"$E2E_SF_SRC_UUID\"}" | python3 -c "import sys,json; print(json.load(sys.stdin))")
-    mkdir -p "$SRC_PATH" && echo "restic test data" > "$SRC_PATH/file.txt"
+    mkdir -p "$SRC_PATH/deep/skip" && echo "restic test data" > "$SRC_PATH/file.txt"
+    echo "excluded" > "$SRC_PATH/deep/skip/secret.txt"
 
     E2E_REPO_JSON="'name': 'restic-test-e2e-$SUFFIX', 'type': 'local',
         'sharedfolderref': '$E2E_SF_REPO_UUID', 'passphrase': \"e2e pa\$\$ 'word\\\"\""
@@ -1727,12 +1729,41 @@ if [ -n "$E2E_REPO_UUID" ]; then
     assert_rpc "setSnapshot (local e2e job)" "Restic" "setSnapshot" \
         "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'name': 'restic-test-e2e-job',
         'sharedfolderrefs': ['$E2E_SF_SRC_UUID'], 'reporef': '$E2E_REPO_UUID',
+        'excludelist': '# nested directory\\n$SRC_PATH/deep/skip',
         'execution': 'daily', 'keepdaily': 7}))")" >/dev/null
     E2E_JOB_UUID=$(json_field "$RPC_OUT" "uuid")
+
+    assert_rpc "setSnapshot (include list only)" "Restic" "setSnapshot" \
+        "$(python3 -c "import json; print(json.dumps({$JOB_BASE, 'name': 'restic-test-e2e-files-job',
+        'sharedfolderrefs': [], 'fileslist': '$SRC_PATH/file.txt', 'reporef': '$E2E_REPO_UUID'}))")" >/dev/null
+    E2E_FILES_JOB_UUID=$(json_field "$RPC_OUT" "uuid")
 fi
 
 if [ -n "$E2E_JOB_UUID" ]; then
     HASH_FILE="/var/lib/openmediavault/restic/hash-$E2E_JOB_UUID"
+    SL_PARAMS="{\"reporef\":\"$E2E_REPO_UUID\",\"start\":0,\"limit\":25,\"sortfield\":\"time\",\"sortdir\":\"desc\"}"
+    assert_task "runSnapshot (dry run, list files) — exclude list applied" ok \
+        "Restic" "runSnapshot" "{\"uuid\":\"$E2E_JOB_UUID\",\"dryrun\":true,\"listfiles\":true}" \
+        "file.txt" "secret.txt"
+    assert_task "runSnapshot (dry run, summary) — reports what would be added" ok \
+        "Restic" "runSnapshot" "{\"uuid\":\"$E2E_JOB_UUID\",\"dryrun\":true}" \
+        "Would add to the repository" "Applying retention policy"
+    if [ -n "$E2E_FILES_JOB_UUID" ]; then
+        assert_task "runSnapshot (dry run) — include list only job" ok \
+            "Restic" "runSnapshot" "{\"uuid\":\"$E2E_FILES_JOB_UUID\",\"dryrun\":true,\"listfiles\":true}" \
+            "file.txt"
+        assert_rpc "deleteSnapshot — include list only job" "Restic" "deleteSnapshot" \
+            "{\"uuid\":\"$E2E_FILES_JOB_UUID\"}" >/dev/null
+        E2E_FILES_JOB_UUID=""
+    fi
+    assert_rpc "runSnapshot (dry run) — no snapshot created" "Restic" "getRepoSnapshotList" \
+        "$SL_PARAMS" '"total":0' >/dev/null
+    [ -e "$HASH_FILE" ] && _fail "runSnapshot (dry run) — snapshot ID recorded" || \
+        _pass "runSnapshot (dry run) — no snapshot ID recorded"
+    ls /tmp/restic-excludelist-* /tmp/restic-fileslist-* &>/dev/null && \
+        _fail "runSnapshot — temporary list files left behind" || \
+        _pass "runSnapshot — temporary list files removed"
+
     assert_task "runSnapshot — backup succeeds and applies retention" ok \
         "Restic" "runSnapshot" "{\"uuid\":\"$E2E_JOB_UUID\"}" "Applying retention policy"
     if [ -s "$HASH_FILE" ]; then
@@ -1741,7 +1772,6 @@ if [ -n "$E2E_JOB_UUID" ]; then
         _fail "runSnapshot — no snapshot ID recorded in $HASH_FILE"
     fi
 
-    SL_PARAMS="{\"reporef\":\"$E2E_REPO_UUID\",\"start\":0,\"limit\":25,\"sortfield\":\"time\",\"sortdir\":\"desc\"}"
     assert_rpc "getRepoSnapshotList — backup listed" "Restic" "getRepoSnapshotList" "$SL_PARAMS" '"total":1' >/dev/null
     assert_task "restoreSnapshot (dry run) — succeeds" ok "Restic" "restoreSnapshot" \
         "{\"reporef\":\"$E2E_REPO_UUID\",\"snapshotid\":\"latest\",\"dryrun\":true}"

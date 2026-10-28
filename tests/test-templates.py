@@ -49,6 +49,15 @@ printf 'RESTIC_PASSWORD=%s\n' "$RESTIC_PASSWORD" >> "$SANDBOX/restic-env"
 env | grep -E '^(RESTIC_REPOSITORY|PRECEDENCE_[A-Z]+)=' | sort >> "$SANDBOX/restic-precedence"
 case "$1" in
     backup)
+        # Keep a copy of the list files, which the job deletes afterwards.
+        prev=""
+        for arg in "$@"; do
+            case "$prev" in
+                --exclude-file) cat "$arg" > "$SANDBOX/exclude-file"; echo "$arg" >> "$SANDBOX/list-files" ;;
+                --files-from)   cat "$arg" > "$SANDBOX/files-from";   echo "$arg" >> "$SANDBOX/list-files" ;;
+            esac
+            prev="$arg"
+        done
         echo "open repository"
         [ "${FAKE_BACKUP_EXIT:-0}" -eq 0 ] && echo "snapshot 0123abcd saved"
         exit "${FAKE_BACKUP_EXIT:-0}" ;;
@@ -97,7 +106,9 @@ def job(**kw):
     j = {
         'uuid': '22222222-2222-4222-8222-222222222222',
         'enable': True, 'name': 'job1', 'tags': '', 'exclude': '',
-        'reporef': repo()['uuid'], 'csvsharedfolderrefs': '',
+        'reporef': repo()['uuid'],
+        'csvsharedfolderrefs': '33333333-3333-4333-8333-333333333333',
+        'excludelist': '', 'fileslist': '',
         'execution': 'daily', 'minute': '0', 'everynminute': False,
         'hour': '0', 'everynhour': False, 'dayofmonth': '*',
         'everyndayofmonth': False, 'month': '*', 'dayofweek': '*',
@@ -251,6 +262,39 @@ class BackupJobScriptTest(ScriptTestCase):
         expected = '-o ' + opts[0] + ' -o ' + opts[1]
         self.assertTrue(calls[0].startswith('backup --verbose --retry-lock 5m ' + expected), calls[0])
         self.assertTrue(calls[1].startswith('forget --prune --retry-lock 5m ' + expected), calls[1])
+
+    def test_job_lists_reach_restic_verbatim(self):
+        nasty = ["it's", 'a "b"', '$(touch MARK)', '`touch MARK`', '*.tmp,x', '\\back']
+        text = '\r\n'.join(['# comment', ''] + ['  /p/' + e + '  ' for e in nasty])
+        script = self.render_job(excludelist=text, fileslist=text)
+        self.assertSyntaxOk(script)
+        self.assertEqual(self.sb.run(self.sb.install(script)), 0)
+        self.assertFalse(os.path.exists(self.sb.path('MARK')))
+        expected = ''.join('/p/' + e + '\n' for e in nasty)
+        self.assertEqual(self.sb.read('exclude-file'), expected)
+        self.assertEqual(self.sb.read('files-from'), expected)
+        for f in self.sb.read('list-files').split():
+            self.assertFalse(os.path.exists(f), 'temp list file left behind: ' + f)
+
+    def test_empty_job_lists_are_not_passed(self):
+        self.sb.run(self.sb.install(self.render_job(excludelist='# x\n\n', fileslist='')))
+        calls = self.sb.read('restic-calls')
+        self.assertNotIn('--exclude-file', calls)
+        self.assertNotIn('--files-from', calls)
+        self.assertNotIn('--tag', calls)
+
+    def test_job_without_source_folders_scopes_retention_by_tag(self):
+        script = render('restic-job.sh.j2',
+                        job=job(csvsharedfolderrefs='', fileslist='/data/x'),
+                        repo=repo(), repo_path=self.sb.path('repo'),
+                        source_paths=[], cachedir='', excludefile='',
+                        excludecaches=False, hashfile=self.sb.hashfile)
+        self.assertEqual(self.sb.run(self.sb.install(script)), 0)
+        tag = '--tag omv-job-' + job()['uuid']
+        backup, forget = self.sb.read('restic-calls').splitlines()
+        self.assertIn(tag, backup)
+        self.assertIn(tag, forget)
+        self.assertNotIn('--path', forget)
 
     def test_prescript_failure_skips_backup(self):
         rc = self.sb.run(self.sb.install(self.render_job(prescript='exit 4')))
