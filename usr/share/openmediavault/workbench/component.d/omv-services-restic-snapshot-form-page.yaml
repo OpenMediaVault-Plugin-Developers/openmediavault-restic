@@ -17,8 +17,6 @@ data:
       - type: hidden
         name: hash
         value: ""
-
-      # ── Identity ─────────────────────────────────────────────────────────
       - type: divider
         title: _("Job")
       - type: checkbox
@@ -31,15 +29,13 @@ data:
         label: _("Job name")
         hint: _("Optional human-readable name for this backup job.")
         value: ""
-
-      # ── Source & destination ──────────────────────────────────────────────
       - type: divider
         title: _("Source & Destination")
       - type: select
         name: sharedfolderrefs
         label: _("Source folders")
         placeholder: _("Select one or more shared folders to back up.")
-        hint: _("All selected folders will be included in the same snapshot.")
+        hint: _("All selected folders go into the same snapshot. Optional if the include list is set.")
         multiple: true
         valueField: uuid
         textField: description
@@ -49,7 +45,10 @@ data:
             get:
               method: enumerateSharedFolders
         validators:
-          required: true
+          requiredIf:
+            operator: falsy
+            arg0:
+              prop: fileslist
       - type: select
         name: reporef
         label: _("Repository")
@@ -63,8 +62,6 @@ data:
               method: enumerateRepoCandidates
         validators:
           required: true
-
-      # ── Options ───────────────────────────────────────────────────────────
       - type: divider
         title: _("Options")
       - type: textInput
@@ -77,12 +74,24 @@ data:
       - type: textInput
         name: exclude
         label: _("Exclude patterns")
-        hint: _("Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys).")
+        hint: _("Comma-separated patterns or absolute paths, e.g. *.tmp,**/node_modules.")
         value: ""
         validators:
           required: false
-
-      # ── Schedule ─────────────────────────────────────────────────────────
+      - type: divider
+        title: _("Advanced")
+      - type: textarea
+        name: excludelist
+        label: _("Exclude list")
+        value: ""
+        rows: 4
+        hint: _("One pattern or absolute path per line. See the restic docs on <a class='omv-color-primary' href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files' target='_blank'>excluding files</a>.")
+      - type: textarea
+        name: fileslist
+        label: _("Include list")
+        value: ""
+        rows: 4
+        hint: _("Extra absolute paths to back up, one per line. See the restic docs on <a class='omv-color-primary' href='https://restic.readthedocs.io/en/stable/040_backup.html#including-files' target='_blank'>including files</a>.")
       - type: divider
         title: _("Schedule")
       - type: select
@@ -435,8 +444,6 @@ data:
             - ["5", _("Friday")]
             - ["6", _("Saturday")]
             - ["7", _("Sunday")]
-
-      # ── Retention policy ──────────────────────────────────────────────────
       - type: divider
         title: _("Retention policy")
       - type: hint
@@ -477,8 +484,6 @@ data:
         value: 0
         validators:
           min: 0
-
-      # ── Notifications ─────────────────────────────────────────────────────
       - type: divider
         title: _("Hooks")
       - type: textInput

@@ -120,6 +120,29 @@ BACKUP_ARGS+=(--exclude-file {{ sq(excludefile) }})
 BACKUP_ARGS+=(--exclude-caches)
 {% endif %}
 
+{# Advanced per-job lists: one entry per line, blank and # comment lines
+   dropped. Must match parseJobList() in the RPC service. #}
+{% set list_files = [] %}
+{% for field, flag in [('excludelist', '--exclude-file'), ('fileslist', '--files-from')] %}
+{% set entries = [] %}
+{% for line in ((job[field] or '') | string).splitlines() %}
+{% if line | trim and not (line | trim).startswith('#') %}
+{% do entries.append(line | trim) %}
+{% endif %}
+{% endfor %}
+{% if entries %}
+{% set var = field | upper %}
+{% do list_files.append(var) %}
+{{ var }}="$(mktemp)"
+printf '%s\n'{% for entry in entries %} {{ sq(entry) }}{% endfor %} > "${{ var }}"
+BACKUP_ARGS+=({{ flag }} "${{ var }}")
+{% endif %}
+{% endfor %}
+{% if not (job.csvsharedfolderrefs or '') | trim %}
+# No source folders: tag the snapshots so retention can be scoped to them
+BACKUP_ARGS+=(--tag {{ sq('omv-job-' ~ job.uuid) }})
+{% endif %}
+
 {% for path in source_paths %}
 BACKUP_ARGS+=({{ sq(path) }})
 {% endfor %}
@@ -162,6 +185,9 @@ if [ ${JOB_EXIT} -eq 0 ]; then
     fi
     rm -f "${BACKUP_OUT}"
 fi
+{% for var in list_files %}
+rm -f "${{ var }}"
+{% endfor %}
 
 {% if postscript %}
 # Post-script: always runs, before retention so services stopped by the
@@ -195,6 +221,9 @@ FORGET_ARGS=(--prune --retry-lock 5m "${RESTIC_OPTS[@]}")
 {% if has_keepweekly  %}FORGET_ARGS+=(--keep-weekly {{ job.keepweekly | int }}){% endif %}
 {% if has_keepmonthly %}FORGET_ARGS+=(--keep-monthly {{ job.keepmonthly | int }}){% endif %}
 {% if has_keepyearly  %}FORGET_ARGS+=(--keep-yearly {{ job.keepyearly | int }}){% endif %}
+{% if not (job.csvsharedfolderrefs or '') | trim %}
+FORGET_ARGS+=(--tag {{ sq('omv-job-' ~ job.uuid) }})
+{% endif %}
 {% for path in source_paths %}
 FORGET_ARGS+=(--path {{ sq(path) }})
 {% endfor %}

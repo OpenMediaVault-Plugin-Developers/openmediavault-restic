@@ -77,6 +77,10 @@ if ! omv_config_exists "${SERVICE_XPATH}/snapshots"; then
     omv_config_add_node "${SERVICE_XPATH}" "snapshots" ""
 fi
 
+# Advanced exclude/include lists on existing backup jobs
+omv_config_add_key "${SERVICE_XPATH}/snapshots/snapshot[not(excludelist)]" "excludelist" ""
+omv_config_add_key "${SERVICE_XPATH}/snapshots/snapshot[not(fileslist)]" "fileslist" ""
+
 # Configure the restore tests config
 if ! omv_config_exists "${SERVICE_XPATH}/restoretests"; then
     omv_config_add_node "${SERVICE_XPATH}" "restoretests" ""

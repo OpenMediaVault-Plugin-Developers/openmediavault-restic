@@ -260,6 +260,14 @@
               "postscript": {
                 "type": "string",
                 "default": ""
+              },
+              "excludelist": {
+                "type": "string",
+                "default": ""
+              },
+              "fileslist": {
+                "type": "string",
+                "default": ""
               }
             }
           }

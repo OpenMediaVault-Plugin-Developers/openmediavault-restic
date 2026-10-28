@@ -189,8 +189,7 @@
           "items": {
             "type": "string",
             "format": "uuidv4"
-          },
-          "required": true
+          }
         },
         "reporef": {
           "type": "string",
@@ -277,6 +276,12 @@
           "type": "string"
         },
         "postscript": {
+          "type": "string"
+        },
+        "excludelist": {
+          "type": "string"
+        },
+        "fileslist": {
           "type": "string"
         }
       }
@@ -591,6 +596,26 @@
           "required": true
         },
         "prune": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.restic.runsnapshot",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "dryrun": {
+          "type": "boolean"
+        },
+        "listfiles": {
           "type": "boolean"
         }
       }

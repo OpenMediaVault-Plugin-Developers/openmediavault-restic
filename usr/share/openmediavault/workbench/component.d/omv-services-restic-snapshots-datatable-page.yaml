@@ -73,6 +73,42 @@ data:
         enabledConstraints:
           minSelected: 1
           maxSelected: 1
+      - type: menu
+        icon: mdi:eye-outline
+        tooltip: _("Dry run")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        actions:
+          - text: _("Summary")
+            icon: mdi:text-box-outline
+            execute:
+              type: taskDialog
+              taskDialog:
+                config:
+                  title: _("Backup dry run ...")
+                  startOnInit: true
+                  request:
+                    service: Restic
+                    method: runSnapshot
+                    params:
+                      uuid: "{{ _selected[0].uuid }}"
+                      dryrun: true
+          - text: _("List files")
+            icon: mdi:file-tree-outline
+            execute:
+              type: taskDialog
+              taskDialog:
+                config:
+                  title: _("Backup dry run ...")
+                  startOnInit: true
+                  request:
+                    service: Restic
+                    method: runSnapshot
+                    params:
+                      uuid: "{{ _selected[0].uuid }}"
+                      dryrun: true
+                      listfiles: true
       - template: delete
         execute:
           type: request
