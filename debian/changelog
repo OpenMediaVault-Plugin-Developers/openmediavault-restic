@@ -1,3 +1,10 @@
+openmediavault-restic (8.0.2) unstable; urgency=low
+
+  * Add per-job exclude list (--exclude-file) and include list (--files-from)
+  * Add dry run for backup jobs
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 28 Oct 2026 14:27:39 +0000
+
 openmediavault-restic (8.0.1) unstable; urgency=low
 
   * Add per-repository Connections setting and extended (-o) options
