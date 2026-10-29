@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 14:13+0000\n"
+"POT-Creation-Date: 2026-10-28 20:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,10 +38,13 @@ msgstr ""
 msgid "Account key / Secret key"
 msgstr ""
 
+msgid "Advanced"
+msgstr ""
+
 msgid "After each backup the retention policy is applied. Snapshots outside these limits are forgotten and the repository is pruned. Set a field to 0 to disable that limit."
 msgstr ""
 
-msgid "All selected folders will be included in the same snapshot."
+msgid "All selected folders go into the same snapshot. Optional if the include list is set."
 msgstr ""
 
 msgid "Always"
@@ -74,6 +77,9 @@ msgstr ""
 msgid "Backup Jobs"
 msgstr ""
 
+msgid "Backup dry run ..."
+msgstr ""
+
 msgid "Backup job saved."
 msgstr ""
 
@@ -104,10 +110,10 @@ msgstr ""
 msgid "Clients must log in as one of the users on the Users page."
 msgstr ""
 
-msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
+msgid "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
 msgstr ""
 
-msgid "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
+msgid "Comma-separated patterns or absolute paths, e.g. *.tmp,**/node_modules."
 msgstr ""
 
 msgid "Command run after the backup, even if it failed. The exit code is in RESTIC_JOB_EXIT."
@@ -257,10 +263,16 @@ msgstr ""
 msgid "Exclude cache directories"
 msgstr ""
 
+msgid "Exclude list"
+msgstr ""
+
 msgid "Exclude patterns"
 msgstr ""
 
 msgid "Extended options"
+msgstr ""
+
+msgid "Extra absolute paths to back up, one per line. See the restic docs on <a class='omv-color-primary' href='https://restic.readthedocs.io/en/stable/040_backup.html#including-files' target='_blank'>including files</a>."
 msgstr ""
 
 msgid "February"
@@ -317,6 +329,9 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
+msgid "Include list"
+msgstr ""
+
 msgid "Inspect snapshot"
 msgstr ""
 
@@ -324,6 +339,9 @@ msgid "Inspecting snapshot ..."
 msgstr ""
 
 msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid "Invalid include path '%s'. Use one absolute path per line."
 msgstr ""
 
 msgid "Invalid restic option '%s'. Use one backend.option=value per line, e.g. s3.region=us-east-1."
@@ -381,6 +399,9 @@ msgid "Last snapshot"
 msgstr ""
 
 msgid "Letters, digits, dot, dash and underscore. With private repositories enabled this is also the user's repository sub-path."
+msgstr ""
+
+msgid "List files"
 msgstr ""
 
 msgid "List files in snapshot"
@@ -447,6 +468,9 @@ msgid "OMV-Extras Wiki"
 msgstr ""
 
 msgid "October"
+msgstr ""
+
+msgid "One pattern or absolute path per line. See the restic docs on <a class='omv-color-primary' href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files' target='_blank'>excluding files</a>."
 msgstr ""
 
 msgid "One pattern per line, applied to every backup job in addition to its own excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are comments."
@@ -708,6 +732,9 @@ msgid "Source & Destination"
 msgstr ""
 
 msgid "Source folders"
+msgstr ""
+
+msgid "Summary"
 msgstr ""
 
 msgid "Sunday"

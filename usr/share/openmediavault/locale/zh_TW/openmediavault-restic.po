@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 14:13+0000\n"
+"POT-Creation-Date: 2026-10-28 20:37+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Last-Translator: kochin <kochinc@outlook.com>, 2026\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/zh_TW/)\n"
@@ -43,14 +43,19 @@ msgstr "帳戸 ID / 存取金鑰"
 msgid "Account key / Secret key"
 msgstr "帳戸金鑰 / 密鑰"
 
+msgid "Advanced"
+msgstr ""
+
 msgid ""
 "After each backup the retention policy is applied. Snapshots outside these "
 "limits are forgotten and the repository is pruned. Set a field to 0 to "
 "disable that limit."
 msgstr "每次備份後，留存政策將被應用施行。在限定之外的快照會被遺忘，儲存庫會被修剪。設定為 0 則停用那限定。"
 
-msgid "All selected folders will be included in the same snapshot."
-msgstr "所有被選的檔案夾都將被包含入同一個快照。"
+msgid ""
+"All selected folders go into the same snapshot. Optional if the include list"
+" is set."
+msgstr ""
 
 msgid "Always"
 msgstr ""
@@ -82,6 +87,9 @@ msgstr ""
 msgid "Backup Jobs"
 msgstr "備份工作"
 
+msgid "Backup dry run ..."
+msgstr ""
+
 msgid "Backup job saved."
 msgstr "備份工作已存入。"
 
@@ -112,12 +120,13 @@ msgstr ""
 msgid "Clients must log in as one of the users on the Users page."
 msgstr ""
 
-msgid "Comma-separated list of patterns to exclude (e.g. *.tmp,/proc,/sys)."
-msgstr "做排除篩選之以逗號分隔的樣式列表 (例如：*.tmp,/proc,/sys)。"
-
 msgid ""
 "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
 msgstr "附加到快照之以逗號分隔的標籤列表 (例如：daily,offsite)。"
+
+msgid ""
+"Comma-separated patterns or absolute paths, e.g. *.tmp,**/node_modules."
+msgstr ""
 
 msgid ""
 "Command run after the backup, even if it failed. The exit code is in "
@@ -295,10 +304,20 @@ msgstr "每 N 分鐘"
 msgid "Exclude cache directories"
 msgstr ""
 
+msgid "Exclude list"
+msgstr ""
+
 msgid "Exclude patterns"
 msgstr "排除型樣"
 
 msgid "Extended options"
+msgstr ""
+
+msgid ""
+"Extra absolute paths to back up, one per line. See the restic docs on <a "
+"class='omv-color-primary' "
+"href='https://restic.readthedocs.io/en/stable/040_backup.html#including-"
+"files' target='_blank'>including files</a>."
 msgstr ""
 
 msgid "February"
@@ -361,6 +380,9 @@ msgstr "每小時"
 msgid "ID"
 msgstr "ID"
 
+msgid "Include list"
+msgstr ""
+
 msgid "Inspect snapshot"
 msgstr ""
 
@@ -368,6 +390,9 @@ msgid "Inspecting snapshot ..."
 msgstr ""
 
 msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid "Invalid include path '%s'. Use one absolute path per line."
 msgstr ""
 
 msgid ""
@@ -429,6 +454,9 @@ msgstr "最後快照"
 msgid ""
 "Letters, digits, dot, dash and underscore. With private repositories enabled"
 " this is also the user's repository sub-path."
+msgstr ""
+
+msgid "List files"
 msgstr ""
 
 msgid "List files in snapshot"
@@ -496,6 +524,13 @@ msgstr "OMV-Extras 維基"
 
 msgid "October"
 msgstr "十月"
+
+msgid ""
+"One pattern or absolute path per line. See the restic docs on <a class='omv-"
+"color-primary' "
+"href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-"
+"files' target='_blank'>excluding files</a>."
+msgstr ""
 
 msgid ""
 "One pattern per line, applied to every backup job in addition to its own "
@@ -788,6 +823,9 @@ msgstr "來源 & 目標"
 
 msgid "Source folders"
 msgstr "來源檔案夾"
+
+msgid "Summary"
+msgstr ""
 
 msgid "Sunday"
 msgstr "週日"
