@@ -1,3 +1,9 @@
+openmediavault-restic (8.0.3) unstable; urgency=low
+
+  * Fix workbench YAML strings split at commas or truncated at # (#4)
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Mon, 02 Nov 2026 23:47:56 +0000
+
 openmediavault-restic (8.0.2) unstable; urgency=low
 
   * Add per-job exclude list (--exclude-file) and include list (--files-from)
