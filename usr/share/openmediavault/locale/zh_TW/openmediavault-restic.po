@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 20:37+0000\n"
+"POT-Creation-Date: 2026-11-02 23:53+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Last-Translator: kochin <kochinc@outlook.com>, 2026\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/zh_TW/)\n"
@@ -29,13 +29,13 @@ msgid "'Every N %s' needs exactly one value greater than 0."
 msgstr ""
 
 msgid "0 = disabled."
-msgstr ""
+msgstr "0 = 停用。"
 
 msgid "A repository must be specified."
 msgstr "必須指定一個儲存庫。"
 
 msgid "Access"
-msgstr ""
+msgstr "存取"
 
 msgid "Account ID / Access key"
 msgstr "帳戸 ID / 存取金鑰"
@@ -44,7 +44,7 @@ msgid "Account key / Secret key"
 msgstr "帳戸金鑰 / 密鑰"
 
 msgid "Advanced"
-msgstr ""
+msgstr "進階"
 
 msgid ""
 "After each backup the retention policy is applied. Snapshots outside these "
@@ -58,16 +58,16 @@ msgid ""
 msgstr ""
 
 msgid "Always"
-msgstr ""
+msgstr "永會"
 
 msgid "Append-only"
 msgstr ""
 
 msgid "Apply now"
-msgstr ""
+msgstr "立即套用"
 
 msgid "Applying retention policy ..."
-msgstr ""
+msgstr "套用留存政策中 ..."
 
 msgid "April"
 msgstr "四月"
@@ -340,7 +340,7 @@ msgstr ""
 msgid ""
 "Forget all snapshots outside this repository's retention policy? This cannot"
 " be undone."
-msgstr ""
+msgstr "要將所有超出此儲存庫留存政策的快照遺忘嗎？此操作無法撤銷。"
 
 msgid "Forget and prune"
 msgstr ""
@@ -498,12 +498,6 @@ msgstr "月"
 msgid "Monthly"
 msgstr "毎月"
 
-msgid "Monthly (1st, 02:00)"
-msgstr ""
-
-msgid "Monthly (1st, 03:00)"
-msgstr ""
-
 msgid "Months with one snapshot each. 0 = disabled."
 msgstr ""
 
@@ -530,12 +524,6 @@ msgid ""
 "color-primary' "
 "href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-"
 "files' target='_blank'>excluding files</a>."
-msgstr ""
-
-msgid ""
-"One pattern per line, applied to every backup job in addition to its own "
-"excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are "
-"comments."
 msgstr ""
 
 msgid ""
@@ -738,7 +726,7 @@ msgid "Retention policy"
 msgstr "留存政策"
 
 msgid "Retention policy preview ..."
-msgstr ""
+msgstr "留存政策預覽 ..."
 
 msgid "Run backup now"
 msgstr "立即執行備份"
@@ -768,7 +756,7 @@ msgid "Scheduled integrity check"
 msgstr ""
 
 msgid "Scheduled retention"
-msgstr ""
+msgstr "預定留存"
 
 msgid "Secure connection"
 msgstr ""

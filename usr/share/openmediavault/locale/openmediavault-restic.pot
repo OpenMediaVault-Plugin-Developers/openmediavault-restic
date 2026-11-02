@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 20:37+0000\n"
+"POT-Creation-Date: 2026-11-02 23:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -443,12 +443,6 @@ msgstr ""
 msgid "Monthly"
 msgstr ""
 
-msgid "Monthly (1st, 02:00)"
-msgstr ""
-
-msgid "Monthly (1st, 03:00)"
-msgstr ""
-
 msgid "Months with one snapshot each. 0 = disabled."
 msgstr ""
 
@@ -471,9 +465,6 @@ msgid "October"
 msgstr ""
 
 msgid "One pattern or absolute path per line. See the restic docs on <a class='omv-color-primary' href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files' target='_blank'>excluding files</a>."
-msgstr ""
-
-msgid "One pattern per line, applied to every backup job in addition to its own excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are comments."
 msgstr ""
 
 msgid "Only a hash of the password is stored. When editing, leave blank to keep the current password."
