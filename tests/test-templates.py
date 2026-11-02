@@ -16,6 +16,7 @@ them.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -561,6 +562,43 @@ class DefaultStateTest(unittest.TestCase):
                if 'context' in a][0]['context']
         self.assertEqual(ctx['hashfile'],
                          '/var/lib/openmediavault/restic/hash-' + job()['uuid'])
+
+
+class WorkbenchYamlTest(unittest.TestCase):
+    """The workbench YAML is loaded by omv-mkworkbench with yaml.safe_load.
+    An unquoted _("a, b") inside a flow list is split at the comma, and an
+    unquoted " #" starts a comment that truncates the string, so every
+    translatable string must come out of the parser as one whole _("...")."""
+
+    WORKBENCH_DIR = os.path.join(ROOT, 'usr', 'share', 'openmediavault', 'workbench')
+    WHOLE = re.compile(r'''_\((?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\)''')
+    FRAGMENT_END = re.compile(r'''["']\)\s*$''')
+
+    @staticmethod
+    def strings(node, path=''):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                yield from WorkbenchYamlTest.strings(v, '%s.%s' % (path, k))
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                yield from WorkbenchYamlTest.strings(v, '%s[%d]' % (path, i))
+        elif isinstance(node, str):
+            yield path, node
+
+    def test_translations_parse_whole(self):
+        files = []
+        for dirpath, _dirs, names in os.walk(self.WORKBENCH_DIR):
+            files += [os.path.join(dirpath, n) for n in names if n.endswith('.yaml')]
+        self.assertTrue(files)
+        for path in sorted(files):
+            rel = os.path.relpath(path, ROOT)
+            with self.subTest(file=rel):
+                with open(path) as f:
+                    data = yaml.safe_load(f)
+                bad = ['%s: %r' % (p, s) for p, s in self.strings(data)
+                       if ('_(' in s and not self.WHOLE.fullmatch(s))
+                       or ('_(' not in s and self.FRAGMENT_END.search(s))]
+                self.assertEqual(bad, [], 'quote these as \'_("...")\'')
 
 
 if __name__ == '__main__':
