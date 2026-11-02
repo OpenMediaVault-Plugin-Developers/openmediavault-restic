@@ -23,7 +23,7 @@ data:
         label: _("Exclude patterns")
         value: ""
         rows: 6
-        hint: _("One pattern per line, applied to every backup job in addition to its own excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are comments.")
+        hint: '_("One pattern per line, applied to every backup job in addition to its own excludes (e.g. *.tmp, .Trash-*, .recycle). Lines starting with # are comments.")'
       - type: checkbox
         name: excludecaches
         label: _("Exclude cache directories")

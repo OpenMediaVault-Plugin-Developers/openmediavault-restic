@@ -123,7 +123,7 @@ data:
             - ["disabled", _("Disabled")]
             - ["daily", _("Daily (03:00)")]
             - ["weekly", _("Weekly (Sunday 03:00)")]
-            - ["monthly", _("Monthly (1st, 03:00)")]
+            - ["monthly", '_("Monthly (1st, 03:00)")']
         hint: _("Periodically run 'restic check' against this repository.")
       - type: textInput
         name: checkreaddata
@@ -169,7 +169,7 @@ data:
             - ["disabled", _("Disabled")]
             - ["daily", _("Daily (02:00)")]
             - ["weekly", _("Weekly (Sunday 02:00)")]
-            - ["monthly", _("Monthly (1st, 02:00)")]
+            - ["monthly", '_("Monthly (1st, 02:00)")']
         hint: _("Forget old snapshots from every host using this repository.")
       - type: numberInput
         name: forgetkeeplast
