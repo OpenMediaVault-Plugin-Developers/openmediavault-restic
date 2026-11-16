@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 23:53+0000\n"
+"POT-Creation-Date: 2026-11-16 18:39+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Last-Translator: kochin <kochinc@outlook.com>, 2026\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/zh_TW/)\n"
@@ -23,10 +23,10 @@ msgstr ""
 
 msgid ""
 "'%s' is set twice. Use either the Connections field or the extended options."
-msgstr ""
+msgstr "'%s'  被設定了兩次。請使用 連線 欄位或 擴充選項 其中一個。"
 
 msgid "'Every N %s' needs exactly one value greater than 0."
-msgstr ""
+msgstr "'每個 N %s' 就只需要一個大於 0 的值。"
 
 msgid "0 = disabled."
 msgstr "0 = 停用。"
@@ -55,13 +55,13 @@ msgstr "每次備份後，留存政策將被應用施行。在限定之外的快
 msgid ""
 "All selected folders go into the same snapshot. Optional if the include list"
 " is set."
-msgstr ""
+msgstr "所有選定的檔案夾都將歸入同一個快照中。若已設定包含列表，則此項為選用性。"
 
 msgid "Always"
 msgstr "永會"
 
 msgid "Append-only"
-msgstr ""
+msgstr "只可附加"
 
 msgid "Apply now"
 msgstr "立即套用"
@@ -82,13 +82,13 @@ msgid "Backblaze B2 (native API)"
 msgstr "Backblaze B2 (原生 API)"
 
 msgid "Backend options"
-msgstr ""
+msgstr "後端選項"
 
 msgid "Backup Jobs"
 msgstr "備份工作"
 
 msgid "Backup dry run ..."
-msgstr ""
+msgstr "備份試運行 ..."
 
 msgid "Backup job saved."
 msgstr "備份工作已存入。"
@@ -100,7 +100,7 @@ msgid "Certain date"
 msgstr "某個日期"
 
 msgid "Certificate"
-msgstr ""
+msgstr "憑證"
 
 msgid "Check repository integrity"
 msgstr "檢查儲存庫完整性"
@@ -109,16 +109,16 @@ msgid "Checking repository integrity ..."
 msgstr "檢查儲存庫完整性中 …"
 
 msgid "Clean up after verify"
-msgstr ""
+msgstr "驗證後進行清理"
 
 msgid "Cleanup"
-msgstr ""
+msgstr "清理"
 
 msgid "Clients can add snapshots but cannot delete existing data."
-msgstr ""
+msgstr "客戶端可以新增快照，但無法刪除現有資料。"
 
 msgid "Clients must log in as one of the users on the Users page."
-msgstr ""
+msgstr "客戶端必須以 用戶 分頁上的一個用戶身分登入。"
 
 msgid ""
 "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
@@ -126,28 +126,28 @@ msgstr "附加到快照之以逗號分隔的標籤列表 (例如：daily,offsite
 
 msgid ""
 "Comma-separated patterns or absolute paths, e.g. *.tmp,**/node_modules."
-msgstr ""
+msgstr "以逗號分隔的型樣或絕對路徑，例如：*.tmp、**/node_modules。"
 
 msgid ""
 "Command run after the backup, even if it failed. The exit code is in "
 "RESTIC_JOB_EXIT."
-msgstr ""
+msgstr "在備份作業結束後執行的指令，即使備份失敗也會執行。結束代碼會儲存在 RESTIC_JOB_EXIT 中。"
 
 msgid ""
 "Command run after the restore test, even if it failed. The exit code is in "
 "RESTIC_JOB_EXIT."
-msgstr ""
+msgstr "在復原測試結束後執行的指令，即使測試失敗也會執行。結束代碼會儲存在 RESTIC_JOB_EXIT 中。"
 
 msgid "Command run before the backup. If it fails, the backup is skipped."
-msgstr ""
+msgstr "在備份開始前執行的指令。若執行失敗，則備份會被跳過。"
 
 msgid ""
 "Command run before the restore test. If it fails, the restore test is "
 "skipped."
-msgstr ""
+msgstr "在復原測試開始前執行的指令。若執行失敗，則復原測試會被跳過。"
 
 msgid "Connections"
-msgstr ""
+msgstr "連線"
 
 msgid "Create"
 msgstr "創建"
@@ -156,13 +156,13 @@ msgid "Create Backup Job"
 msgstr "創建備份工作"
 
 msgid "Create Restore Test"
-msgstr ""
+msgstr "創建復原測試"
 
 msgid "Create repository"
 msgstr "創建儲存庫"
 
 msgid "Created REST server user."
-msgstr ""
+msgstr "已建立 REST 伺服器用戶。"
 
 msgid "Created environment variable."
 msgstr "已建立環境變數。"
@@ -174,10 +174,10 @@ msgid "Daily"
 msgstr "每日"
 
 msgid "Daily (02:00)"
-msgstr ""
+msgstr "每日 (02:00)"
 
 msgid "Daily (03:00)"
-msgstr ""
+msgstr "每日 (03:00)"
 
 msgid "Date / Time"
 msgstr "日期 / 時間"
@@ -192,21 +192,21 @@ msgid "Day of week"
 msgstr "週内何日"
 
 msgid "Days with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "每日有一個快照的天數。0 = 停用。"
 
 msgid "December"
 msgstr "十二月"
 
 msgid "Default excludes"
-msgstr ""
+msgstr "預設排除"
 
 msgid "Delete repository and its data"
-msgstr ""
+msgstr "刪除儲存庫及它的資料"
 
 msgid ""
 "Delete the restored data once the verify completes. Only the per-test "
 "subdirectory created in the target folder is removed."
-msgstr ""
+msgstr "驗證完成後，刪除所復原的資料。只會刪除目標檔案夾中為每次測試建立的子目錄。"
 
 msgid ""
 "Directory where Restic stores its local cache. The cache speeds up "
@@ -215,23 +215,25 @@ msgid ""
 msgstr "Restic 儲存它在本機的快取檔案目錄。快取讓作業加速，尤其對遠端的儲存庫。留空白則停用快取 (不建議)。"
 
 msgid "Disabled"
-msgstr ""
+msgstr "已停用"
 
 msgid "Dry run"
-msgstr ""
+msgstr "試運行"
 
 msgid "Dry run (preview only)"
-msgstr ""
+msgstr "試運行 (僅供預覽)"
 
 msgid ""
 "Dry run previews what would be restored (fast, reads only metadata, writes "
 "nothing). Verify performs a full restore and checks each restored file's "
 "contents against the snapshot (reads all data, writes to disk)."
 msgstr ""
+"試運行會預覽將要復原的內容 (快速，僅讀取元資料，不做任何寫入)。驗證會執行一次完整復原，並檢查每個復原檔案的內容與快照進行比對 "
+"(讀取所有數​資料，寫入磁碟)。"
 
 msgid ""
 "Each user only sees repositories under a path named after their username."
-msgstr ""
+msgstr "每位用戶僅能看到位於以其用戶名稱命名之路徑下的儲存庫。"
 
 msgid "Edit"
 msgstr "編輯"
@@ -240,13 +242,13 @@ msgid "Edit Backup Job"
 msgstr "編輯備份工作"
 
 msgid "Edit Restore Test"
-msgstr ""
+msgstr "編輯復原測試"
 
 msgid "Edit repository"
 msgstr "編輯儲存庫"
 
 msgid "Edited REST server user."
-msgstr ""
+msgstr "編輯 REST 伺服器用戶。"
 
 msgid "Edited environment variable."
 msgstr "已編輯環境變數。"
@@ -257,19 +259,20 @@ msgstr "已編輯儲存庫。"
 msgid ""
 "Email the check output to the root user. Requires notifications to be "
 "configured."
-msgstr ""
+msgstr "將檢查結果經由電子郵件傳送給 root 用戶。需先配置通知功能。"
 
 msgid ""
 "Email the job output to the root user (and any address aliased to it) after "
 "each scheduled run. Requires a working email/notification setup under "
 "System."
-msgstr ""
+msgstr "每次預定工作執行後，將其輸出經由電子郵件傳送給 root 用户 (及其任何別名地址)。這需要在 系統 下配置有效的電子郵件/通知功能。"
 
 msgid ""
 "Email the restore test output to the root user (and any address aliased to "
 "it) after each scheduled run. Requires a working email/notification setup "
 "under System."
 msgstr ""
+"每次預定工作執行後，將復原測試的輸出經由電子郵件傳送給 root 用户 (及其任何別名地址)。這需要在 系統 下配置有效的電子郵件/通知功能。"
 
 msgid ""
 "Enable or disable this backup job. Disabled jobs are skipped by the "
@@ -279,7 +282,7 @@ msgstr "啟用或停用此備份工作。停用的工作會被工作排程器跳
 msgid ""
 "Enable or disable this restore test. Disabled tests are skipped by the "
 "scheduler."
-msgstr ""
+msgstr "啟用或停用此復原測試。已停用的測試會被排程器跳過。"
 
 msgid "Enabled"
 msgstr "已啟用"
@@ -302,16 +305,19 @@ msgid "Every N minute"
 msgstr "每 N 分鐘"
 
 msgid "Exclude cache directories"
+msgstr "排除快取目錄"
+
+msgid "Exclude if present"
 msgstr ""
 
 msgid "Exclude list"
-msgstr ""
+msgstr "排除列表"
 
 msgid "Exclude patterns"
 msgstr "排除型樣"
 
 msgid "Extended options"
-msgstr ""
+msgstr "擴充選項"
 
 msgid ""
 "Extra absolute paths to back up, one per line. See the restic docs on <a "
@@ -319,6 +325,9 @@ msgid ""
 "href='https://restic.readthedocs.io/en/stable/040_backup.html#including-"
 "files' target='_blank'>including files</a>."
 msgstr ""
+"用於備份之額外絕對路徑，每行一個。請參閱 restic 說明文件關於 <a class='omv-color-primary' "
+"href='https://restic.readthedocs.io/en/stable/040_backup.html#including-"
+"files' target='_blank'>包含檔案</a> 部份。"
 
 msgid "February"
 msgstr "二月"
@@ -329,13 +338,13 @@ msgid ""
 msgstr "檔案將被復原到這個共享檔案夾。現存的檔案會被覆寫蓋過去。"
 
 msgid "Folder holding the served repositories."
-msgstr ""
+msgstr "存放所服務儲存庫的檔案夾。"
 
 msgid "Forget"
-msgstr ""
+msgstr "遺忘"
 
 msgid "Forget (delete) selected snapshots"
-msgstr ""
+msgstr "遺忘 (刪除) 所選快照"
 
 msgid ""
 "Forget all snapshots outside this repository's retention policy? This cannot"
@@ -343,21 +352,21 @@ msgid ""
 msgstr "要將所有超出此儲存庫留存政策的快照遺忘嗎？此操作無法撤銷。"
 
 msgid "Forget and prune"
-msgstr ""
+msgstr "遺忘並修剪"
 
 msgid "Forget old snapshots from every host using this repository."
-msgstr ""
+msgstr "從每個使用此儲存庫的主機上，把老舊快照遺忘掉。"
 
 msgid "Forgetting snapshots ..."
-msgstr ""
+msgstr "遺忘快照中 ..."
 
 msgid "Forgetting snapshots and pruning ..."
-msgstr ""
+msgstr "遺忘快照並修剪中 ..."
 
 msgid ""
 "Free the space of forgotten snapshots right away. Can take a long time on "
 "large repositories."
-msgstr ""
+msgstr "立即釋放被遺忘的快照所佔用的空間。對於大型儲存庫，這可能需要很長時間。"
 
 msgid "Friday"
 msgstr "週五"
@@ -366,7 +375,7 @@ msgid "Help"
 msgstr "輔助文件"
 
 msgid "Hooks"
-msgstr ""
+msgstr "指令掛鉤"
 
 msgid "Hostname"
 msgstr "主機名稱"
@@ -381,27 +390,31 @@ msgid "ID"
 msgstr "ID"
 
 msgid "Include list"
-msgstr ""
+msgstr "包含列表"
 
 msgid "Inspect snapshot"
-msgstr ""
+msgstr "檢驗快照"
 
 msgid "Inspecting snapshot ..."
-msgstr ""
+msgstr "檢驗快照中 ..."
 
 msgid "Installs restic-rest-server when the changes are applied."
+msgstr "在套用變更時安裝 restic-rest-server。"
+
+msgid "Invalid file name '%s'. Use one file name per line, without a path."
 msgstr ""
 
 msgid "Invalid include path '%s'. Use one absolute path per line."
-msgstr ""
+msgstr "無效的包含路徑 '%s'。請每行使用一個絕對路徑。"
 
 msgid ""
 "Invalid restic option '%s'. Use one backend.option=value per line, e.g. "
 "s3.region=us-east-1."
 msgstr ""
+"無效的 restic 選項 '%s'。每行使用一個 backend.option=value，例如：s3.region=us-east-1。"
 
 msgid "Invalid tag."
-msgstr ""
+msgstr "無效標籤。"
 
 msgid "January"
 msgstr "一月"
@@ -454,16 +467,16 @@ msgstr "最後快照"
 msgid ""
 "Letters, digits, dot, dash and underscore. With private repositories enabled"
 " this is also the user's repository sub-path."
-msgstr ""
+msgstr "字母、數字、點、短橫線和底線。啟用私有儲存庫後，這同時也是用户的儲存庫子路徑。"
 
 msgid "List files"
-msgstr ""
+msgstr "列出檔案"
 
 msgid "List files in snapshot"
-msgstr ""
+msgstr "列出快照內檔案"
 
 msgid "Listing snapshot files ..."
-msgstr ""
+msgstr "列出快照檔案中 ..."
 
 msgid "Local (shared folder)"
 msgstr "本機 (共享檔案夾)"
@@ -475,7 +488,7 @@ msgid "March"
 msgstr "三月"
 
 msgid "Maximum number of concurrent backend connections. 0 = restic default."
-msgstr ""
+msgstr "並行後端連線的最多個數。0 = restic 預設值。"
 
 msgid "May"
 msgstr "五月"
@@ -487,7 +500,7 @@ msgid "Minute"
 msgstr "分"
 
 msgid "Mode"
-msgstr ""
+msgstr "模式"
 
 msgid "Monday"
 msgstr "週一"
@@ -499,16 +512,16 @@ msgid "Monthly"
 msgstr "毎月"
 
 msgid "Months with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "每月有一個快照的月數。0 = 停用。"
 
 msgid "Name"
 msgstr "名稱"
 
 msgid "Never"
-msgstr ""
+msgstr "永不"
 
 msgid "Notifications"
-msgstr ""
+msgstr "通知"
 
 msgid "November"
 msgstr "十一月"
@@ -525,17 +538,20 @@ msgid ""
 "href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-"
 "files' target='_blank'>excluding files</a>."
 msgstr ""
+"每行填寫一個型樣或絕對路徑。請參閱 restic 說明文件有關 <a class='omv-color-primary' "
+"href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-"
+"files' target='_blank'>排除檔案</a> 部份。"
 
 msgid ""
 "Only a hash of the password is stored. When editing, leave blank to keep the"
 " current password."
-msgstr ""
+msgstr "系統僅儲存密碼的雜湊值。編輯時，留空白即可保留目前密碼。"
 
 msgid "Only host"
-msgstr ""
+msgstr "僅此主機"
 
 msgid "Only on error"
-msgstr ""
+msgstr "僅在有錯誤時"
 
 msgid ""
 "Only restore files matching this path prefix within the snapshot (e.g. "
@@ -545,41 +561,44 @@ msgstr "僅復原快照中附合這個路徑前綴詞的檔案 (例如： /home/
 msgid ""
 "Only restore-test files matching this path prefix within the snapshot (e.g. "
 "/home/user/documents). Leave blank to test the whole snapshot."
-msgstr ""
+msgstr "僅復原測試快照中與此路徑前綴字串的檔案 (例如 /home/user/documents)。留空白則測試整個快照。"
 
 msgid "Only send an email if the scheduled job exits with an error."
-msgstr ""
+msgstr "僅在預定工作因有錯誤而退出時，發送電子郵件。"
 
 msgid ""
 "Only send an email if the scheduled restore test exits with an error (i.e. "
 "the backup could not be restored/verified)."
-msgstr ""
+msgstr "僅當預定的復原測試有錯誤結束時 (即備份無法復原/驗證) 才發送電子郵件。"
 
 msgid "Only tag"
-msgstr ""
+msgstr "僅此標籤"
 
 msgid "Optional human-readable name for this backup job."
 msgstr "給此備份工作選用性的人類可讀名稱。"
 
 msgid "Optional human-readable name for this restore test."
-msgstr ""
+msgstr "選用性，此復原測試的人類可讀名稱。"
 
 msgid ""
 "Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 "
 "or 500M. Leave blank to only check the repository structure. Reading data "
 "from cloud storage may incur egress costs."
 msgstr ""
+"選用性。將也下載並驗證部分儲存的資料，例如 5%、1/7 或 500M。留空白則僅檢查儲存庫結構。從雲端儲存讀取資料，可能會造成出站流量費用。"
 
 msgid ""
 "Optional. One restic extended option per line, passed as -o, e.g. "
 "s3.region=us-east-1. Run 'restic options' to list them."
 msgstr ""
+"選用性。每行一個 restic 擴充選項，以 -o 傳遞，例如：s3.region=us-east-1。執行 'restic options' "
+"來列出它們。"
 
 msgid "Optional. Only apply to snapshots from this hostname."
-msgstr ""
+msgstr "選用性。僅適用於來自此主機名稱的快照。"
 
 msgid "Optional. Only apply to snapshots with this tag."
-msgstr ""
+msgstr "選用性。僅適用於有此標籤的快照。"
 
 msgid "Options"
 msgstr "選項"
@@ -588,7 +607,7 @@ msgid "Passphrase"
 msgstr "密碼短語"
 
 msgid "Password"
-msgstr ""
+msgstr "密碼"
 
 msgid "Path filter (optional)"
 msgstr "路徑篩選 (選用)"
@@ -597,30 +616,30 @@ msgid "Paths"
 msgstr "路徑"
 
 msgid "Periodically run 'restic check' against this repository."
-msgstr ""
+msgstr "定期針對此儲存庫執行 'restic check'。"
 
 msgid "Port"
-msgstr ""
+msgstr "連接埠"
 
 msgid "Post-script"
-msgstr ""
+msgstr "後置腳本程式"
 
 msgid "Pre-script"
-msgstr ""
+msgstr "前置腳本程式"
 
 msgid "Preview (dry run)"
-msgstr ""
+msgstr "預覽 (預覽)"
 
 msgid ""
 "Preview what would be restored without writing any files. Useful for "
 "verifying a snapshot's contents are intact and browsable."
-msgstr ""
+msgstr "預覽被復原的內容，不會寫出任何檔案。這有助於驗證快照的內容是否完整無缺且可瀏覽。"
 
 msgid "Private repositories"
-msgstr ""
+msgstr "私有儲存庫"
 
 msgid "Prune"
-msgstr ""
+msgstr "修剪"
 
 msgid "Prune unused data from repository"
 msgstr "修剪儲存庫內的未用資料"
@@ -629,19 +648,19 @@ msgid "Pruning repository ..."
 msgstr "修剪儲存庫中 ..."
 
 msgid "REST Server"
-msgstr ""
+msgstr "REST 伺服器"
 
 msgid "REST Users"
-msgstr ""
+msgstr "REST 用戶"
 
 msgid "REST server"
 msgstr "REST 伺服器"
 
 msgid "Read data subset"
-msgstr ""
+msgstr "讀取資料子集"
 
 msgid "Recommended when login is required."
-msgstr ""
+msgstr "在需要登入時建議使用。"
 
 msgid "Refresh snapshot list"
 msgstr "重新整理快照列表"
@@ -655,17 +674,17 @@ msgstr "移除過時鎖定 (解鎖)"
 msgid ""
 "Remove the selected snapshots and prune the data no longer referenced by any"
 " snapshot? This cannot be undone and may take a long time."
-msgstr ""
+msgstr "要移除所選擇的快照，並修剪不再被任何快照引用的資料嗎？此操作無法撤銷，且可能需要很長時間。"
 
 msgid ""
 "Remove the selected snapshots from the repository? The data they reference "
 "is kept until the repository is pruned."
-msgstr ""
+msgstr "要從儲存庫中移除所選擇的快照嗎？它們引用的資料將保留到儲存庫被修剪為止。"
 
 msgid ""
 "Remove this repository and permanently delete all of its backup data from "
 "the shared folder? This cannot be undone."
-msgstr ""
+msgstr "要移除此儲存庫，並永久刪除共用檔案夾中的所有備份資料嗎？此操作無法撤銷。"
 
 msgid "Repositories"
 msgstr "儲存庫"
@@ -684,7 +703,7 @@ msgstr "儲存庫在使用中。請先刪除與此儲存庫相關的備份工作
 msgid ""
 "Repository is in use. Please delete the restore tests associated with this "
 "repository first."
-msgstr ""
+msgstr "該儲存庫正在使用中。請先刪除與此儲存庫關聯的復原測試。"
 
 msgid "Repository name"
 msgstr "儲存庫名解"
@@ -693,7 +712,7 @@ msgid "Repository statistics ..."
 msgstr "儲存庫統計數據 …"
 
 msgid "Require login"
-msgstr ""
+msgstr "需要登入"
 
 msgid "Restic"
 msgstr "Restic"
@@ -705,16 +724,16 @@ msgid "Restore Snapshot"
 msgstr "復原快照"
 
 msgid "Restore Tests"
-msgstr ""
+msgstr "復原測試"
 
 msgid "Restore target folder"
 msgstr "復原目標檔案夾"
 
 msgid "Restore test"
-msgstr ""
+msgstr "復原測試"
 
 msgid "Restore test saved."
-msgstr ""
+msgstr "復原測試已被儲存。"
 
 msgid "Restore this snapshot to a shared folder"
 msgstr "復原此快照到一個共享檔案夾"
@@ -732,13 +751,13 @@ msgid "Run backup now"
 msgstr "立即執行備份"
 
 msgid "Run restore test now"
-msgstr ""
+msgstr "立即執行復原測試"
 
 msgid "Running backup job ..."
 msgstr "執行備份工作中 …"
 
 msgid "Running restore test ..."
-msgstr ""
+msgstr "執行復原測試中 ..."
 
 msgid "S3 compatible"
 msgstr "S3 相容"
@@ -753,13 +772,13 @@ msgid "Schedule"
 msgstr "預訂"
 
 msgid "Scheduled integrity check"
-msgstr ""
+msgstr "已預定完整性檢查"
 
 msgid "Scheduled retention"
 msgstr "預定留存"
 
 msgid "Secure connection"
-msgstr ""
+msgstr "安全連線"
 
 msgid "Select a repository"
 msgstr "選擇一個儲存庫"
@@ -776,13 +795,13 @@ msgid ""
 msgstr "選擇 '全部儲存庫' 將確定環境變數會套用到所有的儲存庫。"
 
 msgid "Send command output via email"
-msgstr ""
+msgstr "經由電子郵件發送指令的輸出"
 
 msgid "Send email"
-msgstr ""
+msgstr "發送電子郵件"
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "僅在有錯誤時發送電子郵件"
 
 msgid "September"
 msgstr "九月"
@@ -794,11 +813,11 @@ msgid "Shared Folder"
 msgstr "共享檔案夾"
 
 msgid "Shared folder"
-msgstr ""
+msgstr "共享檔案夾"
 
 msgid ""
 "Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches)."
-msgstr ""
+msgstr "跳過含有 CACHEDIR.TAG 檔案的目錄 (restic --exclude-caches)。"
 
 msgid "Skip initialisation"
 msgstr "跳過初始化"
@@ -813,31 +832,31 @@ msgid "Source folders"
 msgstr "來源檔案夾"
 
 msgid "Summary"
-msgstr ""
+msgstr "概要"
 
 msgid "Sunday"
 msgstr "週日"
 
 msgid "TLS enabled"
-msgstr ""
+msgstr "TLS 已啟用"
 
 msgid "Tags"
 msgstr "標籤"
 
 msgid "Target folder"
-msgstr ""
+msgstr "目標檔案夾"
 
 msgid "Test connection"
-msgstr "測試連接"
+msgstr "測試連線"
 
 msgid "Test mode"
-msgstr ""
+msgstr "測試模式"
 
 msgid "Testing repository connection ..."
-msgstr "測試儲存庫連接中 ..."
+msgstr "測試儲存庫連線中 ..."
 
 msgid "The latest snapshot in this repository will be restore-tested."
-msgstr ""
+msgstr "此儲存庫中的最新快照將接受復原測試。"
 
 msgid "The shared folder used as the restic repository location."
 msgstr "作為 restic 儲存庫位置的共享檔案夾。"
@@ -866,36 +885,36 @@ msgid "Unlocking repository ..."
 msgstr "解鎖儲存庫中 …"
 
 msgid "Use a percentage (5%), a fraction (1/7) or a size (500M)."
-msgstr ""
+msgstr "使用百分比 (5%)、分數 (1/7) 或大小 (500M)。"
 
 msgid "Use letters, digits and underscores only, not starting with a digit."
-msgstr ""
+msgstr "僅限使用字母、數字和底線，且不得以數字開頭。"
 
 msgid "Use letters, digits, dot, dash and underscore only."
-msgstr ""
+msgstr "僅限使用字母、數字、點號、連字號和底線。"
 
 msgid "Use one backend.option=value per line."
-msgstr ""
+msgstr "每行使用一個 backend.option=value。"
 
 msgid "Username"
-msgstr ""
+msgstr "用戶名稱"
 
 msgid "Users"
-msgstr ""
+msgstr "用戶"
 
 msgid "Value"
 msgstr "數值"
 
 msgid "Verify (full restore + checksum)"
-msgstr ""
+msgstr "驗證 (完整復原 + 核對和)"
 
 msgid ""
 "Verify restores into a per-test subdirectory inside this shared folder. "
 "Required for verify mode."
-msgstr ""
+msgstr "驗證還原到此共用檔案夾內的每個測試子目錄。驗證模式需要此設定。"
 
 msgid "Verify target folder"
-msgstr ""
+msgstr "驗證目標檔案夾"
 
 msgid "View repository statistics"
 msgstr "檢視儲存庫統計數據"
@@ -910,19 +929,19 @@ msgid "Weekly"
 msgstr "每週"
 
 msgid "Weekly (Sunday 02:00)"
-msgstr ""
+msgstr "每週 (週日 02:00)"
 
 msgid "Weekly (Sunday 03:00)"
-msgstr ""
+msgstr "每週 (週日 03:00)"
 
 msgid "Weeks with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "每週有一個快照的週數。0 = 停用。"
 
 msgid "Yearly"
 msgstr "每年"
 
 msgid "Years with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "每年有一個快照的年數。0 = 停用。"
 
 msgid "n/a"
 msgstr "不適用"

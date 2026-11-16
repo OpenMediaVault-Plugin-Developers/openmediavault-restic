@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 23:53+0000\n"
+"POT-Creation-Date: 2026-11-16 18:39+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2026\n"
 "Language-Team: Dutch (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/nl/)\n"
@@ -350,6 +350,9 @@ msgstr "Elke N minuten"
 msgid "Exclude cache directories"
 msgstr "Cachemappen uitsluiten"
 
+msgid "Exclude if present"
+msgstr ""
+
 msgid "Exclude list"
 msgstr "Exclusief lijst"
 
@@ -450,6 +453,9 @@ msgstr "Momentopname inspecteren…"
 msgid "Installs restic-rest-server when the changes are applied."
 msgstr ""
 "Installeert restic-rest-server wanneer de wijzigingen worden doorgevoerd."
+
+msgid "Invalid file name '%s'. Use one file name per line, without a path."
+msgstr ""
 
 msgid "Invalid include path '%s'. Use one absolute path per line."
 msgstr "Ongeldig inclusief pad '%s'. Gebruik één absoluut pad per regel."

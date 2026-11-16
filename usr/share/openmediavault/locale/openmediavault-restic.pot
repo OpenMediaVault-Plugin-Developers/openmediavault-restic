@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 23:53+0000\n"
+"POT-Creation-Date: 2026-11-16 18:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -263,6 +263,9 @@ msgstr ""
 msgid "Exclude cache directories"
 msgstr ""
 
+msgid "Exclude if present"
+msgstr ""
+
 msgid "Exclude list"
 msgstr ""
 
@@ -339,6 +342,9 @@ msgid "Inspecting snapshot ..."
 msgstr ""
 
 msgid "Installs restic-rest-server when the changes are applied."
+msgstr ""
+
+msgid "Invalid file name '%s'. Use one file name per line, without a path."
 msgstr ""
 
 msgid "Invalid include path '%s'. Use one absolute path per line."

@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 23:53+0000\n"
+"POT-Creation-Date: 2026-11-16 18:39+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Last-Translator: Giovanni Scafora <scafora.giovanni@gmail.com>, 2026\n"
 "Language-Team: Italian (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/it/)\n"
@@ -349,6 +349,9 @@ msgstr "Ogni N minuto"
 msgid "Exclude cache directories"
 msgstr "Escludi le directory di cache"
 
+msgid "Exclude if present"
+msgstr "Escludi se presente"
+
 msgid "Exclude list"
 msgstr "Elenco di esclusione"
 
@@ -447,6 +450,11 @@ msgstr "Ispezione dello snapshot in corso..."
 
 msgid "Installs restic-rest-server when the changes are applied."
 msgstr "Installa restic-rest-server quando le modifiche vengono applicate."
+
+msgid "Invalid file name '%s'. Use one file name per line, without a path."
+msgstr ""
+"Il nome del file non è valido '%s'. Inserisci un nome file per riga, senza "
+"percorso."
 
 msgid "Invalid include path '%s'. Use one absolute path per line."
 msgstr ""
