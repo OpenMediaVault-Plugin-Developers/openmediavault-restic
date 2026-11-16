@@ -1,3 +1,10 @@
+openmediavault-restic (8.0.4) unstable; urgency=low
+
+  * Add exclude-if-present marker files (--exclude-if-present) to settings
+    and backup jobs
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Mon, 16 Nov 2026 18:35:13 +0000
+
 openmediavault-restic (8.0.3) unstable; urgency=low
 
   * Fix workbench YAML strings split at commas or truncated at # (#4)
