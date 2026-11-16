@@ -422,6 +422,13 @@ $r = setSnapshotResult(['fileslist' => 'relative/path']);
 check('include paths must be absolute', is_string($r), json_encode($r));
 $r = setSnapshotResult(['excludelist' => "a\x1b[2J"]);
 check('lists reject control characters', is_string($r), json_encode($r));
+$r = setSnapshotResult(['excludeifpresent' => " .nobackup\r\n# c\r\nCACHEDIR.TAG:Signature: 8a/b\r\n"]);
+check('exclude-if-present list is normalised; a header may contain /',
+    is_array($r) && $r['excludeifpresent'] === ".nobackup\n# c\nCACHEDIR.TAG:Signature: 8a/b", json_encode($r));
+$r = setSnapshotResult(['excludeifpresent' => 'dir/.nobackup']);
+check('exclude-if-present rejects a path', is_string($r), json_encode($r));
+$r = setSnapshotResult(['excludeifpresent' => ".nobackup\x1b"]);
+check('exclude-if-present rejects control characters', is_string($r), json_encode($r));
 
 echo "\n=== RPC methods ===\n";
 $registered = (new ReflectionProperty(\OMV\Rpc\ServiceAbstract::class, 'registeredMethods'));

@@ -109,7 +109,7 @@ def job(**kw):
         'enable': True, 'name': 'job1', 'tags': '', 'exclude': '',
         'reporef': repo()['uuid'],
         'csvsharedfolderrefs': '33333333-3333-4333-8333-333333333333',
-        'excludelist': '', 'fileslist': '',
+        'excludelist': '', 'fileslist': '', 'excludeifpresent': '',
         'execution': 'daily', 'minute': '0', 'everynminute': False,
         'hour': '0', 'everynhour': False, 'dayofmonth': '*',
         'everyndayofmonth': False, 'month': '*', 'dayofweek': '*',
@@ -277,11 +277,30 @@ class BackupJobScriptTest(ScriptTestCase):
         for f in self.sb.read('list-files').split():
             self.assertFalse(os.path.exists(f), 'temp list file left behind: ' + f)
 
+    def test_exclude_if_present_from_settings_and_job(self):
+        script = render('restic-job.sh.j2',
+                        job=job(excludeifpresent="# c\r\n .nobackup \r\n$(touch MARK)\nCACHEDIR.TAG:Signature: 8a477f597d28d172789f06886806bc55"),
+                        repo=repo(), repo_path=self.sb.path('repo'),
+                        source_paths=[self.sb.path('src')], cachedir='',
+                        excludefile='', excludecaches=False,
+                        excludeifpresent=".nobackup\n.norestic\n",
+                        hashfile=self.sb.hashfile)
+        self.assertSyntaxOk(script)
+        self.assertEqual(self.sb.run(self.sb.install(script)), 0)
+        self.assertFalse(os.path.exists(self.sb.path('MARK')))
+        backup = self.sb.read('restic-calls').splitlines()[0]
+        self.assertIn('--exclude-if-present .nobackup --exclude-if-present .norestic '
+                      '--exclude-if-present $(touch MARK) '
+                      '--exclude-if-present CACHEDIR.TAG:Signature: 8a477f597d28d172789f06886806bc55',
+                      backup)
+        self.assertEqual(backup.count('.nobackup'), 1)
+
     def test_empty_job_lists_are_not_passed(self):
         self.sb.run(self.sb.install(self.render_job(excludelist='# x\n\n', fileslist='')))
         calls = self.sb.read('restic-calls')
         self.assertNotIn('--exclude-file', calls)
         self.assertNotIn('--files-from', calls)
+        self.assertNotIn('--exclude-if-present', calls)
         self.assertNotIn('--tag', calls)
 
     def test_job_without_source_folders_scopes_retention_by_tag(self):
