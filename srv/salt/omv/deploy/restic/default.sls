@@ -31,6 +31,7 @@ include:
 {% set excludeFile = envVarDir ~ '/exclude-default' %}
 {% set excludeText = config.settings.exclude | default('') | string %}
 {% set excludeCaches = config.settings.excludecaches | default(false) | string | lower not in ['false', '0', 'no', 'off', ''] %}
+{% set excludeIfPresent = config.settings.excludeifpresent | default('') | string %}
 {% set cronFile = '/etc/cron.d/openmediavault-restic' %}
 
 {# -----------------------------------------------------------------------
@@ -206,6 +207,7 @@ configure_restic_job_script_{{ job.uuid }}:
         cachedir: "{{ cacheDir }}"
         excludefile: "{{ excludeFile if excludeText | trim else '' }}"
         excludecaches: {{ excludeCaches | json }}
+        excludeifpresent: {{ excludeIfPresent | json }}
     - template: jinja
     - user: root
     - group: root

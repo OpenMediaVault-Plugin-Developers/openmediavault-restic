@@ -18,6 +18,10 @@
     "excludecaches": {
       "type": "boolean",
       "default": false
+    },
+    "excludeifpresent": {
+      "type": "string",
+      "default": ""
     }
   }
 }

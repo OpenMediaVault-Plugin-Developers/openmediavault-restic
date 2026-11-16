@@ -104,6 +104,8 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             "cachedir" => $params['cachedir'],
             "exclude" => $params['exclude'] ?? $object->get('exclude'),
             "excludecaches" => $params['excludecaches'] ?? $object->get('excludecaches'),
+            "excludeifpresent" => $this->normaliseExcludeIfPresent(
+                $params['excludeifpresent'] ?? $object->get('excludeifpresent')),
         ]);
         $db->set($object);
         return $object->getAssoc();
@@ -258,6 +260,27 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
             }
         }
         return $entries;
+    }
+
+    /**
+     * Normalise an "exclude if present" list (one `filename[:header]` per
+     * line, restic --exclude-if-present) and reject entries restic cannot
+     * match: control characters, or a file name with a path separator.
+     */
+    private function normaliseExcludeIfPresent($text)
+    {
+        $text = trim(str_replace(["\r\n", "\r"], "\n", $text ?? ''));
+        if (preg_match('/[\x00-\x08\x0b-\x1f\x7f]/', $text)) {
+            throw new \OMV\Exception(gettext(
+                'The exclude if present list must not contain control characters.'));
+        }
+        foreach ($this->parseJobList($text) as $entry) {
+            if (strpos(explode(':', $entry, 2)[0], '/') !== false) {
+                throw new \OMV\Exception(sprintf(gettext(
+                    "Invalid file name '%s'. Use one file name per line, without a path."), $entry));
+            }
+        }
+        return $text;
     }
 
     /**
@@ -964,6 +987,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
                     'The exclude and include lists must not contain control characters.'));
             }
         }
+        $params['excludeifpresent'] = $this->normaliseExcludeIfPresent($params['excludeifpresent'] ?? '');
         $files = $this->parseJobList($params['fileslist']);
         foreach ($files as $path) {
             if ($path[0] !== '/') {
@@ -1050,6 +1074,13 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
                 }
                 if ($settings->get('excludecaches')) {
                     $cmdArgs[] = '--exclude-caches';
+                }
+                // Marker files from the settings and the job; same order as restic-job.sh.j2.
+                $markers = array_unique(array_merge(
+                    $this->parseJobList($settings->get('excludeifpresent')),
+                    $this->parseJobList($params['excludeifpresent'] ?? '')));
+                foreach ($markers as $marker) {
+                    $cmdArgs[] = '--exclude-if-present ' . escapeshellarg($marker);
                 }
 
                 // Advanced per-job lists, written to temp files from the stored

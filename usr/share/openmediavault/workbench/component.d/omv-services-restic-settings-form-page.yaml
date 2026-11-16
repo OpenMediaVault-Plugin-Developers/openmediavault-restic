@@ -29,5 +29,11 @@ data:
         label: _("Exclude cache directories")
         value: false
         hint: _("Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches).")
+      - type: textarea
+        name: excludeifpresent
+        label: _("Exclude if present")
+        value: ""
+        rows: 3
+        hint: '_("Skip the contents of directories that contain one of these files, one file name per line (e.g. .nobackup). Applies to every backup job.")'
     buttons:
       - template: submit

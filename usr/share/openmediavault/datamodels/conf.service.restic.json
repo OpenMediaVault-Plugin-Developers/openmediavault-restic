@@ -21,6 +21,10 @@
         "excludecaches": {
           "type": "boolean",
           "default": false
+        },
+        "excludeifpresent": {
+          "type": "string",
+          "default": ""
         }
       }
     },
@@ -262,6 +266,10 @@
                 "default": ""
               },
               "excludelist": {
+                "type": "string",
+                "default": ""
+              },
+              "excludeifpresent": {
                 "type": "string",
                 "default": ""
               },

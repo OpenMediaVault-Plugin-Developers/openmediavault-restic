@@ -47,7 +47,7 @@ if ! omv_config_exists "${SERVICE_XPATH}/settings"; then
     omv_config_add_node "${SERVICE_XPATH}" "settings"
 fi
 add_missing_keys "${SERVICE_XPATH}/settings" \
-    "cachedir:/var/cache/restic" "exclude:" "excludecaches:0"
+    "cachedir:/var/cache/restic" "exclude:" "excludecaches:0" "excludeifpresent:"
 
 # Configure the repos config
 if ! omv_config_exists "${SERVICE_XPATH}/repos"; then
@@ -80,6 +80,7 @@ fi
 # Advanced exclude/include lists on existing backup jobs
 omv_config_add_key "${SERVICE_XPATH}/snapshots/snapshot[not(excludelist)]" "excludelist" ""
 omv_config_add_key "${SERVICE_XPATH}/snapshots/snapshot[not(fileslist)]" "fileslist" ""
+omv_config_add_key "${SERVICE_XPATH}/snapshots/snapshot[not(excludeifpresent)]" "excludeifpresent" ""
 
 # Configure the restore tests config
 if ! omv_config_exists "${SERVICE_XPATH}/restoretests"; then

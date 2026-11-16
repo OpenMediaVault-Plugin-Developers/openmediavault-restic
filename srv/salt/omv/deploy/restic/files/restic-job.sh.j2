@@ -119,6 +119,17 @@ BACKUP_ARGS+=(--exclude-file {{ sq(excludefile) }})
 {% if excludecaches %}
 BACKUP_ARGS+=(--exclude-caches)
 {% endif %}
+{# Marker files (filename[:header]) from the settings, then the job, one per
+   line like the lists below. Must match runBackup() in the RPC service. #}
+{% set markers = [] %}
+{% for line in ((excludeifpresent | default('') or '') | string).splitlines() + ((job.excludeifpresent or '') | string).splitlines() %}
+{% if line | trim and not (line | trim).startswith('#') and (line | trim) not in markers %}
+{% do markers.append(line | trim) %}
+{% endif %}
+{% endfor %}
+{% for marker in markers %}
+BACKUP_ARGS+=(--exclude-if-present {{ sq(marker) }})
+{% endfor %}
 
 {# Advanced per-job lists: one entry per line, blank and # comment lines
    dropped. Must match parseJobList() in the RPC service. #}

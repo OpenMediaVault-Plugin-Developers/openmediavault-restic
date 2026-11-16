@@ -87,6 +87,12 @@ data:
         rows: 4
         hint: _("One pattern or absolute path per line. See the restic docs on <a class='omv-color-primary' href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files' target='_blank'>excluding files</a>.")
       - type: textarea
+        name: excludeifpresent
+        label: _("Exclude if present")
+        value: ""
+        rows: 2
+        hint: '_("Skip the contents of directories that contain one of these files, one file name per line (e.g. .nobackup), in addition to the default ones in the settings.")'
+      - type: textarea
         name: fileslist
         label: _("Include list")
         value: ""
