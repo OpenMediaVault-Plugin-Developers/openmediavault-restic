@@ -1351,7 +1351,7 @@ fi
 # The snapshot ID is validated as hex before any command is built, so
 # anything else (including shell metacharacters) must be rejected up front.
 # ---------------------------------------------------------------------------
-section "Snapshot operations (inspect / ls / forget)"
+section "Snapshot operations (inspect / ls / diff / forget)"
 
 if [ -z "$REST_REPO_UUID" ]; then
     _skip "snapshot operations" "no test repo available"
@@ -1365,6 +1365,11 @@ else
     for ids in "abcdef12;id" "abcdef12," "" "abcdef12,xyz"; do
         assert_rpc_fails "forgetRepoSnapshots — invalid ID list '$ids' rejected" \
             "Restic" "forgetRepoSnapshots" \
+            "{\"reporef\":\"$REST_REPO_UUID\",\"snapshotids\":\"$ids\"}"
+    done
+    for ids in "abcdef12" "abcdef12,0123abcd,deadbeef" "abcdef12,abcdef12" "abcdef12;id,0123abcd"; do
+        assert_rpc_fails "diffRepoSnapshots — invalid ID pair '$ids' rejected" \
+            "Restic" "diffRepoSnapshots" \
             "{\"reporef\":\"$REST_REPO_UUID\",\"snapshotids\":\"$ids\"}"
     done
 

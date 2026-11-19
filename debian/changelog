@@ -1,3 +1,10 @@
+openmediavault-restic (8.0.5) unstable; urgency=low
+
+  * Add comparing two selected snapshots (restic diff) in the snapshot
+    browser (#6)
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 19 Nov 2026 09:45:42 +0000
+
 openmediavault-restic (8.0.4) unstable; urgency=low
 
   * Add exclude-if-present marker files (--exclude-if-present) to settings

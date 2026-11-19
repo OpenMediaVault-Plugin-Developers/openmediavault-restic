@@ -104,6 +104,12 @@ $forget = ['reporef' => NEW_UUID, 'snapshotids' => 'abcdef12,0123abcd'];
 expectValid('rpc.restic.forgetreposnapshots', $forget, 'a list of hex IDs');
 expectInvalid('rpc.restic.forgetreposnapshots', ['snapshotids' => "abcdef12,0123abcd\n"] + $forget,
     'a list with a trailing newline');
+$diff = ['reporef' => NEW_UUID, 'snapshotids' => 'abcdef12,0123abcd'];
+expectValid('rpc.restic.diffreposnapshots', $diff, 'a pair of hex IDs');
+foreach (['abcdef12', 'abcdef12,0123abcd,deadbeef', "abcdef12,0123abcd\n", 'abcdef12,0123abcd;id'] as $bad) {
+    expectInvalid('rpc.restic.diffreposnapshots', ['snapshotids' => $bad] + $diff,
+        'snapshot IDs ' . json_encode($bad));
+}
 $user = ['uuid' => NEW_UUID, 'username' => 'alice', 'password' => 'x'];
 expectValid('rpc.restic.setrestuser', $user, 'a plain username');
 expectInvalid('rpc.restic.setrestuser', ['username' => "alice\n"] + $user,
