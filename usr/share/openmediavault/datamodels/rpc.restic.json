@@ -587,6 +587,25 @@
   },
   {
     "type": "rpc",
+    "id": "rpc.restic.diffreposnapshots",
+    "params": {
+      "type": "object",
+      "properties": {
+        "reporef": {
+          "type": "string",
+          "format": "uuidv4",
+          "required": true
+        },
+        "snapshotids": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8,64},[0-9a-f]{8,64}\\z",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
     "id": "rpc.restic.forgetreposnapshots",
     "params": {
       "type": "object",

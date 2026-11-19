@@ -87,6 +87,24 @@ data:
         enabledConstraints:
           minSelected: 1
           maxSelected: 1
+      - type: iconButton
+        icon: mdi:file-compare
+        tooltip: _("Compare two selected snapshots")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("Comparing snapshots ...")
+              startOnInit: true
+              request:
+                service: Restic
+                method: diffRepoSnapshots
+                params:
+                  reporef: "{{ _routeParams.uuid }}"
+                  snapshotids: "{{ _selected | map('get', 'id') | join(',') }}"
+        enabledConstraints:
+          minSelected: 2
+          maxSelected: 2
       - type: menu
         icon: mdi:delete
         tooltip: _("Forget (delete) selected snapshots")

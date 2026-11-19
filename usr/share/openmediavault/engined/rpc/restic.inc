@@ -47,6 +47,7 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod("getRepoSnapshotList");
         $this->registerMethod("inspectRepoSnapshot");
         $this->registerMethod("listRepoSnapshotFiles");
+        $this->registerMethod("diffRepoSnapshots");
         $this->registerMethod("forgetRepoSnapshots");
         $this->registerMethod("applyRepoForget");
 
@@ -685,22 +686,13 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * List actual restic snapshots stored in the repository (not OMV backup job configs).
+     * Run `restic snapshots --json` (optionally limited to the given IDs) and
+     * return the decoded snapshot list.
      */
-    public function getRepoSnapshotList($params, $context)
+    private function fetchRepoSnapshots($repo, $context, array $ids = [])
     {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-
-        $reporef = $params['reporef'] ?? null;
-        if (empty($reporef)) {
-            throw new \OMV\Exception(gettext("A repository must be specified."));
-        }
-
-        $db = \OMV\Config\Database::getInstance();
-        $repo = $db->get('conf.service.restic.repo', $reporef);
-
-        $cmdArgs = $this->addRepoOptions($repo,
-            [$this->getProgram, 'snapshots', '--json', '--retry-lock', '5m']);
+        $cmdArgs = $this->addRepoOptions($repo, array_merge(
+            [$this->getProgram, 'snapshots', '--json', '--retry-lock', '5m'], $ids));
         $cmd = new \OMV\System\Process($cmdArgs);
         $this->buildRepoEnv($repo, $context, $cmd);
         // Keep stderr out of stdout, which must hold only the JSON, but keep
@@ -730,6 +722,24 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
                 $snapshots = $parsed;
             }
         }
+        return $snapshots;
+    }
+
+    /**
+     * List actual restic snapshots stored in the repository (not OMV backup job configs).
+     */
+    public function getRepoSnapshotList($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+
+        $reporef = $params['reporef'] ?? null;
+        if (empty($reporef)) {
+            throw new \OMV\Exception(gettext("A repository must be specified."));
+        }
+
+        $db = \OMV\Config\Database::getInstance();
+        $repo = $db->get('conf.service.restic.repo', $reporef);
+        $snapshots = $this->fetchRepoSnapshots($repo, $context);
 
         // Normalise for datatable: ensure required fields exist
         foreach ($snapshots as &$s) {
@@ -832,6 +842,47 @@ class OMVRpcServiceRestic extends \OMV\Rpc\ServiceAbstract
         [$repo, $id] = $this->getRepoAndSnapshotId($params);
         return $this->execRepoCommands($repo, $context, [
             ['ls', '--long', '--retry-lock', '5m', $id],
+        ]);
+    }
+
+    /**
+     * Compare two snapshots (`restic diff`), given as a comma-separated pair
+     * of IDs. The pair is ordered oldest first whatever order the snapshots
+     * were selected in, so "+" lines are what the newer snapshot added.
+     */
+    public function diffRepoSnapshots($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.restic.diffreposnapshots');
+        $ids = explode(',', $params['snapshotids']);
+        if ($ids[0] === $ids[1]) {
+            throw new \OMV\Exception(gettext("Select two different snapshots to compare."));
+        }
+        $db = \OMV\Config\Database::getInstance();
+        $repo = $db->get('conf.service.restic.repo', $params['reporef']);
+        $times = [];
+        foreach ($this->fetchRepoSnapshots($repo, $context, $ids) as $s) {
+            if (isset($s['id'], $s['time'])) {
+                $times[$s['id']] = strtotime($s['time']);
+            }
+        }
+        // Match on prefix: the UI sends full IDs but a short ID is valid too.
+        $timeOf = function ($id) use ($times) {
+            foreach ($times as $full => $t) {
+                if (0 === strpos($full, $id)) {
+                    return $t;
+                }
+            }
+            return null;
+        };
+        $t0 = $timeOf($ids[0]);
+        $t1 = $timeOf($ids[1]);
+        if (!is_null($t0) && !is_null($t1) && $t0 > $t1) {
+            $ids = [$ids[1], $ids[0]];
+        }
+        // IDs are validated as hex by the schema, so they are shell-safe.
+        return $this->execRepoCommands($repo, $context, [
+            array_merge(['diff', '--retry-lock', '5m'], $ids),
         ]);
     }
 
