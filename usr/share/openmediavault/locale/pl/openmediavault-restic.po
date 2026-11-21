@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 18:39+0000\n"
+"POT-Creation-Date: 2026-11-21 14:39+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
 "Language-Team: Polish (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/pl/)\n"
 "MIME-Version: 1.0\n"
@@ -140,6 +140,12 @@ msgstr ""
 msgid ""
 "Command run before the restore test. If it fails, the restore test is "
 "skipped."
+msgstr ""
+
+msgid "Compare two selected snapshots"
+msgstr ""
+
+msgid "Comparing snapshots ..."
 msgstr ""
 
 msgid "Connections"
@@ -770,6 +776,9 @@ msgid "Select a repository."
 msgstr ""
 
 msgid "Select one or more shared folders to back up."
+msgstr ""
+
+msgid "Select two different snapshots to compare."
 msgstr ""
 
 msgid ""

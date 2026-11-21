@@ -3,13 +3,17 @@
 # This file is distributed under the same license as the openmediavault-restic package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
+# Translators:
+# Дмитрий <bardimnik@rambler.ru>, 2026
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-restic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 18:39+0000\n"
+"POT-Creation-Date: 2026-11-21 14:39+0000\n"
 "PO-Revision-Date: 2026-05-29 00:46+0000\n"
+"Last-Translator: Дмитрий <bardimnik@rambler.ru>, 2026\n"
 "Language-Team: Russian (https://app.transifex.com/openmediavault-plugin-developers/teams/1854/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,297 +24,349 @@ msgstr ""
 msgid ""
 "'%s' is set twice. Use either the Connections field or the extended options."
 msgstr ""
+"'%s' задан дважды. Используйте либо поле «Соединения», либо расширенные "
+"параметры."
 
 msgid "'Every N %s' needs exactly one value greater than 0."
-msgstr ""
+msgstr "Для 'Каждые N %s' нужно ровно одно значение больше 0."
 
 msgid "0 = disabled."
-msgstr ""
+msgstr "0 = отключено."
 
 msgid "A repository must be specified."
-msgstr ""
+msgstr "Необходимо указать репозиторий."
 
 msgid "Access"
-msgstr ""
+msgstr "Доступ"
 
 msgid "Account ID / Access key"
-msgstr ""
+msgstr "ID учётной записи / Ключ доступа"
 
 msgid "Account key / Secret key"
-msgstr ""
+msgstr "Ключ учётной записи / Секретный ключ"
 
 msgid "Advanced"
-msgstr ""
+msgstr "Дополнительно"
 
 msgid ""
 "After each backup the retention policy is applied. Snapshots outside these "
 "limits are forgotten and the repository is pruned. Set a field to 0 to "
 "disable that limit."
 msgstr ""
+"После каждого резервного копирования применяется политика удержания. Снимки "
+"за пределами этих ограничений удаляются (forget), а репозиторий очищается "
+"(prune). Установите значение 0, чтобы отключить соответствующее ограничение."
 
 msgid ""
 "All selected folders go into the same snapshot. Optional if the include list"
 " is set."
 msgstr ""
+"Все выбранные папки попадают в один снимок. Необязательно, если задан список"
+" включений."
 
 msgid "Always"
-msgstr ""
+msgstr "Всегда"
 
 msgid "Append-only"
-msgstr ""
+msgstr "Только добавление"
 
 msgid "Apply now"
-msgstr ""
+msgstr "Применить сейчас"
 
 msgid "Applying retention policy ..."
-msgstr ""
+msgstr "Применение политики удержания ..."
 
 msgid "April"
-msgstr ""
+msgstr "Апрель"
 
 msgid "At reboot"
-msgstr ""
+msgstr "При перезагрузке"
 
 msgid "August"
-msgstr ""
+msgstr "Август"
 
 msgid "Backblaze B2 (native API)"
-msgstr ""
+msgstr "Backblaze B2 (нативный API)"
 
 msgid "Backend options"
-msgstr ""
+msgstr "Параметры бэкенда"
 
 msgid "Backup Jobs"
-msgstr ""
+msgstr "Задания резервного копирования"
 
 msgid "Backup dry run ..."
-msgstr ""
+msgstr "Пробный запуск резервного копирования ..."
 
 msgid "Backup job saved."
-msgstr ""
+msgstr "Задание резервного копирования сохранено."
 
 msgid "Cache directory"
-msgstr ""
+msgstr "Каталог кэша"
 
 msgid "Certain date"
-msgstr ""
+msgstr "Конкретная дата"
 
 msgid "Certificate"
-msgstr ""
+msgstr "Сертификат"
 
 msgid "Check repository integrity"
-msgstr ""
+msgstr "Проверить целостность репозитория"
 
 msgid "Checking repository integrity ..."
-msgstr ""
+msgstr "Проверка целостности репозитория ..."
 
 msgid "Clean up after verify"
-msgstr ""
+msgstr "Очистка после проверки"
 
 msgid "Cleanup"
-msgstr ""
+msgstr "Очистка"
 
 msgid "Clients can add snapshots but cannot delete existing data."
 msgstr ""
+"Клиенты могут добавлять снимки, но не могут удалять существующие данные."
 
 msgid "Clients must log in as one of the users on the Users page."
 msgstr ""
+"Клиенты должны входить под одним из пользователей со страницы "
+"«Пользователи»."
 
 msgid ""
 "Comma-separated list of tags to attach to the snapshot (e.g. daily,offsite)."
 msgstr ""
+"Список тегов через запятую для добавления к снимку (например, "
+"daily,offsite)."
 
 msgid ""
 "Comma-separated patterns or absolute paths, e.g. *.tmp,**/node_modules."
 msgstr ""
+"Шаблоны или абсолютные пути через запятую, например *.tmp,**/node_modules."
 
 msgid ""
 "Command run after the backup, even if it failed. The exit code is in "
 "RESTIC_JOB_EXIT."
 msgstr ""
+"Команда, выполняемая после резервного копирования, даже если оно завершилось"
+" ошибкой. Код возврата в RESTIC_JOB_EXIT."
 
 msgid ""
 "Command run after the restore test, even if it failed. The exit code is in "
 "RESTIC_JOB_EXIT."
 msgstr ""
+"Команда, выполняемая после теста восстановления, даже если он завершился "
+"ошибкой. Код возврата в RESTIC_JOB_EXIT."
 
 msgid "Command run before the backup. If it fails, the backup is skipped."
 msgstr ""
+"Команда, выполняемая перед резервным копированием. Если она завершается "
+"ошибкой, резервное копирование пропускается."
 
 msgid ""
 "Command run before the restore test. If it fails, the restore test is "
 "skipped."
 msgstr ""
+"Команда, выполняемая перед тестом восстановления. Если она завершается "
+"ошибкой, тест восстановления пропускается."
+
+msgid "Compare two selected snapshots"
+msgstr ""
+
+msgid "Comparing snapshots ..."
+msgstr ""
 
 msgid "Connections"
-msgstr ""
+msgstr "Соединения"
 
 msgid "Create"
-msgstr ""
+msgstr "Создать"
 
 msgid "Create Backup Job"
-msgstr ""
+msgstr "Создать задание резервного копирования"
 
 msgid "Create Restore Test"
-msgstr ""
+msgstr "Создать тест восстановления"
 
 msgid "Create repository"
-msgstr ""
+msgstr "Создать репозиторий"
 
 msgid "Created REST server user."
-msgstr ""
+msgstr "Пользователь REST-сервера создан."
 
 msgid "Created environment variable."
-msgstr ""
+msgstr "Переменная окружения создана."
 
 msgid "Created repository."
-msgstr ""
+msgstr "Репозиторий создан."
 
 msgid "Daily"
-msgstr ""
+msgstr "Ежедневно"
 
 msgid "Daily (02:00)"
-msgstr ""
+msgstr "Ежедневно (02:00)"
 
 msgid "Daily (03:00)"
-msgstr ""
+msgstr "Ежедневно (03:00)"
 
 msgid "Date / Time"
-msgstr ""
+msgstr "Дата / время"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Дата/время"
 
 msgid "Day of month"
-msgstr ""
+msgstr "День месяца"
 
 msgid "Day of week"
-msgstr ""
+msgstr "День недели"
 
 msgid "Days with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Количество дней с хранением одного снимка в день. 0 = отключено."
 
 msgid "December"
-msgstr ""
+msgstr "Декабрь"
 
 msgid "Default excludes"
-msgstr ""
+msgstr "Исключения по умолчанию"
 
 msgid "Delete repository and its data"
-msgstr ""
+msgstr "Удалить репозиторий и его данные"
 
 msgid ""
 "Delete the restored data once the verify completes. Only the per-test "
 "subdirectory created in the target folder is removed."
 msgstr ""
+"Удалить восстановленные данные после завершения проверки. Удаляется только "
+"подкаталог, созданный для этого теста в целевой папке."
 
 msgid ""
 "Directory where Restic stores its local cache. The cache speeds up "
 "operations, especially for remote repositories. Leave blank to disable "
 "caching (not recommended)."
 msgstr ""
+"Каталог, где Restic хранит локальный кэш. Кэш ускоряет операции, особенно "
+"для удалённых репозиториев. Оставьте пустым, чтобы отключить кэширование (не"
+" рекомендуется)."
 
 msgid "Disabled"
-msgstr ""
+msgstr "Отключено"
 
 msgid "Dry run"
-msgstr ""
+msgstr "Пробный запуск"
 
 msgid "Dry run (preview only)"
-msgstr ""
+msgstr "Пробный запуск (только предпросмотр)"
 
 msgid ""
 "Dry run previews what would be restored (fast, reads only metadata, writes "
 "nothing). Verify performs a full restore and checks each restored file's "
 "contents against the snapshot (reads all data, writes to disk)."
 msgstr ""
+"Пробный запуск показывает, что будет восстановлено (быстро, читает только "
+"метаданные, ничего не записывает). Проверка (verify) выполняет полное "
+"восстановление и сверяет содержимое каждого восстановленного файла со "
+"снимком (читает все данные, пишет на диск)."
 
 msgid ""
 "Each user only sees repositories under a path named after their username."
 msgstr ""
+"Каждый пользователь видит только репозитории в пути, названном его именем "
+"пользователя."
 
 msgid "Edit"
-msgstr ""
+msgstr "Изменить"
 
 msgid "Edit Backup Job"
-msgstr ""
+msgstr "Изменить задание резервного копирования"
 
 msgid "Edit Restore Test"
-msgstr ""
+msgstr "Изменить тест восстановления"
 
 msgid "Edit repository"
-msgstr ""
+msgstr "Изменить репозиторий"
 
 msgid "Edited REST server user."
-msgstr ""
+msgstr "Пользователь REST-сервера изменён."
 
 msgid "Edited environment variable."
-msgstr ""
+msgstr "Переменная окружения изменена."
 
 msgid "Edited repository."
-msgstr ""
+msgstr "Репозиторий изменён."
 
 msgid ""
 "Email the check output to the root user. Requires notifications to be "
 "configured."
 msgstr ""
+"Отправлять результат проверки по email пользователю root. Требуется "
+"настроенная отправка уведомлений."
 
 msgid ""
 "Email the job output to the root user (and any address aliased to it) after "
 "each scheduled run. Requires a working email/notification setup under "
 "System."
 msgstr ""
+"Отправлять вывод задания по email пользователю root (и на все связанные с "
+"ним псевдонимы/алиасы) после каждого запланированного запуска. Требуется "
+"работающая настройка email/уведомлений в разделе «Система»."
 
 msgid ""
 "Email the restore test output to the root user (and any address aliased to "
 "it) after each scheduled run. Requires a working email/notification setup "
 "under System."
 msgstr ""
+"Отправлять вывод теста восстановления по email пользователю root (и на все "
+"связанные с ним псевдонимы/алиасы) после каждого запланированного запуска. "
+"Требуется работающая настройка email/уведомлений в разделе «Система»."
 
 msgid ""
 "Enable or disable this backup job. Disabled jobs are skipped by the "
 "scheduler."
 msgstr ""
+"Включить или отключить это задание резервного копирования. Отключённые "
+"задания пропускаются планировщиком."
 
 msgid ""
 "Enable or disable this restore test. Disabled tests are skipped by the "
 "scheduler."
 msgstr ""
+"Включить или отключить этот тест восстановления. Отключённые тесты "
+"пропускаются планировщиком."
 
 msgid "Enabled"
-msgstr ""
+msgstr "Включено"
 
 msgid ""
 "Ensure that the passphrase is strong and stored securely. It cannot be "
 "recovered if lost."
 msgstr ""
+"Убедитесь, что парольная фраза достаточно надёжна и хранится в безопасности."
+" Если она будет потеряна, восстановить её невозможно."
 
 msgid "Environment Variables"
-msgstr ""
+msgstr "Переменные окружения"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "Каждый N-й день месяца"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "Каждые N часов"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "Каждые N минут"
 
 msgid "Exclude cache directories"
-msgstr ""
+msgstr "Исключать каталоги кэша"
 
 msgid "Exclude if present"
-msgstr ""
+msgstr "Исключать при наличии файла-маркера"
 
 msgid "Exclude list"
-msgstr ""
+msgstr "Список исключений"
 
 msgid "Exclude patterns"
-msgstr ""
+msgstr "Шаблоны исключений"
 
 msgid "Extended options"
-msgstr ""
+msgstr "Расширенные параметры"
 
 msgid ""
 "Extra absolute paths to back up, one per line. See the restic docs on <a "
@@ -318,208 +374,234 @@ msgid ""
 "href='https://restic.readthedocs.io/en/stable/040_backup.html#including-"
 "files' target='_blank'>including files</a>."
 msgstr ""
+"Дополнительные абсолютные пути для резервного копирования, по одному в "
+"строке. См. документацию restic о <a class='omv-color-primary' "
+"href='https://restic.readthedocs.io/en/stable/040_backup.html#including-"
+"files' target='_blank'>включении файлов</a>."
 
 msgid "February"
-msgstr ""
+msgstr "Февраль"
 
 msgid ""
 "Files will be restored into this shared folder. Existing files may be "
 "overwritten."
 msgstr ""
+"Файлы будут восстановлены в эту общую папку. Существующие файлы могут быть "
+"перезаписаны."
 
 msgid "Folder holding the served repositories."
-msgstr ""
+msgstr "Папка, в которой хранятся обслуживаемые репозитории."
 
 msgid "Forget"
-msgstr ""
+msgstr "Забыть (forget)"
 
 msgid "Forget (delete) selected snapshots"
-msgstr ""
+msgstr "Забыть (удалить) выбранные снимки"
 
 msgid ""
 "Forget all snapshots outside this repository's retention policy? This cannot"
 " be undone."
 msgstr ""
+"Забыть все снимки вне политики удержания этого репозитория? Это действие "
+"нельзя отменить."
 
 msgid "Forget and prune"
-msgstr ""
+msgstr "Забыть и очистить"
 
 msgid "Forget old snapshots from every host using this repository."
-msgstr ""
+msgstr "Забыть старые снимки всех хостов, использующих этот репозиторий."
 
 msgid "Forgetting snapshots ..."
-msgstr ""
+msgstr "Удаление снимков (forget) ..."
 
 msgid "Forgetting snapshots and pruning ..."
-msgstr ""
+msgstr "Удаление снимков и очистка (prune) ..."
 
 msgid ""
 "Free the space of forgotten snapshots right away. Can take a long time on "
 "large repositories."
 msgstr ""
+"Немедленно освободить место, занятое удалёнными снимками. На больших "
+"репозиториях может занять много времени."
 
 msgid "Friday"
-msgstr ""
+msgstr "Пятница"
 
 msgid "Help"
-msgstr ""
+msgstr "Справка"
 
 msgid "Hooks"
-msgstr ""
+msgstr "Хуки"
 
 msgid "Hostname"
-msgstr ""
+msgstr "Имя хоста"
 
 msgid "Hour"
-msgstr ""
+msgstr "Час"
 
 msgid "Hourly"
-msgstr ""
+msgstr "Ежечасно"
 
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 msgid "Include list"
-msgstr ""
+msgstr "Список включений"
 
 msgid "Inspect snapshot"
-msgstr ""
+msgstr "Просмотреть снимок"
 
 msgid "Inspecting snapshot ..."
-msgstr ""
+msgstr "Просмотр снимка ..."
 
 msgid "Installs restic-rest-server when the changes are applied."
-msgstr ""
+msgstr "Устанавливает restic-rest-server при применении изменений."
 
 msgid "Invalid file name '%s'. Use one file name per line, without a path."
 msgstr ""
+"Недопустимое имя файла '%s'. По одному имени файла на строку, без пути."
 
 msgid "Invalid include path '%s'. Use one absolute path per line."
 msgstr ""
+"Недопустимый путь включения '%s'. По одному абсолютному пути на строку."
 
 msgid ""
 "Invalid restic option '%s'. Use one backend.option=value per line, e.g. "
 "s3.region=us-east-1."
 msgstr ""
+"Недопустимый параметр restic '%s'. По одному backend.option=value на строку,"
+" например s3.region=us-east-1."
 
 msgid "Invalid tag."
-msgstr ""
+msgstr "Недопустимый тег."
 
 msgid "January"
-msgstr ""
+msgstr "Январь"
 
 msgid "Job"
-msgstr ""
+msgstr "Задание"
 
 msgid "Job name"
-msgstr ""
+msgstr "Имя задания"
 
 msgid "July"
-msgstr ""
+msgstr "Июль"
 
 msgid "June"
-msgstr ""
+msgstr "Июнь"
 
 msgid "Keep daily"
-msgstr ""
+msgstr "Хранить по дням"
 
 msgid "Keep last N"
-msgstr ""
+msgstr "Хранить последние N"
 
 msgid "Keep monthly"
-msgstr ""
+msgstr "Хранить по месяцам"
 
 msgid "Keep one snapshot per day for this many days (0 = disabled)."
 msgstr ""
+"Хранить по одному снимку в день в течение этого количества дней (0 = "
+"отключено)."
 
 msgid "Keep one snapshot per month for this many months (0 = disabled)."
 msgstr ""
+"Хранить по одному снимку в месяц в течение этого количества месяцев (0 = "
+"отключено)."
 
 msgid "Keep one snapshot per week for this many weeks (0 = disabled)."
 msgstr ""
+"Хранить по одному снимку в неделю в течение этого количества недель (0 = "
+"отключено)."
 
 msgid "Keep one snapshot per year for this many years (0 = disabled)."
 msgstr ""
+"Хранить по одному снимку в год в течение этого количества лет (0 = "
+"отключено)."
 
 msgid "Keep this many of the most recent snapshots (0 = disabled)."
-msgstr ""
+msgstr "Хранить это количество самых последних снимков (0 = отключено)."
 
 msgid "Keep weekly"
-msgstr ""
+msgstr "Хранить по неделям"
 
 msgid "Keep yearly"
-msgstr ""
+msgstr "Хранить по годам"
 
 msgid "Last snapshot"
-msgstr ""
+msgstr "Последний снимок"
 
 msgid ""
 "Letters, digits, dot, dash and underscore. With private repositories enabled"
 " this is also the user's repository sub-path."
 msgstr ""
+"Буквы, цифры, точка, дефис и подчеркивание. При включённых частных "
+"репозиториях это также подпуть репозитория пользователя."
 
 msgid "List files"
-msgstr ""
+msgstr "Список файлов"
 
 msgid "List files in snapshot"
-msgstr ""
+msgstr "Список файлов снимка"
 
 msgid "Listing snapshot files ..."
-msgstr ""
+msgstr "Список файлов снимка ..."
 
 msgid "Local (shared folder)"
-msgstr ""
+msgstr "Локальный (общая папка)"
 
 msgid "Location / URI"
-msgstr ""
+msgstr "Расположение / URI"
 
 msgid "March"
-msgstr ""
+msgstr "Март"
 
 msgid "Maximum number of concurrent backend connections. 0 = restic default."
 msgstr ""
+"Максимальное число одновременных соединений с бэкендом. 0 = значение restic "
+"по умолчанию."
 
 msgid "May"
-msgstr ""
+msgstr "Май"
 
 msgid "Message"
-msgstr ""
+msgstr "Сообщение"
 
 msgid "Minute"
-msgstr ""
+msgstr "Минута"
 
 msgid "Mode"
-msgstr ""
+msgstr "Режим"
 
 msgid "Monday"
-msgstr ""
+msgstr "Понедельник"
 
 msgid "Month"
-msgstr ""
+msgstr "Месяц"
 
 msgid "Monthly"
-msgstr ""
+msgstr "Ежемесячно"
 
 msgid "Months with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Количество месяцев с хранением одного снимка в месяц. 0 = отключено."
 
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 msgid "Never"
-msgstr ""
+msgstr "Никогда"
 
 msgid "Notifications"
-msgstr ""
+msgstr "Уведомления"
 
 msgid "November"
-msgstr ""
+msgstr "Ноябрь"
 
 msgid "OMV-Extras Wiki"
-msgstr ""
+msgstr "Вики OMV-Extras"
 
 msgid "October"
-msgstr ""
+msgstr "Октябрь"
 
 msgid ""
 "One pattern or absolute path per line. See the restic docs on <a class='omv-"
@@ -527,407 +609,455 @@ msgid ""
 "href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-"
 "files' target='_blank'>excluding files</a>."
 msgstr ""
+"По одному шаблону или абсолютному пути на строку. См. документацию restic о "
+"<a class='omv-color-primary' "
+"href='https://restic.readthedocs.io/en/stable/040_backup.html#excluding-"
+"files' target='_blank'>исключении файлов</a>."
 
 msgid ""
 "Only a hash of the password is stored. When editing, leave blank to keep the"
 " current password."
 msgstr ""
+"Хранится только хеш пароля. При редактировании оставьте пустым, чтобы "
+"сохранить текущий пароль."
 
 msgid "Only host"
-msgstr ""
+msgstr "Только этот хост"
 
 msgid "Only on error"
-msgstr ""
+msgstr "Только при ошибке"
 
 msgid ""
 "Only restore files matching this path prefix within the snapshot (e.g. "
 "/home/user/documents)."
 msgstr ""
+"Восстанавливать только файлы, соответствующие этому префиксу пути внутри "
+"снимка (например, /home/user/documents)."
 
 msgid ""
 "Only restore-test files matching this path prefix within the snapshot (e.g. "
 "/home/user/documents). Leave blank to test the whole snapshot."
 msgstr ""
+"Восстанавливать в тесте только файлы, соответствующие этому префиксу пути "
+"внутри снимка (например, /home/user/documents). Оставьте пустым, чтобы "
+"проверить весь снимок."
 
 msgid "Only send an email if the scheduled job exits with an error."
 msgstr ""
+"Отправлять письмо, только если запланированное задание завершилось с "
+"ошибкой."
 
 msgid ""
 "Only send an email if the scheduled restore test exits with an error (i.e. "
 "the backup could not be restored/verified)."
 msgstr ""
+"Отправлять письмо, только если запланированный тест восстановления "
+"завершился с ошибкой (т.е. резервную копию не удалось "
+"восстановить/проверить)."
 
 msgid "Only tag"
-msgstr ""
+msgstr "Только этот тег"
 
 msgid "Optional human-readable name for this backup job."
 msgstr ""
+"Необязательное человекочитаемое имя для этого задания резервного "
+"копирования."
 
 msgid "Optional human-readable name for this restore test."
-msgstr ""
+msgstr "Необязательное человекочитаемое имя для этого теста восстановления."
 
 msgid ""
 "Optional. Also download and verify part of the stored data, e.g. 5% or 1/7 "
 "or 500M. Leave blank to only check the repository structure. Reading data "
 "from cloud storage may incur egress costs."
 msgstr ""
+"Необязательно. Также скачать и проверить часть сохраненных данных, например "
+"5% или 1/7 или 500M. Оставьте пустым, чтобы проверить только структуру "
+"репозитория. Чтение данных из облачного хранилища может повлечь плату за "
+"исходящий трафик."
 
 msgid ""
 "Optional. One restic extended option per line, passed as -o, e.g. "
 "s3.region=us-east-1. Run 'restic options' to list them."
 msgstr ""
+"Необязательно. По одному расширенному параметру restic на строку, передается"
+" как -o, например s3.region=us-east-1. Выполните 'restic options', чтобы "
+"увидеть список."
 
 msgid "Optional. Only apply to snapshots from this hostname."
-msgstr ""
+msgstr "Необязательно. Применять только к снимкам с указанного хоста."
 
 msgid "Optional. Only apply to snapshots with this tag."
-msgstr ""
+msgstr "Необязательно. Применять только к снимкам с этим тегом."
 
 msgid "Options"
-msgstr ""
+msgstr "Параметры"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "Парольная фраза"
 
 msgid "Password"
-msgstr ""
+msgstr "Пароль"
 
 msgid "Path filter (optional)"
-msgstr ""
+msgstr "Фильтр путей (необязательно)"
 
 msgid "Paths"
-msgstr ""
+msgstr "Пути"
 
 msgid "Periodically run 'restic check' against this repository."
-msgstr ""
+msgstr "Периодически выполнять 'restic check' для этого репозитория."
 
 msgid "Port"
-msgstr ""
+msgstr "Порт"
 
 msgid "Post-script"
-msgstr ""
+msgstr "Скрипт после"
 
 msgid "Pre-script"
-msgstr ""
+msgstr "Скрипт до"
 
 msgid "Preview (dry run)"
-msgstr ""
+msgstr "Предпросмотр (пробный запуск)"
 
 msgid ""
 "Preview what would be restored without writing any files. Useful for "
 "verifying a snapshot's contents are intact and browsable."
 msgstr ""
+"Показывает, что будет восстановлено, без записи файлов. Полезно для проверки"
+" и просмотра содержимого снимка."
 
 msgid "Private repositories"
-msgstr ""
+msgstr "Частные репозитории"
 
 msgid "Prune"
-msgstr ""
+msgstr "Очистка (prune)"
 
 msgid "Prune unused data from repository"
-msgstr ""
+msgstr "Очистить неиспользуемые данные репозитория"
 
 msgid "Pruning repository ..."
-msgstr ""
+msgstr "Очистка репозитория (prune) ..."
 
 msgid "REST Server"
-msgstr ""
+msgstr "REST-сервер"
 
 msgid "REST Users"
-msgstr ""
+msgstr "Пользователи REST"
 
 msgid "REST server"
-msgstr ""
+msgstr "REST-сервер"
 
 msgid "Read data subset"
-msgstr ""
+msgstr "Читать часть данных"
 
 msgid "Recommended when login is required."
-msgstr ""
+msgstr "Рекомендуется, когда требуется вход."
 
 msgid "Refresh snapshot list"
-msgstr ""
+msgstr "Обновить список снимков"
 
 msgid "Remote path / URI"
-msgstr ""
+msgstr "Удалённый путь / URI"
 
 msgid "Remove stale locks (unlock)"
-msgstr ""
+msgstr "Удалить устаревшие блокировки (unlock)"
 
 msgid ""
 "Remove the selected snapshots and prune the data no longer referenced by any"
 " snapshot? This cannot be undone and may take a long time."
 msgstr ""
+"Удалить выбранные снимки и очистить (prune) данные, на которые больше не "
+"ссылается ни один снимок? Действие нельзя отменить и оно может занять много "
+"времени."
 
 msgid ""
 "Remove the selected snapshots from the repository? The data they reference "
 "is kept until the repository is pruned."
 msgstr ""
+"Удалить выбранные снимки из репозитория? Данные, на которые они ссылаются, "
+"сохранятся до очистки репозитория (prune)."
 
 msgid ""
 "Remove this repository and permanently delete all of its backup data from "
 "the shared folder? This cannot be undone."
 msgstr ""
+"Удалить этот репозиторий и безвозвратно стереть все его резервные данные из "
+"общей папки? Действие нельзя отменить."
 
 msgid "Repositories"
-msgstr ""
+msgstr "Репозитории"
 
 msgid "Repository"
-msgstr ""
+msgstr "Репозиторий"
 
 msgid "Repository Snapshots"
-msgstr ""
+msgstr "Снимки репозитория"
 
 msgid ""
 "Repository is in use. Please delete the backup jobs associated with this "
 "repository first."
 msgstr ""
+"Репозиторий используется. Сначала удалите задания резервного копирования, "
+"связанные с этим репозиторием."
 
 msgid ""
 "Repository is in use. Please delete the restore tests associated with this "
 "repository first."
 msgstr ""
+"Репозиторий используется. Сначала удалите тесты восстановления, связанные с "
+"этим репозиторием."
 
 msgid "Repository name"
-msgstr ""
+msgstr "Имя репозитория"
 
 msgid "Repository statistics ..."
-msgstr ""
+msgstr "Статистика репозитория ..."
 
 msgid "Require login"
-msgstr ""
+msgstr "Требовать вход"
 
 msgid "Restic"
-msgstr ""
+msgstr "Restic"
 
 msgid "Restic documentation"
-msgstr ""
+msgstr "Документация Restic"
 
 msgid "Restore Snapshot"
-msgstr ""
+msgstr "Восстановить снимок"
 
 msgid "Restore Tests"
-msgstr ""
+msgstr "Тесты восстановления"
 
 msgid "Restore target folder"
-msgstr ""
+msgstr "Целевая папка восстановления"
 
 msgid "Restore test"
-msgstr ""
+msgstr "Тест восстановления"
 
 msgid "Restore test saved."
-msgstr ""
+msgstr "Тест восстановления сохранен."
 
 msgid "Restore this snapshot to a shared folder"
-msgstr ""
+msgstr "Восстановить этот снимок в общую папку"
 
 msgid "Restoring snapshot, this may take a while…"
-msgstr ""
+msgstr "Восстановление снимка, это может занять время…"
 
 msgid "Retention policy"
-msgstr ""
+msgstr "Политика удержания"
 
 msgid "Retention policy preview ..."
-msgstr ""
+msgstr "Предпросмотр политики удержания ..."
 
 msgid "Run backup now"
-msgstr ""
+msgstr "Запустить резервное копирование сейчас"
 
 msgid "Run restore test now"
-msgstr ""
+msgstr "Запустить тест восстановления сейчас"
 
 msgid "Running backup job ..."
-msgstr ""
+msgstr "Выполнение задания резервного копирования ..."
 
 msgid "Running restore test ..."
-msgstr ""
+msgstr "Выполнение теста восстановления ..."
 
 msgid "S3 compatible"
-msgstr ""
+msgstr "S3-совместимый"
 
 msgid "SFTP"
-msgstr ""
+msgstr "SFTP"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Суббота"
 
 msgid "Schedule"
-msgstr ""
+msgstr "Расписание"
 
 msgid "Scheduled integrity check"
-msgstr ""
+msgstr "Запланированная проверка целостности"
 
 msgid "Scheduled retention"
-msgstr ""
+msgstr "Запланированное удержание"
 
 msgid "Secure connection"
-msgstr ""
+msgstr "Защищённое соединение"
 
 msgid "Select a repository"
-msgstr ""
+msgstr "Выберите репозиторий"
 
 msgid "Select a repository."
-msgstr ""
+msgstr "Выберите репозиторий."
 
 msgid "Select one or more shared folders to back up."
+msgstr "Выберите одну или несколько общих папок для резервного копирования."
+
+msgid "Select two different snapshots to compare."
 msgstr ""
 
 msgid ""
 "Selecting 'All Repositories' will ensure that the environment variable will "
 "be applied to all repositories."
 msgstr ""
+"Выбор «Все репозитории» гарантирует, что переменная окружения будет "
+"применена ко всем репозиториям."
 
 msgid "Send command output via email"
-msgstr ""
+msgstr "Отправлять вывод команды по email"
 
 msgid "Send email"
-msgstr ""
+msgstr "Отправлять email"
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "Отправлять письмо только при ошибке"
 
 msgid "September"
-msgstr ""
+msgstr "Сентябрь"
 
 msgid "Settings"
-msgstr ""
+msgstr "Настройки"
 
 msgid "Shared Folder"
-msgstr ""
+msgstr "Общая папка"
 
 msgid "Shared folder"
-msgstr ""
+msgstr "Общая папка"
 
 msgid ""
 "Skip directories that contain a CACHEDIR.TAG file (restic --exclude-caches)."
 msgstr ""
+"Пропускать каталоги, содержащие файл CACHEDIR.TAG (restic --exclude-caches)."
 
 msgid "Skip initialisation"
-msgstr ""
+msgstr "Пропустить инициализацию"
 
 msgid "Snapshot ID"
-msgstr ""
+msgstr "ID снимка"
 
 msgid "Source & Destination"
-msgstr ""
+msgstr "Источник и назначение"
 
 msgid "Source folders"
-msgstr ""
+msgstr "Исходные папки"
 
 msgid "Summary"
-msgstr ""
+msgstr "Сводка"
 
 msgid "Sunday"
-msgstr ""
+msgstr "Воскресенье"
 
 msgid "TLS enabled"
-msgstr ""
+msgstr "TLS включён"
 
 msgid "Tags"
-msgstr ""
+msgstr "Теги"
 
 msgid "Target folder"
-msgstr ""
+msgstr "Целевая папка"
 
 msgid "Test connection"
-msgstr ""
+msgstr "Проверить соединение"
 
 msgid "Test mode"
-msgstr ""
+msgstr "Режим проверки"
 
 msgid "Testing repository connection ..."
-msgstr ""
+msgstr "Проверка соединения с репозиторием ..."
 
 msgid "The latest snapshot in this repository will be restore-tested."
-msgstr ""
+msgstr "Будет проверен восстановлением последний снимок в этом репозитории."
 
 msgid "The shared folder used as the restic repository location."
-msgstr ""
+msgstr "Общая папка, используемая как расположение репозитория restic."
 
 msgid "This must be a valid Restic environment variable."
-msgstr ""
+msgstr "Это должна быть допустимая переменная окружения Restic."
 
 msgid "Thursday"
-msgstr ""
+msgstr "Четверг"
 
 msgid ""
 "Tick this to import an existing restic repository. The passphrase must match"
 " the one already used by that repository."
 msgstr ""
+"Отметьте, чтобы подключить существующий репозиторий restic. Парольная фраза "
+"должна совпадать с уже используемой этим репозиторием."
 
 msgid "Time of execution"
-msgstr ""
+msgstr "Время выполнения"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Вторник"
 
 msgid "Type"
-msgstr ""
+msgstr "Тип"
 
 msgid "Unlocking repository ..."
-msgstr ""
+msgstr "Разблокировка репозитория ..."
 
 msgid "Use a percentage (5%), a fraction (1/7) or a size (500M)."
-msgstr ""
+msgstr "Используйте процент (5%), долю (1/7) или размер (500M)."
 
 msgid "Use letters, digits and underscores only, not starting with a digit."
-msgstr ""
+msgstr "Только буквы, цифры и подчеркивания, не начиная с цифры."
 
 msgid "Use letters, digits, dot, dash and underscore only."
-msgstr ""
+msgstr "Только буквы, цифры, точка, дефис и подчеркивание."
 
 msgid "Use one backend.option=value per line."
-msgstr ""
+msgstr "По одному backend.option=value на строку."
 
 msgid "Username"
-msgstr ""
+msgstr "Имя пользователя"
 
 msgid "Users"
-msgstr ""
+msgstr "Пользователи"
 
 msgid "Value"
-msgstr ""
+msgstr "Значение"
 
 msgid "Verify (full restore + checksum)"
-msgstr ""
+msgstr "Проверка (полное восстановление + контрольные суммы)"
 
 msgid ""
 "Verify restores into a per-test subdirectory inside this shared folder. "
 "Required for verify mode."
 msgstr ""
+"Проверка восстанавливает данные в подкаталог для каждого теста внутри этой "
+"общей папки. Требуется для режима проверки."
 
 msgid "Verify target folder"
-msgstr ""
+msgstr "Целевая папка проверки"
 
 msgid "View repository statistics"
-msgstr ""
+msgstr "Просмотреть статистику репозитория"
 
 msgid "View snapshots stored in this repository"
-msgstr ""
+msgstr "Просмотреть снимки, хранящиеся в этом репозитории"
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Среда"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Еженедельно"
 
 msgid "Weekly (Sunday 02:00)"
-msgstr ""
+msgstr "Еженедельно (воскресенье 02:00)"
 
 msgid "Weekly (Sunday 03:00)"
-msgstr ""
+msgstr "Еженедельно (воскресенье 03:00)"
 
 msgid "Weeks with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Количество недель с хранением одного снимка в неделю. 0 = отключено."
 
 msgid "Yearly"
-msgstr ""
+msgstr "Ежегодно"
 
 msgid "Years with one snapshot each. 0 = disabled."
-msgstr ""
+msgstr "Количество лет с хранением одного снимка в год. 0 = отключено."
 
 msgid "n/a"
-msgstr ""
+msgstr "н/д"
 
 msgid "rclone remote"
-msgstr ""
+msgstr "Удалённый ресурс rclone"
